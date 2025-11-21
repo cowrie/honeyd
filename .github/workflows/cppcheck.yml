@@ -2,7 +2,7 @@ name: Cppcheck
 
 on:
   push:
-    branches: [ main, michel ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 

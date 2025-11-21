@@ -2,7 +2,7 @@ name: Clang-Tidy
 
 on:
   push:
-    branches: [ main, michel ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
