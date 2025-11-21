@@ -36,6 +36,10 @@ jobs:
 
     - name: Run clang-tidy
       run: |
+        set -o pipefail
+        echo "Running clang-tidy on C source files..."
+        echo "========================================"
+
         # Run clang-tidy on all C source files
         find . -name '*.c' \
           -not -path './build/*' \
@@ -46,14 +50,42 @@ jobs:
           | xargs clang-tidy -p build --warnings-as-errors='' 2>&1 \
           | tee clang-tidy-report.txt
 
-    - name: Check for errors
+        echo "========================================"
+        echo "Clang-tidy analysis complete"
+
+    - name: Show summary and check for errors
+      if: always()
       run: |
-        # Fail if there are any error-level issues (not warnings)
-        if grep -q "error:" clang-tidy-report.txt; then
-          echo "Clang-tidy found errors"
+        echo "Clang-Tidy Summary"
+        echo "=================="
+
+        # Count warnings and errors
+        ERROR_COUNT=$(grep -c "error:" clang-tidy-report.txt || true)
+        WARNING_COUNT=$(grep -c "warning:" clang-tidy-report.txt || true)
+
+        echo "Errors found: $ERROR_COUNT"
+        echo "Warnings found: $WARNING_COUNT"
+        echo ""
+
+        # Show first 50 issues in the log
+        if [ "$ERROR_COUNT" -gt 0 ] || [ "$WARNING_COUNT" -gt 0 ]; then
+          echo "First 50 issues:"
+          echo "----------------"
+          grep -E "(error:|warning:)" clang-tidy-report.txt | head -50 || true
+          echo ""
+
+          if [ $(wc -l < clang-tidy-report.txt) -gt 50 ]; then
+            echo "(More issues available in the artifact)"
+          fi
+        fi
+
+        # Fail if there are any error-level issues
+        if [ "$ERROR_COUNT" -gt 0 ]; then
+          echo "::error::Clang-tidy found $ERROR_COUNT error(s)"
           exit 1
         fi
-        echo "Clang-tidy completed with only warnings"
+
+        echo "Clang-tidy completed successfully (warnings only)"
 
     - name: Upload clang-tidy report
       if: always()
