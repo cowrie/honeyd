@@ -3,18 +3,27 @@ Section: net
 Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 XSBC-Original-Maintainer: Javier Fernandez-Sanguino Pen~a <jfs@debian.org>
-Build-Depends: debhelper (>> 5.0.0), automake, libevent-dev, libpcap-dev, libdumbnet-dev (>> 1.8), libevent-dev, wget, sharutils, flex, bison, libreadline5-dev | libreadline-dev, python-support (>= 0.5.3), zlib1g-dev, libpcre3-dev, rrdtool
-Standards-Version: 3.8.0
+Build-Depends: debhelper-compat (= 13),
+               cmake,
+               libevent-dev,
+               libpcap-dev,
+               libdumbnet-dev (>> 1.8),
+               flex,
+               bison,
+               libreadline-dev,
+               zlib1g-dev
+Standards-Version: 4.6.2
 Homepage: http://www.honeyd.org
+Rules-Requires-Root: no
 
 Package: honeyd
 Architecture: any
-Depends: adduser (>= 3.52), ${shlibs:Depends}, ${python:Depends}, ${misc:Depends}
-XB-Python-Version: ${python:Versions}
+Depends: adduser (>= 3.52),
+         ${shlibs:Depends},
+         ${misc:Depends}
 Recommends: farpd, honeyd-common, rrdtool
 Suggests: iisemulator
-Homepage: http://www.honeyd.org
-Description:  Small daemon that creates virtual hosts simulating their services and behaviour
+Description: Small daemon that creates virtual hosts simulating their services and behaviour
  Honeyd is a small daemon that creates virtual hosts on a network. The
  hosts can be configured to run arbitrary services, and their TCP
  personality can be adapted so that they appear to be running certain
@@ -40,7 +49,6 @@ Package: honeyd-common
 Architecture: all
 Recommends: honeyd
 Depends: ${misc:Depends}
-Homepage: http://www.honeyd.org
 Description: Honeyd's honeypot documentation and scripts
  Honeyd is a small daemon that creates virtual hosts on a network,
  including OS fingerprinting personality and simulation of services

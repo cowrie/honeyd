@@ -1,0 +1,55 @@
+name: Debian Package
+
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-deb:
+    name: Build Debian Packages
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          debhelper \
+          devscripts \
+          cmake \
+          libevent-dev \
+          libpcap-dev \
+          libdumbnet-dev \
+          flex \
+          bison \
+          libreadline-dev \
+          zlib1g-dev
+
+    - name: Build Debian packages
+      run: |
+        dpkg-buildpackage -us -uc -b
+
+    - name: List built packages
+      run: |
+        ls -lh ../*.deb
+        echo "---"
+        dpkg -c ../honeyd_*.deb | grep -E "bin/|man/" || true
+
+    - name: Upload packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: debian-packages
+        path: ../*.deb
+        if-no-files-found: error
+
+    - name: Upload to release
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ../*.deb

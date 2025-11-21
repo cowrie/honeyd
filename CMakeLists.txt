@@ -161,9 +161,9 @@ link_directories(/usr/lib)
 
 add_definitions(-DHAVE_CONFIG_H)
 add_definitions(-D_GNU_SOURCE)
-add_definitions(-DPATH_HONEYDINCLUDE=\"/home/alenor/local/include/honeyd\")
-add_definitions(-DPATH_HONEYDLIB=\"/home/alenor/local/lib/honeyd\")
-add_definitions(-DPATH_HONEYDDATA=\"/home/alenor/local/share/honeyd\")
+add_definitions(-DPATH_HONEYDINCLUDE=\"${PATH_HONEYDINCLUDE}\")
+add_definitions(-DPATH_HONEYDLIB=\"${PATH_HONEYDLIB}\")
+add_definitions(-DPATH_HONEYDDATA=\"${PATH_HONEYDDATA}\")
 add_definitions(-DPATH_RRDTOOL=\"/usr/bin/rrdtool\")
 add_definitions(-DHONEYD_PLUGINS_DECLARE=)
 add_definitions(-DHONEYD_PLUGINS=)
@@ -268,3 +268,35 @@ add_executable(honeyd
 
 # link the libraries to the executable
 target_link_libraries (honeyd pcap dumbnet event m z dl)
+
+# Installation
+install(TARGETS honeyd honeydctl honeydstats hsniff
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+install(TARGETS libhoneyd
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/honeyd)
+
+install(FILES
+    config.sample
+    nmap.assoc
+    nmap-mac-prefixes
+    nmap-os-db
+    pf.os
+    xprobe2.conf
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/honeyd)
+
+install(DIRECTORY scripts/
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/honeyd/scripts
+    USE_SOURCE_PERMISSIONS
+    PATTERN "*.pyc" EXCLUDE)
+
+install(DIRECTORY webserver/
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/honeyd/webserver
+    USE_SOURCE_PERMISSIONS
+    PATTERN "*.pyc" EXCLUDE)
+
+install(FILES honeyd.8
+    DESTINATION ${CMAKE_INSTALL_MANDIR}/man8)
+
+install(FILES honeydctl.1
+    DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)

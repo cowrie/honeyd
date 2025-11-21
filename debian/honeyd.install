@@ -1,0 +1,10 @@
+usr/bin/*
+usr/lib/*/honeyd/*
+usr/share/honeyd/nmap-mac-prefixes
+usr/share/honeyd/nmap-os-db
+usr/share/honeyd/nmap.assoc
+usr/share/honeyd/pf.os
+usr/share/honeyd/xprobe2.conf
+etc/honeyd/*
+usr/share/man/man1/honeydctl.1
+usr/share/man/man8/honeyd.8
