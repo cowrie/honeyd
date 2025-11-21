@@ -3,14 +3,11 @@ project(honeyd)
 
 set(CMAKE_COLOR_MAKEFILE ON)
 
-# Include our extra files
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
-
 include(CheckIncludeFiles)
 include(CheckLibraryExists)
 include(CheckFunctionExists)
 include(CheckStructHasMember)
-include(CheckTypeExists)
+include(CheckTypeSize)
 include(FindPkgConfig)
 include(TestBigEndian)
 
@@ -95,7 +92,9 @@ check_function_exists(strncasecmp HAVE_STRNCASECMP)
 check_function_exists(strsep HAVE_STRSEP)
 check_function_exists(strspn HAVE_STRSPN)
 check_function_exists(strtoul HAVE_STRTOUL)
-check_type_exists("struct sockaddr_storage" sys/socket.h HAVE_STRUCT_SOCKADDR_STORAGE)
+set(CMAKE_EXTRA_INCLUDE_FILES sys/socket.h)
+check_type_size("struct sockaddr_storage" STRUCT_SOCKADDR_STORAGE)
+set(CMAKE_EXTRA_INCLUDE_FILES)
 check_struct_has_member("struct socketaddr_un" sun_len sys/socket.h HAVE_SUN_LEN)
 check_include_files(syslog.h HAVE_SYSLOG_H)
 check_include_files(sys/file.h HAVE_SYS_FILE_H)
