@@ -28,6 +28,17 @@ set(PATH_HONEYDDATA "${CMAKE_INSTALL_FULL_DATAROOTDIR}/honeyd")
 
 include(FindZLIB)
 
+# Python 3 support (optional)
+find_package(Python3 COMPONENTS Interpreter Development)
+if(Python3_FOUND)
+    message(STATUS "Python 3 found: ${Python3_EXECUTABLE} (version ${Python3_VERSION})")
+    set(HAVE_PYTHON 1)
+    include_directories(${Python3_INCLUDE_DIRS})
+else()
+    message(STATUS "Python 3 not found - Python support disabled")
+    set(HAVE_PYTHON 0)
+endif()
+
 # DISABLE_KQUEUE
 # DISABLE_POLL
 set(DLOPENLIBC "libc.so.6")

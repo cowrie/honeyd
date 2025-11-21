@@ -1,14 +1,13 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python3
 
 import os
 import sys
 import re
-import string
 
 def get_xprobe(filename):
     file = open(filename, "r")
 
-    m = re.compile("\s*$")
+    m = re.compile(r"\s*$")
     m2 = re.compile("#.*")
     for line in file:
         line = m2.sub("", line)
@@ -16,7 +15,7 @@ def get_xprobe(filename):
         if not len(line):
             continue
 
-        res = re.search('OS_ID\s*=\s*"(.*)"', line)
+        res = re.search(r'OS_ID\s*=\s*"(.*)"', line)
         if not res:
             continue
 
@@ -25,7 +24,7 @@ def get_xprobe(filename):
     file.close()
 
 def find_match(fingerprint):
-    tokens = string.split(fingerprint, " ")
+    tokens = fingerprint.split(" ")
     bestname = None
     maxcount = 0
 
@@ -46,14 +45,14 @@ def find_match(fingerprint):
             bestname = name
 
     if maxcount > 1 and bestname:
-        print "%s;%s" % (fingerprint, bestname)
+        print("%s;%s" % (fingerprint, bestname))
     else:
-        print "#%s;" % fingerprint
+        print("#%s;" % fingerprint)
 
 def make_configuration(filename):
     file = open(filename, "r")
 
-    r = re.compile('\s*$')
+    r = re.compile(r'\s*$')
     m = re.compile("^Fingerprint ([^#]*)$")
     for line in file:
         line = r.sub("", line)
