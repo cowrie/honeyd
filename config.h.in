@@ -13,25 +13,25 @@
 #undef DL_NEED_UNDERSCORE
 
 /* Define if your system uses access rights style file descriptor passing */
-#undef HAVE_ACCRIGHTS_IN_MSGHDR
+#cmakedefine HAVE_ACCRIGHTS_IN_MSGHDR
 
 /* Define to 1 if you have the 'asprintf' function. */
-#undef HAVE_ASPRINTF
+#cmakedefine HAVE_ASPRINTF
 
 /* Define to 1 if you have the <assert.h> header file. */
-#undef HAVE_ASSERT_H
+#cmakedefine HAVE_ASSERT_H
 
 /* Define if the addr_cmp in libdnet is broken */
 #undef HAVE_BROKEN_DNET
 
 /* Define if your system uses ancillary data style file descriptor passing */
-#undef HAVE_CONTROL_IN_MSGHDR
+#cmakedefine HAVE_CONTROL_IN_MSGHDR
 
 /* Define to 1 if you have the 'daemon' function. */
-#undef HAVE_DAEMON
+#cmakedefine HAVE_DAEMON
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
-#undef HAVE_DLFCN_H
+#cmakedefine HAVE_DLFCN_H
 
 /* Define to 1 if you don't have 'vprintf' but do have '_doprnt.' */
 #undef HAVE_DOPRNT
@@ -40,43 +40,43 @@
 #cmakedefine HAVE_DUMBNET
 
 /* Define to 1 if you have the 'dup2' function. */
-#undef HAVE_DUP2
+#cmakedefine HAVE_DUP2
 
 /* Define to 1 if you have the 'err' function. */
-#undef HAVE_ERR
+#cmakedefine HAVE_ERR
 
 /* Define to 1 if you have the <errno.h> header file. */
-#undef HAVE_ERRNO_H
+#cmakedefine HAVE_ERRNO_H
 
 /* Define to 1 if you have the <fcntl.h> header file. */
-#undef HAVE_FCNTL_H
+#cmakedefine HAVE_FCNTL_H
 
 /* Define to 1 if you have the 'fgetln' function. */
-#undef HAVE_FGETLN
+#cmakedefine HAVE_FGETLN
 
 /* Define to 1 if you have the 'freeaddrinfo' function. */
-#undef HAVE_FREEADDRINFO
+#cmakedefine HAVE_FREEADDRINFO
 
 /* Define to 1 if you have the 'getaddrinfo' function. */
-#undef HAVE_GETADDRINFO
+#cmakedefine HAVE_GETADDRINFO
 
 /* Define to 1 if you have the 'getnameinfo' function. */
-#undef HAVE_GETNAMEINFO
+#cmakedefine HAVE_GETNAMEINFO
 
 /* Define to 1 if you have the 'getopt_long' function. */
-#undef HAVE_GETOPT_LONG
+#cmakedefine HAVE_GETOPT_LONG
 
 /* Define to 1 if you have the 'gettimeofday' function. */
-#undef HAVE_GETTIMEOFDAY
+#cmakedefine HAVE_GETTIMEOFDAY
 
 /* Define to 1 if you have the <inttypes.h> header file. */
-#undef HAVE_INTTYPES_H
+#cmakedefine HAVE_INTTYPES_H
 
 /* Define to 1 if you have the 'isblank' function. */
-#undef HAVE_ISBLANK
+#cmakedefine HAVE_ISBLANK
 
 /* Define to 1 if you have the 'kqueue' function. */
-#undef HAVE_KQUEUE
+#cmakedefine HAVE_KQUEUE
 
 /* Define if you have libedit */
 #cmakedefine HAVE_LIBEDIT
@@ -91,19 +91,19 @@
 #undef HAVE_LIBZ
 
 /* Define to 1 if you have the 'memmove' function. */
-#undef HAVE_MEMMOVE
+#cmakedefine HAVE_MEMMOVE
 
 /* Define to 1 if you have the 'memset' function. */
-#undef HAVE_MEMSET
+#cmakedefine HAVE_MEMSET
 
 /* Define to 1 if you have the <net/bpf.h> header file. */
-#undef HAVE_NET_BPF_H
+#cmakedefine HAVE_NET_BPF_H
 
 /* Define to 1 if you have the <paths.h> header file. */
-#undef HAVE_PATHS_H
+#cmakedefine HAVE_PATHS_H
 
 /* Define if libpcap has pcap_get_selectable_fd */
-#undef HAVE_PCAP_GET_SELECTABLE_FD
+#cmakedefine HAVE_PCAP_GET_SELECTABLE_FD
 
 /* Define if Python knows about the dnet modules */
 #undef HAVE_PYDNET
@@ -112,118 +112,118 @@
 #undef HAVE_PYTHON
 
 /* Define to 1 if you have the 'recvmsg' function. */
-#undef HAVE_RECVMSG
+#cmakedefine HAVE_RECVMSG
 
 /* Define to 1 if you have the 'sendmsg' function. */
-#undef HAVE_SENDMSG
+#cmakedefine HAVE_SENDMSG
 
 /* Define to 1 if you have the 'setgroups' function. */
-#undef HAVE_SETGROUPS
+#cmakedefine HAVE_SETGROUPS
 
 /* Define to 1 if you have the 'setregid' function. */
-#undef HAVE_SETREGID
+#cmakedefine HAVE_SETREGID
 
 /* Define to 1 if you have the 'setruid' function. */
-#undef HAVE_SETRUID
+#cmakedefine HAVE_SETRUID
 
 /* Define to 1 if you have the 'SHA1Update' function. */
-#undef HAVE_SHA1UPDATE
+#cmakedefine HAVE_SHA1UPDATE
 
 /* Define if sockaddr struct has sa_len. */
-#undef HAVE_SOCKADDR_SA_LEN
+#cmakedefine HAVE_SOCKADDR_SA_LEN
 
 /* Define to 1 if you have the <stdarg.h> header file. */
-#undef HAVE_STDARG_H
+#cmakedefine HAVE_STDARG_H
 
 /* Define to 1 if you have the <stdint.h> header file. */
-#undef HAVE_STDINT_H
+#cmakedefine HAVE_STDINT_H
 
 /* Define to 1 if you have the <stdio.h> header file. */
 #undef HAVE_STDIO_H
 
 /* Define to 1 if you have the <stdlib.h> header file. */
-#undef HAVE_STDLIB_H
+#cmakedefine HAVE_STDLIB_H
 
 /* Define to 1 if you have the 'strcasecmp' function. */
-#undef HAVE_STRCASECMP
+#cmakedefine HAVE_STRCASECMP
 
 /* Define to 1 if you have the 'strchr' function. */
-#undef HAVE_STRCHR
+#cmakedefine HAVE_STRCHR
 
 /* Define to 1 if you have the 'strdup' function. */
-#undef HAVE_STRDUP
+#cmakedefine HAVE_STRDUP
 
 /* Define to 1 if you have the <strings.h> header file. */
-#undef HAVE_STRINGS_H
+#cmakedefine HAVE_STRINGS_H
 
 /* Define to 1 if you have the <string.h> header file. */
-#undef HAVE_STRING_H
+#cmakedefine HAVE_STRING_H
 
 /* Define to 1 if you have the 'strlcat' function. */
-#undef HAVE_STRLCAT
+#cmakedefine HAVE_STRLCAT
 
 /* Define to 1 if you have the 'strlcpy' function. */
-#undef HAVE_STRLCPY
+#cmakedefine HAVE_STRLCPY
 
 /* Define to 1 if you have the 'strncasecmp' function. */
-#undef HAVE_STRNCASECMP
+#cmakedefine HAVE_STRNCASECMP
 
 /* Define to 1 if you have the 'strsep' function. */
-#undef HAVE_STRSEP
+#cmakedefine HAVE_STRSEP
 
 /* Define to 1 if you have the 'strspn' function. */
-#undef HAVE_STRSPN
+#cmakedefine HAVE_STRSPN
 
 /* Define to 1 if you have the 'strtoul' function. */
-#undef HAVE_STRTOUL
+#cmakedefine HAVE_STRTOUL
 
 /* Define if your system defines struct sockaddr_storage */
 #cmakedefine HAVE_STRUCT_SOCKADDR_STORAGE
 
 /* Set if you have sun_len in socketaddr_un */
-#undef HAVE_SUN_LEN
+#cmakedefine HAVE_SUN_LEN
 
 /* Define to 1 if you have the <syslog.h> header file. */
-#undef HAVE_SYSLOG_H
+#cmakedefine HAVE_SYSLOG_H
 
 /* Define to 1 if you have the <sys/file.h> header file. */
-#undef HAVE_SYS_FILE_H
+#cmakedefine HAVE_SYS_FILE_H
 
 /* Define to 1 if you have the <sys/ioccom.h> header file. */
-#undef HAVE_SYS_IOCCOM_H
+#cmakedefine HAVE_SYS_IOCCOM_H
 
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
-#undef HAVE_SYS_IOCTL_H
+#cmakedefine HAVE_SYS_IOCTL_H
 
 /* Define to 1 if you have the <sys/param.h> header file. */
-#undef HAVE_SYS_PARAM_H
+#cmakedefine HAVE_SYS_PARAM_H
 
 /* Define to 1 if you have the <sys/socket.h> header file. */
-#undef HAVE_SYS_SOCKET_H
+#cmakedefine HAVE_SYS_SOCKET_H
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
-#undef HAVE_SYS_STAT_H
+#cmakedefine HAVE_SYS_STAT_H
 
 /* Define to 1 if you have the <sys/time.h> header file. */
-#undef HAVE_SYS_TIME_H
+#cmakedefine HAVE_SYS_TIME_H
 
 /* Define to 1 if you have the <sys/types.h> header file. */
-#undef HAVE_SYS_TYPES_H
+#cmakedefine HAVE_SYS_TYPES_H
 
 /* Define to 1 if you have <sys/wait.h> that is POSIX.1 compatible. */
 #undef HAVE_SYS_WAIT_H
 
 /* Define if timeradd is define in <sys/time.h> */
-#undef HAVE_TIMERADD
+#cmakedefine HAVE_TIMERADD
 
 /* Define to 1 if you have the <time.h> header file. */
-#undef HAVE_TIME_H
+#cmakedefine HAVE_TIME_H
 
 /* Define to 1 if you have the <unistd.h> header file. */
-#undef HAVE_UNISTD_H
+#cmakedefine HAVE_UNISTD_H
 
 /* Define to 1 if you have the 'vprintf' function. */
-#undef HAVE_VPRINTF
+#cmakedefine HAVE_VPRINTF
 
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
