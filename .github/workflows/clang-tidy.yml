@@ -1,0 +1,63 @@
+name: Clang-Tidy
+
+on:
+  push:
+    branches: [ main, michel ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  clang-tidy:
+    name: Clang-Tidy Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          clang-tidy \
+          cmake \
+          libevent-dev \
+          libdumbnet-dev \
+          libpcap-dev \
+          libreadline-dev \
+          zlib1g-dev \
+          bison \
+          flex
+
+    - name: Configure CMake
+      run: |
+        mkdir -p build
+        cd build
+        cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+    - name: Run clang-tidy
+      run: |
+        # Run clang-tidy on all C source files
+        find . -name '*.c' \
+          -not -path './build/*' \
+          -not -path './compat/*' \
+          -not -path './dpkt/*' \
+          -not -path './pypcap/*' \
+          -not -path './webserver/*' \
+          | xargs clang-tidy -p build --warnings-as-errors='' 2>&1 \
+          | tee clang-tidy-report.txt
+
+    - name: Check for errors
+      run: |
+        # Fail if there are any error-level issues (not warnings)
+        if grep -q "error:" clang-tidy-report.txt; then
+          echo "Clang-tidy found errors"
+          exit 1
+        fi
+        echo "Clang-tidy completed with only warnings"
+
+    - name: Upload clang-tidy report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: clang-tidy-report
+        path: clang-tidy-report.txt

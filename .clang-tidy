@@ -1,0 +1,23 @@
+---
+# Clang-tidy configuration for honeyd
+# Focuses on real bugs and security issues, not style
+
+Checks: >
+  clang-analyzer-*,
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-assignment-in-if-condition,
+  concurrency-*,
+  performance-*,
+  portability-*,
+  readability-inconsistent-declaration-parameter-name,
+  readability-misplaced-array-index,
+  -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling
+
+WarningsAsErrors: ''
+HeaderFilterRegex: '.*'
+FormatStyle: none
+
+CheckOptions:
+  - key: readability-identifier-naming.VariableCase
+    value: lower_case

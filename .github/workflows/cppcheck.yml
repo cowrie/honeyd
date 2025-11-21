@@ -1,0 +1,55 @@
+name: Cppcheck
+
+on:
+  push:
+    branches: [ main, michel ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  cppcheck:
+    name: Static Analysis with Cppcheck
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install cppcheck
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cppcheck
+
+    - name: Run cppcheck
+      run: |
+        cppcheck \
+          --enable=warning,style,performance,portability \
+          --suppress=missingIncludeSystem \
+          --suppress=unusedFunction \
+          --inline-suppr \
+          --template='{file}:{line}:{severity}:{message}' \
+          --error-exitcode=0 \
+          -I . \
+          -I build \
+          --exclude=build \
+          --exclude=compat \
+          --exclude=dpkt \
+          --exclude=pypcap \
+          --exclude=webserver \
+          . 2>&1 | tee cppcheck-report.txt
+
+    - name: Check for errors
+      run: |
+        # Fail if there are error-level issues
+        if grep -q ":error:" cppcheck-report.txt; then
+          echo "Cppcheck found errors"
+          cat cppcheck-report.txt | grep ":error:"
+          exit 1
+        fi
+        echo "Cppcheck completed successfully"
+
+    - name: Upload cppcheck report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: cppcheck-report
+        path: cppcheck-report.txt
