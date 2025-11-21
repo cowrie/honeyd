@@ -143,6 +143,15 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 add_definitions("-DHAVE_CONFIG_H")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
+# Compatibility sources - only compile if system doesn't have them
+set(COMPAT_SOURCES "")
+if(NOT HAVE_STRLCPY)
+    list(APPEND COMPAT_SOURCES strlcpy.c)
+endif()
+if(NOT HAVE_STRLCAT)
+    list(APPEND COMPAT_SOURCES strlcat.c)
+endif()
+
 add_subdirectory(pypcap)
 add_subdirectory(regress)
 
@@ -181,8 +190,7 @@ target_link_libraries (hsniff pcap dumbnet event z dl)
 
 add_executable(honeydctl
     honeydctl.c
-    strlcpy.c
-    strlcat.c
+    ${COMPAT_SOURCES}
     sha1.c
 )
 target_link_libraries(honeydctl readline termcap dl)
@@ -254,8 +262,7 @@ add_executable(honeyd
     rrdtool.c
     histogram.c
     untagging.c
-    strlcpy.c
-    strlcat.c
+    ${COMPAT_SOURCES}
     sha1.c
 )
 
