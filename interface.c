@@ -117,6 +117,7 @@ static struct interface *
 interface_new(char *dev)
 {
 	char ebuf[PCAP_ERRBUF_SIZE];
+	static char default_dev[256];
 	struct interface *inter;
 
 	if ((inter = calloc(1, sizeof(struct interface))) == NULL)
@@ -126,11 +127,16 @@ interface_new(char *dev)
 	}
 
 	if (dev == NULL) {
-		if ((dev = pcap_lookupdev(ebuf)) == NULL)
+		pcap_if_t *alldevs;
+		if (pcap_findalldevs(&alldevs, ebuf) == -1 || alldevs == NULL)
 		{
-			syslog(LOG_ERR, "pcap_lookupdev: %s",ebuf);
+			syslog(LOG_ERR, "pcap_findalldevs: %s", ebuf);
 			exit(EXIT_FAILURE);
 		}
+		/* Copy device name to static buffer before freeing the list */
+		strlcpy(default_dev, alldevs->name, sizeof(default_dev));
+		pcap_freealldevs(alldevs);
+		dev = default_dev;
 	}
 
 	TAILQ_INSERT_TAIL(&interfaces, inter, next);
