@@ -60,6 +60,7 @@
 
 #include "rrdtool.h"
 
+struct event_base *rrdtool_libevent_base;
 extern rand_t *honeyd_rand;
 
 

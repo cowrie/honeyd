@@ -91,9 +91,9 @@ struct stats {
 		reserved:4;
 };
 
-enum {
+enum measurement_tags {
 	M_COUNTER, M_TV_START, M_TV_END, M_RECORD, M_MAX
-} measurement_tags;
+};
 
 struct measurement {
 	uint32_t counter;
@@ -105,9 +105,9 @@ struct measurement {
 #define SHA1_DIGESTSIZE	20
 #endif
 
-enum {
+enum signature_tags {
 	SIG_NAME, SIG_DIGEST, SIG_DATA, SIG_COMPRESSED_DATA, SIG_MAX
-} signature_tags;
+};
 
 struct signature {
 	char *name;

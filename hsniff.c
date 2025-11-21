@@ -81,6 +81,7 @@
 #include "debug.h"
 
 int			honeyd_debug;
+struct event_base *libevent_base;
 
 static int		hsniff_show_version;
 static int		hsniff_show_usage;

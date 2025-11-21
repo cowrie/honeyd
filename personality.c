@@ -66,6 +66,9 @@
 #include "debug.h"
 
 /* ET - Moved SPLAY_HEAD to personality.h so xprobe_assoc.c could use it. */
+perstree_t personalities;
+xp_fprint_tree_t xp_fprints;
+
 int npersons;
 
 /* ET - global from honeyd.c */

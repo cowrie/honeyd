@@ -292,7 +292,8 @@ void xprobe_personality_init(void);
 void print_perstree(void);
 
 /* Splay stuff here so other modules can use it */
-SPLAY_HEAD(perstree, personality) personalities;
+typedef SPLAY_HEAD(perstree, personality) perstree_t;
+extern perstree_t personalities;
 static int
 perscompare(struct personality *a, struct personality *b)
 {
@@ -300,7 +301,8 @@ perscompare(struct personality *a, struct personality *b)
 }
 SPLAY_PROTOTYPE(perstree, personality, node, perscompare);
 
-SPLAY_HEAD(xp_fprint_tree, xp_fingerprint) xp_fprints;
+typedef SPLAY_HEAD(xp_fprint_tree, xp_fingerprint) xp_fprint_tree_t;
+extern xp_fprint_tree_t xp_fprints;
 static int 
 xp_fprint_compare(struct xp_fingerprint *a, struct xp_fingerprint *b)
 {

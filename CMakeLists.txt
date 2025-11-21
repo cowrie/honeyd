@@ -148,6 +148,7 @@ link_directories(/usr/lib)
 #link_directories(/usr/local/lib)
 
 add_definitions(-DHAVE_CONFIG_H)
+add_definitions(-D_GNU_SOURCE)
 add_definitions(-DPATH_HONEYDINCLUDE=\"/home/alenor/local/include/honeyd\")
 add_definitions(-DPATH_HONEYDLIB=\"/home/alenor/local/lib/honeyd\")
 add_definitions(-DPATH_HONEYDDATA=\"/home/alenor/local/share/honeyd\")

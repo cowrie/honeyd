@@ -155,6 +155,7 @@ struct pool			*pool_pkt;
 struct pool			*pool_delay;
 rand_t				*honeyd_rand;
 int					honeyd_sig;
+struct event_base *libevent_base;
 int					honeyd_nconnects;
 int					honeyd_nchildren;
 int					honeyd_ttl = HONEYD_DFL_TTL;
