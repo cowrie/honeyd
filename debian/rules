@@ -18,23 +18,23 @@ override_dh_auto_configure:
 override_dh_auto_install:
 	dh_auto_install
 	# Relocate configuration files
-	mkdir -p $(CURDIR)/debian/honeyd/etc/honeyd
+	mkdir -p $(CURDIR)/debian/tmp/etc/honeyd
 	for file in nmap.assoc nmap-mac-prefixes nmap-os-db xprobe2.conf pf.os config.sample; do \
-		if [ -f $(CURDIR)/debian/honeyd/usr/share/honeyd/$$file ]; then \
-			mv $(CURDIR)/debian/honeyd/usr/share/honeyd/$$file \
-				$(CURDIR)/debian/honeyd/etc/honeyd/; \
+		if [ -f $(CURDIR)/debian/tmp/usr/share/honeyd/$$file ]; then \
+			mv $(CURDIR)/debian/tmp/usr/share/honeyd/$$file \
+				$(CURDIR)/debian/tmp/etc/honeyd/; \
 			ln -s /etc/honeyd/$$file \
-				$(CURDIR)/debian/honeyd/usr/share/honeyd/$$file; \
+				$(CURDIR)/debian/tmp/usr/share/honeyd/$$file; \
 		fi; \
 	done
 	# Rename config.sample to honeyd.conf
-	if [ -f $(CURDIR)/debian/honeyd/etc/honeyd/config.sample ]; then \
-		mv $(CURDIR)/debian/honeyd/etc/honeyd/config.sample \
-			$(CURDIR)/debian/honeyd/etc/honeyd/honeyd.conf; \
+	if [ -f $(CURDIR)/debian/tmp/etc/honeyd/config.sample ]; then \
+		mv $(CURDIR)/debian/tmp/etc/honeyd/config.sample \
+			$(CURDIR)/debian/tmp/etc/honeyd/honeyd.conf; \
 	fi
 	# Remove redundant files
-	rm -f $(CURDIR)/debian/honeyd/usr/share/honeyd/README
-	rm -f $(CURDIR)/debian/honeyd/usr/share/honeyd/config.sample
+	rm -f $(CURDIR)/debian/tmp/usr/share/honeyd/README
+	rm -f $(CURDIR)/debian/tmp/usr/share/honeyd/config.sample
 
 override_dh_installlogrotate:
 	dh_installlogrotate
