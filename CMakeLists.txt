@@ -11,6 +11,9 @@ include(CheckTypeSize)
 include(FindPkgConfig)
 include(TestBigEndian)
 
+find_package(BISON REQUIRED)
+find_package(FLEX REQUIRED)
+
 #include(CheckCmakeCompat)
 #include(AutoVersioning)
 #include(ConfigOptions)
@@ -131,6 +134,7 @@ set(VERSION "1.6e")
 # ...
 
 # Include directories
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -207,11 +211,17 @@ add_executable(honeydstats
 # link the libraries to the executable
 target_link_libraries (honeydstats  dumbnet event z dl)
 
+# Generate parser and lexer
+BISON_TARGET(HoneydParser parse.y ${CMAKE_CURRENT_BINARY_DIR}/parse.c
+    DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/parse.h)
+FLEX_TARGET(HoneydLexer lex.l ${CMAKE_CURRENT_BINARY_DIR}/lex.c)
+ADD_FLEX_BISON_DEPENDENCY(HoneydLexer HoneydParser)
+
 add_executable(honeyd
     honeyd.c
     command.c
-    parse.c
-    lex.c
+    ${BISON_HoneydParser_OUTPUTS}
+    ${FLEX_HoneydLexer_OUTPUTS}
     config.c
     personality.c
     util.c

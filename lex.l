@@ -81,6 +81,7 @@ int includes_index = 0;
 
 %option nounput
 %option noinput
+%option prefix="hyd"
 
 %%
 create		{ return CREATE; }
