@@ -182,6 +182,34 @@ add_definitions(-DHONEYD_PLUGINS=)
 include_directories (${honeyd_SOURCE_DIR}/compat)
 include_directories (${honeyd_SOURCE_DIR}/compat/libdnet)
 
+# Enable compiler warnings
+set(WARNING_FLAGS
+    -Wall
+    -Wextra
+    -Wformat=2
+    -Wstrict-prototypes
+    -Wmissing-prototypes
+    -Wold-style-definition
+    -Wshadow
+    -Wpointer-arith
+    -Wcast-qual
+    -Wwrite-strings
+    -Wundef
+    -Wmissing-declarations
+    -Wredundant-decls
+    -Wno-unused-parameter
+)
+
+# Check which warning flags are supported and add them
+foreach(flag ${WARNING_FLAGS})
+    string(REPLACE "-W" "" flag_var ${flag})
+    string(REPLACE "=" "_" flag_var ${flag_var})
+    check_c_compiler_flag(${flag} COMPILER_SUPPORTS_${flag_var})
+    if(COMPILER_SUPPORTS_${flag_var})
+        add_compile_options(${flag})
+    endif()
+endforeach()
+
 add_executable(hsniff
     hsniff.c
     tagging.c

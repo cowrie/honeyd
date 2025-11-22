@@ -1567,7 +1567,7 @@ tcp_send(struct tcp_con *con, uint8_t flags, u_char *payload, u_int len)
 			options.options = malloc(sizeof(struct tcp_option));
 			if (options.options == NULL) {
 				syslog(LOG_ERR, "%s: malloc failed for tcp_option", __func__);
-				return;
+				return (-1);
 			}
 			options.options->opt_type = 'M';
 			options.options->value = 0;
