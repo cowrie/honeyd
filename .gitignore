@@ -161,3 +161,30 @@ os-test/results*
 /scripts/names_alloc
 
 /scripts/lib/names.pyc
+dpkt/
+
+# Build directories
+/build/
+/obj-*/
+
+# Debian package build artifacts
+/debian/.debhelper/
+/debian/debhelper-build-stamp
+/debian/files
+/debian/*.substvars
+/debian/honeyd/
+/debian/honeyd-*/
+/debian/tmp/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+ENV/
+env/
+
+# direnv
+/.envrc
+/.direnv/

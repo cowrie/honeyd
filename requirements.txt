@@ -1,0 +1,10 @@
+# Python dependencies for honeyd development and testing
+
+# Network packet parsing library (used by regression tests)
+dpkt>=1.9.8
+
+# Code quality tools
+ruff>=0.1.0
+
+# Build/upgrade tools
+pyupgrade>=3.15.0

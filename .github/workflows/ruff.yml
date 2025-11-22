@@ -24,10 +24,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install ruff
 
+    - name: Install Python dependencies
+      run: pip install -r requirements.txt
+
     - name: Run ruff check
       run: |
         ruff check webserver/ scripts/ *.py \
-          --exclude dpkt \
           --exclude pypcap \
           --output-format=github
       continue-on-error: true
@@ -35,7 +37,6 @@ jobs:
     - name: Run ruff format check
       run: |
         ruff format --check webserver/ scripts/ *.py \
-          --exclude dpkt \
           --exclude pypcap
       continue-on-error: true
 
@@ -46,6 +47,5 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Check Results" >> $GITHUB_STEP_SUMMARY
         ruff check webserver/ scripts/ *.py \
-          --exclude dpkt \
           --exclude pypcap \
           --statistics || true >> $GITHUB_STEP_SUMMARY
