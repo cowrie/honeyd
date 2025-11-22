@@ -711,3 +711,39 @@ trace_onoff(int on) {
 			trace_free(i);
 	}
 }
+
+/*
+ * Safe string to integer conversion with error checking.
+ * Returns 0 on success, -1 on error.
+ */
+int
+safe_atoi(const char *str, int *result, const char *context)
+{
+	char *endptr;
+	long val;
+
+	if (str == NULL || *str == '\0') {
+		if (context != NULL)
+			syslog(LOG_ERR, "%s: empty or NULL string", context);
+		return -1;
+	}
+
+	errno = 0;
+	val = strtol(str, &endptr, 10);
+
+	/* Check for various possible errors */
+	if (errno == ERANGE || val < INT_MIN || val > INT_MAX) {
+		if (context != NULL)
+			syslog(LOG_ERR, "%s: number out of range: %s", context, str);
+		return -1;
+	}
+
+	if (endptr == str || *endptr != '\0') {
+		if (context != NULL)
+			syslog(LOG_ERR, "%s: invalid number: %s", context, str);
+		return -1;
+	}
+
+	*result = (int)val;
+	return 0;
+}

@@ -45,6 +45,9 @@ struct evbuffer;
 int trace_inspect(int, struct evbuffer *buffer);
 void trace_onoff(int);
 
+/* Safe string to integer conversion */
+int safe_atoi(const char *str, int *result, const char *context);
+
 /* Simple tracing of fd activity */
 #define TRACE(x, y) do { \
 	if (trace_on) { \

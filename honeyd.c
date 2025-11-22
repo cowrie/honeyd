@@ -1067,12 +1067,17 @@ determine_path(char *abspath, char **input)
 {
 	char *buffer = NULL;
 	if (*input[0] != '/') {
-		buffer = malloc(strlen(abspath) + strlen(*input));
-		strcpy(buffer, abspath);
-		strcat(buffer, "/");
-		strcat(buffer, *input);
-		*input = (char *) malloc(strlen(buffer));
-		strcpy(*input, buffer);
+		size_t size = strlen(abspath) + strlen(*input) + 2; /* +1 for '/', +1 for '\0' */
+		buffer = malloc(size);
+		if (buffer == NULL) {
+			err(1, "malloc");
+		}
+		snprintf(buffer, size, "%s/%s", abspath, *input);
+		char *new_input = strdup(buffer);
+		if (new_input == NULL) {
+			err(1, "strdup");
+		}
+		*input = new_input;
 		free(buffer);
 	}
 }
