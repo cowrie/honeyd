@@ -79,8 +79,11 @@ tcp_increase_buf(u_char **pbuf, u_int *psize, u_int maxsize)
 		size = maxsize;
 
 	p = realloc(*pbuf, size);
-	if (p == NULL)
+	if (p == NULL) {
+		syslog(LOG_ERR, "%s: realloc failed for %u bytes", __func__, size);
+		/* Keep original buffer - caller can still use existing data */
 		return;
+	}
 
 	*psize = size;
 	*pbuf = p;
