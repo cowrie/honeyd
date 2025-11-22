@@ -1,0 +1,75 @@
+name: Static Analysis
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  cppcheck:
+    name: Cppcheck
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install cppcheck
+      run: sudo apt-get update && sudo apt-get install -y cppcheck
+
+    - name: Run cppcheck
+      run: |
+        cppcheck --enable=all --inconclusive --error-exitcode=1 \
+          --suppress=missingIncludeSystem \
+          --suppress=unusedFunction \
+          -i dpkt \
+          -i pypcap \
+          -i build \
+          .
+
+  clang-tidy:
+    name: Clang-Tidy
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          clang-tidy \
+          cmake \
+          libevent-dev \
+          libpcap-dev \
+          libdumbnet-dev \
+          flex \
+          bison \
+          libreadline-dev \
+          zlib1g-dev
+
+    - name: Configure with CMake
+      run: |
+        mkdir -p build
+        cd build
+        cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+    - name: Run clang-tidy
+      run: |
+        cd build
+        # Get list of source files
+        find .. -name "*.c" ! -path "../build/*" ! -path "../dpkt/*" ! -path "../pypcap/*" > files.txt
+
+        # Run clang-tidy on each file
+        cat files.txt | xargs -I {} clang-tidy -p . {} 2>&1 | tee clang-tidy.log || true
+
+        # Show first 50 issues in the workflow log
+        echo "=== First 50 clang-tidy issues ==="
+        head -50 clang-tidy.log || true
+
+    - name: Upload clang-tidy results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: clang-tidy-report
+        path: build/clang-tidy.log
