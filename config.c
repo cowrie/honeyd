@@ -86,6 +86,8 @@ struct templtree templates;
 /* Counter for addresses in 169.254/16 that we assign for DHCP */
 static uint16_t privip_counter = 1;
 
+extern rand_t *honeyd_rand;
+
 int
 templ_compare(struct template *a, struct template *b)
 {
@@ -268,7 +270,6 @@ template_find_best(const char *addr, const struct ip_hdr *ip, u_short iplen)
 struct template *
 template_create(const char *name)
 {
-	extern rand_t *honeyd_rand;
 	struct template *tmpl;
 
 	if (template_find(name))
@@ -641,7 +642,6 @@ struct port *
 port_random(struct template *tmpl, int proto, struct action *action,
     int min, int max)
 {
-	extern rand_t *honeyd_rand;
 	struct port *port = NULL;
 	int count = 100;
 	int number;
@@ -1240,7 +1240,6 @@ template_test_add(struct evbuffer *evbuf, struct addr *addr, int count)
 void
 template_test_measure(int count)
 {
-	extern rand_t *honeyd_rand;
 	extern void
 	  honeyd_recv_cb(u_char *, const struct pcap_pkthdr *, const u_char *);
 	u_char pkt[1500];
