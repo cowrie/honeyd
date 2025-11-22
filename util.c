@@ -615,13 +615,13 @@ trace_init(int fd)
 	while (n <= fd)
 		n <<= 1;
 
-	tmp = (struct traceq **)realloc(trace_refs, n * sizeof(struct traceq));
+	tmp = (struct traceq **)realloc(trace_refs, n * sizeof(struct traceq *));
 	if (tmp == NULL)
 		return (-1);
 
 	/* Initialize all queues */
 	for (i = trace_refsize; i < n; ++i) {
-		struct traceq *head = malloc(sizeof(struct traceq *));
+		struct traceq *head = malloc(sizeof(struct traceq));
 		if (head == NULL)
 		{
 			syslog(LOG_ERR, "%s: malloc", __func__);

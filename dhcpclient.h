@@ -142,7 +142,7 @@ struct template;
 void dhcp_abort(struct template *);
 int dhcp_release(struct template *);
 void queue_dhcp_discover(struct template *tmpl);
-void dhcp_send_discover();
+void dhcp_send_discover(void);
 
 void dhcp_recv_cb(struct eth_hdr *, struct ip_hdr *, u_short);
 

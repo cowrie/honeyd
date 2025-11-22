@@ -73,7 +73,7 @@ struct reporttree;
 void report_free(struct reporttree *tree);
 void report_print(struct reporttree *, FILE *,  char *(*)(void *, size_t));
 
-void analyze_print_report();
+void analyze_print_report(void);
 
 void analyze_test(void);
 

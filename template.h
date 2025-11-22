@@ -132,7 +132,7 @@ void		template_subsystem_start(struct template *tmpl,
 struct template	*template_clone(const char *, const struct template *,
 		    struct interface *, int);
 struct template *template_find(const char *);
-void template_dump_ips();
+void template_dump_ips(void);
 struct template *template_find_best(const char *, const struct ip_hdr *,
 		    u_short);
 void		template_list_glob(struct evbuffer *buffer,
@@ -151,8 +151,6 @@ void		template_subsystem_free(struct subsystem *);
 void		template_subsystem_free_ports(struct subsystem *);
 void		template_subsystem_list_glob(struct evbuffer *buffer,
 		    const char *pattern);
-
-int		templ_compare(struct template *, struct template *);
 
 /* Get a temporary IP address to be used with DHCP */
 int		template_get_dhcp_address(struct addr *addr);

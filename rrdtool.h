@@ -90,6 +90,6 @@ int rrdtool_db_update(struct rrdtool_db *db, struct timeval *tv, char *update);
 void rrdtool_graph(struct rrdtool_db *, char *filename,
     struct timeval *, struct timeval *, char *spec);
 
-void rrdtool_test();
+void rrdtool_test(void);
 
 #endif /* _RRDTOOL_ */
