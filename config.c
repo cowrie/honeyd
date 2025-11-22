@@ -467,6 +467,7 @@ port_action_clone(struct action *dst, const struct action *src)
 		struct addrinfo *ai = src->aitop;
 		char addr[NI_MAXHOST];
 		char port[NI_MAXSERV];
+		int port_num;
 		short nport;
 
 		if (getnameinfo(ai->ai_addr, ai->ai_addrlen,
@@ -476,7 +477,13 @@ port_action_clone(struct action *dst, const struct action *src)
 			syslog(LOG_ERR, "%s: getnameinfo", __func__);
 			exit(EXIT_FAILURE);
 		}
-		nport = atoi(port);
+		if (safe_atoi(port, &port_num, "port_action_clone") != 0 ||
+		    port_num < 0 || port_num > 65535)
+		{
+			syslog(LOG_ERR, "%s: invalid port number", __func__);
+			exit(EXIT_FAILURE);
+		}
+		nport = (short)port_num;
 		dst->aitop = cmd_proxy_getinfo(addr, ai->ai_socktype, nport);
 		if (dst->aitop == NULL)
 		{
@@ -1281,8 +1288,8 @@ template_test_measure(int count)
 	}
 	gettimeofday(&tv_end, NULL);
 	timersub(&tv_end, &tv_start, &tv_end);
-	msperpkt = (double)(tv_end.tv_sec * 1000 + tv_end.tv_usec / 1000)
-	    / (double) j;
+	msperpkt = (double)(tv_end.tv_sec * 1000) + tv_end.tv_usec / 1000.0;
+	msperpkt /= (double) j;
 	syslog(LOG_ERR, "\t\t%7d templates: %.4f ms per packet\n", count,msperpkt);
 	fprintf(stderr, "\t\t%7d templates: %.4f ms per packet\n",
 	    count, msperpkt);
