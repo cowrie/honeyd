@@ -376,6 +376,9 @@ interface_init(char *dev, int naddresses, char **addresses)
 		 inter->if_ent.intf_mtu + 40, promisc, time, ebuf)) == NULL)
 	{
 		syslog(LOG_ERR, "pcap_open_live: %s",ebuf);
+		fprintf(stderr, "Error: Failed to open interface '%s': %s\n",
+			inter->if_ent.intf_name, ebuf);
+		fprintf(stderr, "Honeyd requires root privileges or CAP_NET_RAW+CAP_NET_ADMIN capabilities.\n");
 		exit(EXIT_FAILURE);
 	}
 

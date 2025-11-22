@@ -3814,13 +3814,17 @@ main(int argc, char *argv[])
 		unittest();
 
 	if ((honeyd_ip = ip_open()) == NULL) {
-		/* 
+		/*
 		 * We ignore this error if a user just wants to verify
 		 * the configuration - some configs will not load without
 		 * this call succeeding.
 		 */
 		if (!honeyd_verify_config){
-			syslog(LOG_ERR, "ip_open");
+			syslog(LOG_ERR, "ip_open: failed to open raw IP socket");
+			fprintf(stderr, "Error: Failed to open raw IP socket.\n");
+			fprintf(stderr, "Honeyd requires root privileges or CAP_NET_RAW capability.\n");
+			fprintf(stderr, "Try running with: sudo honeyd ...\n");
+			fprintf(stderr, "Or grant capability: sudo setcap cap_net_raw+ep ./honeyd\n");
 			exit(EXIT_FAILURE);
 		}
 	}
