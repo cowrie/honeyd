@@ -1,8 +1,6 @@
 import sys
 import os
 import struct
-import binascii
-import time
 
 class PreLoginToken:
 	def __init__(self):
@@ -18,7 +16,7 @@ class TDSPacket:
 
 	# Returns string version of the packet
 	def writePacket(self):
-		ret = "";
+		ret = ""
 		ret += struct.pack("!B", self.type)
 		ret += struct.pack("!B", self.status)
 		ret += struct.pack("!H", self.length)
@@ -91,7 +89,7 @@ class TDSPacket:
 		ret += "Packet: " + str(self.packet) + "\n"
 		ret += "Window: " + str(self.window) + "\n\n"
 
-		ret += "Payload: ";
+		ret += "Payload: "
 		ret += ":".join("{:x}".format(ord(c)) for c in self.payload)
 		ret += "\n"
 

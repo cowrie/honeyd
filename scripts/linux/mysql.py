@@ -32,7 +32,7 @@ class ErrorGreeting:
 		returnString = ""
 
 		# First 3 bytes are packet length, 4th byte is packet number
-		firstBytes = (self.packetNumber << 24) | (self.length);
+		firstBytes = (self.packetNumber << 24) | (self.length)
 	
 		# Padding? Not really sure what this is for, reverse engineered from packet caps in wireshark
 		ff = 0xff

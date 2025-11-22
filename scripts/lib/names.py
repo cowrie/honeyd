@@ -41,7 +41,7 @@ def AddNameAllocation(names_path, our_IP):
 	cursor.execute("SELECT * FROM allocs WHERE IP is NULL")
 	row = cursor.fetchone()
 	if row is None:
-		conn.close();
+		conn.close()
 		sys.stderr.write("Unable to assign hostname to honeypot. No unused hostnames configured.\n")
 		return ""
 	name = row[1]

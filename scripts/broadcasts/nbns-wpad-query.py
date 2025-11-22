@@ -26,29 +26,29 @@ returnString = ""
 returnString += struct.pack('>H', random.randint(0, 65535))
 
 # Flags (name query)
-returnString += struct.pack('>H', 0x0110);
+returnString += struct.pack('>H', 0x0110)
 
 # Questions (1)
-returnString += struct.pack('>H', 1);
+returnString += struct.pack('>H', 1)
 
 # Answer RRs (0)
-returnString += struct.pack('>H', 0);
+returnString += struct.pack('>H', 0)
 
 # Authority RRs (0)
-returnString += struct.pack('>H', 0);
+returnString += struct.pack('>H', 0)
 
 # Additional RRs (0)
-returnString += struct.pack('>H', 0);
+returnString += struct.pack('>H', 0)
 
 # Query for WPAD<00> (Workstation/Redirector)
-returnString += struct.pack('>33s', " FHFAEBEECACACACACACACACACACACAAAA");
-returnString += struct.pack('>B', 0);
+returnString += struct.pack('>33s', " FHFAEBEECACACACACACACACACACACAAAA")
+returnString += struct.pack('>B', 0)
 
 # Type (NB)
-returnString += struct.pack('>H', 0x0020);
+returnString += struct.pack('>H', 0x0020)
 
 #Class (IN)
-returnString += struct.pack('>H', 1);
+returnString += struct.pack('>H', 1)
 
-sys.stdout.write(returnString);
-sys.exit(0);
+sys.stdout.write(returnString)
+sys.exit(0)

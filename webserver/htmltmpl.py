@@ -202,8 +202,8 @@ class TemplateManager:
                 try:
                     precompiled = self.load_precompiled(file)
                 except PrecompiledError as template:
-                    print >> sys.stderr, "Htmltmpl: bad precompiled "\
-                                         "template '%s' removed" % template
+                    print("Htmltmpl: bad precompiled "
+                                         "template '%s' removed" % template, file=sys.stderr)
                     compiled = self.compile(file)
                     self.save_precompiled(compiled)
                 else:
@@ -257,7 +257,8 @@ class TemplateManager:
         """ Print debugging message to stderr if debugging is enabled. 
             @hidden
         """
-        if self._debug: print >> sys.stderr, str
+        if self._debug:
+            print(str, file=sys.stderr)
 
     def lock_file(self, file, lock):
         """ Provide platform independent file locking.
@@ -775,7 +776,8 @@ class TemplateProcessor:
         """ Print debugging message to stderr if debugging is enabled.
             @hidden
         """
-        if self._debug: print >> sys.stderr, str
+        if self._debug:
+            print(str, file=sys.stderr)
 
     def find_value(self, var, loop_name, loop_pass, loop_total,
                    global_override=None):
@@ -916,11 +918,10 @@ class TemplateProcessor:
         """ Return true if var is a scalar. (not a reference to loop)
             @hidden
         """
-        if type(var) == StringType or type(var) == IntType or \
-           type(var) == LongType or type(var) == FloatType:
-            return 1
+        if isinstance(var, (str, int, float)):
+            return True
         else:
-            return 0
+            return False
 
 
 ##############################################
@@ -1021,7 +1022,8 @@ class TemplateCompiler:
         """ Print debugging message to stderr if debugging is enabled.
             @hidden
         """
-        if self._debug: print >> sys.stderr, str
+        if self._debug:
+            print(str, file=sys.stderr)
     
     def read(self, filename):
         """ Read content of file and return it. Raise an error if a problem
@@ -1437,7 +1439,8 @@ class Template:
         """ Print debugging message to stderr.
             @hidden
         """
-        if self._debug: print >> sys.stderr, str
+        if self._debug:
+            print(str, file=sys.stderr)
 
 
 ##############################################

@@ -1,7 +1,6 @@
 import honeyd
 import urllib.parse
 import html
-import sys
 from htmltmpl import TemplateManager, TemplateProcessor
 
 def quote(data):

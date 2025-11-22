@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import sys
-import binascii
 
 native_os = ""
 primary_domain = ""

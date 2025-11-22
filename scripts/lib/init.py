@@ -3,7 +3,6 @@ import os
 
 sys.path.append("/usr/share/honeyd/scripts/lib/")
 from names import InitializeDB
-from names import AddNames
 
 home = os.path.expanduser("~")
 InitializeDB(home + "/.config/honeyd/names")

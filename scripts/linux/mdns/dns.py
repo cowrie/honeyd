@@ -1,6 +1,4 @@
-import sys
 import struct
-import binascii
 
 # From RFC1035, meant to be & with m_flags
 BITMASK_QR = 1 << 7

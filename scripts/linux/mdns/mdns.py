@@ -1,10 +1,7 @@
 import os
 import sys
 import socket
-import struct
-import binascii
 
-from pprint import pprint
 
 sys.path.append("/usr/share/honeyd/scripts/lib/")
 from names import AddNameAllocation

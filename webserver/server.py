@@ -11,7 +11,6 @@ import io
 import posixpath
 import urllib.parse
 import time
-import honeyd
 
 __version__ = "0.1"
 
@@ -181,16 +180,16 @@ class HoneydRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def send_nocache(self):
         """Sends headers that makes the results page non-cacheable."""
-        self.send_header("Expires", "0");
-        self.send_header("Last-Modified", self.date_time_string());
-        self.send_header("Cache-Control", "no-cache, must-revalidate");
-        self.send_header("Pragma", "no-cache");
+        self.send_header("Expires", "0")
+        self.send_header("Last-Modified", self.date_time_string())
+        self.send_header("Cache-Control", "no-cache, must-revalidate")
+        self.send_header("Pragma", "no-cache")
 
     def finish(self):
         self.server.result = self.wfile.getvalue()
 
 def make_server(root):
-    return HoneydServer(HoneydRequestHandler, root);
+    return HoneydServer(HoneydRequestHandler, root)
 
 def handle_request(server, request, client_address):
     server.handle_request(request, client_address)

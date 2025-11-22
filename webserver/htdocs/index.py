@@ -1,5 +1,3 @@
-import honeyd
-import time
 import support
 from htmltmpl import TemplateManager, TemplateProcessor
 
