@@ -174,8 +174,8 @@ pyrecord_test(void)
 {
 	char *some_code =
 	    "def TestProcessing(input):\n"
-	    "  print '\t\t', input\n"
-	    "  return [ [ input['src'], '\x01' ] ]\n"
+	    "  print('\\t\\t', input)\n"
+	    "  return [ [ input['src'], b'\\x01' ] ]\n"
 	    "output_record = TestProcessing(input_record)\n";
 
 	PyObject *pValue, *pRes;
