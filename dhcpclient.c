@@ -131,6 +131,10 @@ queue_dhcp_discover(struct template *tmpl)
 	if(dhcp_queue == NULL)
 	{
 		dhcp_queue = (Queue*) malloc(sizeof(Queue));
+		if (dhcp_queue == NULL) {
+			syslog(LOG_ERR, "%s: malloc failed for Queue", __func__);
+			return;
+		}
 		dhcp_queue->m_count = 0;
 		dhcp_queue->m_front = NULL;
 		dhcp_queue->m_rear = NULL;
@@ -140,7 +144,7 @@ queue_dhcp_discover(struct template *tmpl)
 
 	if(!(nextQueueNode = (QueueNode*)malloc(sizeof(QueueNode))))
 	{
-		//TODO: malloc returned an error, let's at least make a warning
+		syslog(LOG_ERR, "%s: malloc failed for QueueNode", __func__);
 		return;
 	}
 

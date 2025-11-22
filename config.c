@@ -372,6 +372,10 @@ template_insert(struct template *tmpl)
 			strncpy(bport->templateName, tmpl->name, sizeof(bport->templateName));
 
 			struct udp_con *con = calloc(1, sizeof(struct udp_con));
+			if (con == NULL) {
+				syslog(LOG_ERR, "%s: calloc failed for udp_con", __func__);
+				continue;
+			}
 			con->port = bport;
 
 
@@ -586,6 +590,10 @@ void bcast_insert(struct template *tmpl, int srcport, int dstport, int seconds, 
 {
 	struct port *p;
 	p = calloc(1, sizeof(struct port));
+	if (p == NULL) {
+		syslog(LOG_ERR, "%s: calloc failed for port", __func__);
+		return;
+	}
 	p->action = *action;
 	p->number = dstport;
 	p->srcport = srcport;

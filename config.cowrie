@@ -1,0 +1,14 @@
+create default
+set default default tcp action filtered
+set default default udp action filtered
+set default default icmp action filtered
+
+create cowrie
+set cowrie personality "OpenBSD 4.0 (x86)"
+set cowrie uptime 1728650
+set cowrie maxfds 35
+add cowrie tcp port 80 "scripts/web.sh"
+add cowrie tcp port 22 proxy localhost:2222
+add cowrie udp port 53 open
+set cowrie ethernet "dell"
+set cowrie default tcp action closed

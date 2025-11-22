@@ -554,6 +554,10 @@ honeyd_init(void)
 	char config_suffix[] = "/.config";
 	char honeyd_suffix[] = "/honeyd/";
 	char *full_path = malloc(strlen(home_path) + strlen(config_suffix) + strlen(honeyd_suffix) + 1);
+	if (full_path == NULL) {
+		syslog(LOG_ERR, "%s: malloc failed for full_path", __func__);
+		exit(EXIT_FAILURE);
+	}
 	strcpy(full_path, home_path);
 	strcat(full_path, config_suffix);
 
@@ -1561,6 +1565,10 @@ tcp_send(struct tcp_con *con, uint8_t flags, u_char *payload, u_int len)
 		{
 			options.count = 1;
 			options.options = malloc(sizeof(struct tcp_option));
+			if (options.options == NULL) {
+				syslog(LOG_ERR, "%s: malloc failed for tcp_option", __func__);
+				return;
+			}
 			options.options->opt_type = 'M';
 			options.options->value = 0;
 		}
