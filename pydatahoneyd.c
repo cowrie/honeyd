@@ -181,7 +181,7 @@ pyrecord_test(void)
 	PyObject *pValue, *pRes;
 	struct PyFilter *filter = PyFilterFromCode(some_code);
 	char *result;
-	int res_len;
+	Py_ssize_t res_len;
 	struct record *record = NULL;
 	struct evbuffer *tmp = evbuffer_new();
 	assert(filter != NULL);
@@ -218,8 +218,8 @@ pyrecord_test(void)
 
 		Py_DECREF(pRes);
 		Py_DECREF(pValue);
-	
-		fprintf(stderr, "\t\tResult len: %d\n", res_len);
+
+		fprintf(stderr, "\t\tResult len: %zd\n", res_len);
 	
 		free(record);
 	}

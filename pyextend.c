@@ -681,7 +681,8 @@ pyextend_cbwrite(int fd, short what, void *arg)
 	struct pyextend *pye = state->pye;
 	struct pywrite *writebuf;
 	char *buf;
-	int size, res;
+	Py_ssize_t size;
+	int res;
 
 	/* If we still have buffered data from before, we are going
 	 * to send it now and reschedule us if necessary.
@@ -734,7 +735,7 @@ pyextend_cbwrite(int fd, short what, void *arg)
 		goto error;
 	}
 
-	res = PyString_AsStringAndSize(pValue, &buf, &size);
+	res = PyBytes_AsStringAndSize(pValue, &buf, &size);
 
 	if (res == -1) {
 		Py_DECREF(pValue);
@@ -776,28 +777,34 @@ pyextend_init(void)
 	SPLAY_INIT(&pyextends);
 
 	Py_Initialize();
-	strlcpy(path, Py_GetPath(), sizeof(path));
-	/* Append the current path */
-	strlcat(path, ":.", sizeof(path));
-	strlcat(path, ":webserver", sizeof(path));
+
+	/* Add paths to sys.path using Python API */
+	PyRun_SimpleString("import sys");
+	PyRun_SimpleString("sys.path.append('.')");
+	PyRun_SimpleString("sys.path.append('webserver')");
 
 	/* Append the webserver root directory */
-	snprintf(singlepath, sizeof(singlepath), ":%s", honeyd_webserver_root);
+	snprintf(singlepath, sizeof(singlepath), "%s", honeyd_webserver_root);
 	if ((p = strstr(singlepath, "/htdocs")) != NULL) {
 		*p = '\0';
-		strlcat(path, singlepath, sizeof(path));
+		snprintf(path, sizeof(path), "sys.path.append('%s')", singlepath);
+		PyRun_SimpleString(path);
 	}
 
-	/* Append the Honeyd shared data directory */ 
-	snprintf(singlepath, sizeof(singlepath),
-	    ":%s", PATH_HONEYDDATA);
-	strlcat(path, singlepath, sizeof(path));
-	snprintf(singlepath, sizeof(singlepath),
-	    ":%s/webserver", PATH_HONEYDDATA);
-	strlcat(path, singlepath, sizeof(path));
-	PySys_SetPath(path);
+	/* Append the Honeyd shared data directory */
+	snprintf(path, sizeof(path), "sys.path.append('%s')", PATH_HONEYDDATA);
+	PyRun_SimpleString(path);
+	snprintf(path, sizeof(path), "sys.path.append('%s/webserver')", PATH_HONEYDDATA);
+	PyRun_SimpleString(path);
 
-	pModule = Py_InitModule("honeyd", HoneydMethods);
+	static struct PyModuleDef honeyd_module = {
+		PyModuleDef_HEAD_INIT,
+		"honeyd",
+		NULL,
+		-1,
+		HoneydMethods
+	};
+	pModule = PyModule_Create(&honeyd_module);
 	PyModule_AddIntConstant(pModule, "EVENT_ON", 1);
 	PyModule_AddIntConstant(pModule, "EVENT_OFF", 0);
 	PyModule_AddStringConstant(pModule, "version", VERSION);
@@ -816,7 +823,7 @@ pyextend_run(struct evbuffer *output, char *command)
 {
 	PyObject *res = NULL, *compiled_code;
 	char *data;
-	int datlen;
+	Py_ssize_t datlen;
 
 	char *preamble = "import StringIO\n"
 	    "import sys\n"
@@ -885,7 +892,7 @@ pyextend_run(struct evbuffer *output, char *command)
 		}
 	}
 
-	res = PyEval_EvalCode((PyCodeObject *)compiled_code,
+	res = PyEval_EvalCode(compiled_code,
 	    pyextend_dict_global, pyextend_dict_local);
 	Py_DECREF(compiled_code);
 
@@ -898,7 +905,7 @@ pyextend_run(struct evbuffer *output, char *command)
 	res = PyDict_GetItemString(pyextend_dict_local, "output");
 	assert(res != NULL);
 
-	if (PyString_AsStringAndSize(res, &data, &datlen) == 0) 
+	if (PyBytes_AsStringAndSize(res, &data, &datlen) == 0)
 		evbuffer_add(output, data, datlen);
 }
 
@@ -930,7 +937,7 @@ pyextend_load_module(const char *name)
 	if ((pye = SPLAY_FIND(pyetree, &pyextends, &tmp)) != NULL)
 		return (pye);
 
-	pName = PyString_FromString(script);
+	pName = PyUnicode_FromString(script);
 	pModule = PyImport_Import(pName);
 	Py_DECREF(pName);
 
@@ -1129,7 +1136,8 @@ pyextend_evb_readcb(struct bufferevent *bev, void *parameter)
 	PyObject *pArgs, *pValue;
 	char *client_address = addr_ntoa(&req->src);
 	char *buf;
-	int size, res;
+	Py_ssize_t size;
+	int res;
 
 	/* Check if we have received the complete request */
 	if (evbuffer_find(bev->input, "\r\n\r\n", 4) == NULL) {
@@ -1158,7 +1166,7 @@ pyextend_evb_readcb(struct bufferevent *bev, void *parameter)
 	if (pValue == NULL)
 		goto error;
 
-	res = PyString_AsStringAndSize(pValue, &buf, &size);
+	res = PyBytes_AsStringAndSize(pValue, &buf, &size);
 
 	if (res == -1) {
 		Py_DECREF(pValue);
@@ -1272,7 +1280,7 @@ pyextend_webserver_fix_permissions(const char *path, uid_t uid, gid_t gid)
 		if (snprintf(fullname, sizeof(fullname), "%s/graphs", path) >=
 		    sizeof(fullname))
 		{
-			syslog(LOG_ERR, "Path too long: %s\graphs", path);
+			syslog(LOG_ERR, "Path too long: %s/graphs", path);
 			exit(EXIT_FAILURE);
 		}
 		if (lstat(fullname, &sb) == -1 && errno == ENOENT) {
@@ -1396,7 +1404,7 @@ pyextend_webserver_init(char *address, int port, char *root_dir)
 	PyObject *pArgs, *pName, *pModule, *pDict, *pFuncWebInit;
 	char *script = "server";
 
-	pName = PyString_FromString(script);
+	pName = PyUnicode_FromString(script);
 	pModule = PyImport_Import(pName);
 	Py_DECREF(pName);
 

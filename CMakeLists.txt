@@ -277,8 +277,22 @@ add_executable(honeyd
     sha1.c
 )
 
+# Add Python extension sources if Python 3 is available
+if(Python3_FOUND AND HAVE_PYTHON)
+    target_sources(honeyd PRIVATE
+        pyextend.c
+        pydataprocessing.c
+        pydatahoneyd.c
+    )
+endif()
+
 # link the libraries to the executable
 target_link_libraries (honeyd pcap dumbnet event m z dl)
+
+# Link Python 3 libraries if available
+if(Python3_FOUND AND HAVE_PYTHON)
+    target_link_libraries(honeyd ${Python3_LIBRARIES})
+endif()
 
 # Installation
 install(TARGETS honeyd honeydctl honeydstats hsniff

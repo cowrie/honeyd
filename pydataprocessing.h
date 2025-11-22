@@ -88,7 +88,7 @@ PyObject *PyFilterRun(struct PyFilter *filter, PyObject *record);
 
 int PyMapData(struct mkvtree *tree, struct PyFilter *filter, PyObject* input);
 
-int PyMarshalToString(PyObject *pValue, char **data, int *datlen);
+int PyMarshalToString(PyObject *pValue, char **data, Py_ssize_t *datlen);
 
 
 #endif /* _PYDATAPROCESSING_ */

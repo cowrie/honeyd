@@ -170,7 +170,7 @@ PyMapData(struct mkvtree *tree, struct PyFilter *filter, PyObject* input)
 {
 	PyObject* output = PyFilterRun(filter, input);
 	char *dat_key = NULL, *dat_value = NULL;
-	int dat_keylen = 0, dat_vallen = 0;
+	Py_ssize_t dat_keylen = 0, dat_vallen = 0;
 	int i = 0;
 	int res = -1;
 	
@@ -201,22 +201,22 @@ PyMapData(struct mkvtree *tree, struct PyFilter *filter, PyObject* input)
 		}
 
 		key = PyList_GetItem(item, 0);
-		if (key == NULL || !PyString_Check(key)) {
-			warnx("%s: key not available or not string", __func__);
+		if (key == NULL || !PyBytes_Check(key)) {
+			warnx("%s: key not available or not bytes", __func__);
 			goto out;
 		}
 		value = PyList_GetItem(item, 1);
-		if (value == NULL || !PyString_Check(value)){
-			warnx("%s: value not available or not string",
+		if (value == NULL || !PyBytes_Check(value)){
+			warnx("%s: value not available or not bytes",
 			    __func__);
 			goto out;
 		}
 
-		if (PyString_AsStringAndSize(key, &dat_key, &dat_keylen) == -1){
+		if (PyBytes_AsStringAndSize(key, &dat_key, &dat_keylen) == -1){
 			PyErr_Print();
 			goto out;
 		}
-		if (PyString_AsStringAndSize(value,
+		if (PyBytes_AsStringAndSize(value,
 			&dat_value, &dat_vallen) == -1) {
 			PyErr_Print();
 			goto out;
@@ -304,14 +304,14 @@ PyUnmarshalString(char *input, size_t len)
 }
 
 int
-PyMarshalToString(PyObject *pValue, char **data, int *datlen)
+PyMarshalToString(PyObject *pValue, char **data, Py_ssize_t *datlen)
 {
 	int res = -1;
 	PyObject *datastr = NULL;
 	datastr = PyMarshal_WriteObjectToString(pValue, Py_MARSHAL_VERSION);
 	if (datastr == NULL)
 		return (-1);
-	res = PyString_AsStringAndSize(datastr, data, datlen);
+	res = PyBytes_AsStringAndSize(datastr, data, datlen);
 	Py_DECREF(datastr);
 
 	return (res);
@@ -352,7 +352,7 @@ PyFilterRun(struct PyFilter *filter, PyObject *record)
 	if (PyErr_Occurred())
 		return (NULL);
 
-	res = PyEval_EvalCode((PyCodeObject *)filter->compiled_code,
+	res = PyEval_EvalCode(filter->compiled_code,
 	    pyextend_dict_global, filter->dict_local);
 	if (res == NULL)
 		return (NULL);
@@ -383,7 +383,7 @@ pyfilter_test(void)
 	struct PyFilter *filter = PyFilterFromCode(some_code);
 	struct mkvtree mkvs;
 	char *result;
-	int res_len;
+	Py_ssize_t res_len;
 	assert(filter != NULL);
 
 	SPLAY_INIT(&mkvs);
@@ -410,8 +410,8 @@ pyfilter_test(void)
 	assert(PyMarshalToString(pRes, &result, &res_len) != -1);
 
 	Py_DECREF(pRes);
-	
-	fprintf(stderr, "\t\tResult len: %d\n", res_len);
+
+	fprintf(stderr, "\t\tResult len: %zd\n", res_len);
 	
 	assert(PyMapData(&mkvs, filter, pValue) != -1);
 
