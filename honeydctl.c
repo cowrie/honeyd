@@ -96,7 +96,7 @@ char Buffer[LINELEN];
 #define HONEYD_SOCK	"/var/run/honeyd.sock"
 
 int
-usage()
+usage(void)
 {
     fprintf(stderr,
 	"usage: %s [-v] [-t n] [LocalSock]\n"

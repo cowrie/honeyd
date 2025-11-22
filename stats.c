@@ -307,7 +307,7 @@ stats_shingle_data(struct stats *stats)
 /* Adds a regular timeout at which stats are sent off to a monitor */
 
 static void
-stats_measure_timeout()
+stats_measure_timeout(void)
 {
 	struct timeval tv, now;
 	uint32_t diff_ms;
@@ -433,7 +433,7 @@ stats_prepare_send(struct evbuffer *evbuf)
 }
 
 static void
-stats_package_measurement()
+stats_package_measurement(void)
 {
 	struct evbuffer *evbuf;
 	u_char digest[SHA1_DIGESTSIZE];
@@ -841,7 +841,7 @@ stats_init_collect(struct addr *dst, u_short port, char *name, char *password)
 }
 
 void
-stats_init()
+stats_init(void)
 {
 	/* Information to establish the authentication */
 	memset(&sc, 0, sizeof(sc));
@@ -877,7 +877,7 @@ stats_init()
 }
 
 void
-stats_hmac_test()
+stats_hmac_test(void)
 {
 	u_char digest[SHA1_DIGESTSIZE];
 	char *test1 = "test", *test2 = "txst";
@@ -903,7 +903,7 @@ stats_hmac_test()
 }
 
 void
-stats_compress_test()
+stats_compress_test(void)
 {
 	u_char something[1024];
 	struct evbuffer *buf = evbuffer_new();

@@ -652,7 +652,7 @@ analyze_filter_cb(void *reparg, void *treearg)
 }
 
 void
-analyze_print_port_report()
+analyze_print_port_report(void)
 {
 	struct reporttree *tree, *filtered_tree;
 	struct filtertree *min_filters, *hour_filters, *day_filters;
@@ -705,7 +705,7 @@ analyze_print_port_report()
 }
 
 void
-analyze_print_spammer_report()
+analyze_print_spammer_report(void)
 {
 	struct reporttree *tree, *filtered_tree;
 	struct filtertree *min_filters, *hour_filters, *day_filters;
@@ -758,7 +758,7 @@ analyze_print_spammer_report()
 }
 
 void
-analyze_print_country_report()
+analyze_print_country_report(void)
 {
 	struct reporttree *tree, *filtered_tree;
 	struct filtertree *min_filters, *hour_filters, *day_filters;
@@ -811,7 +811,7 @@ analyze_print_country_report()
 }
 
 void
-analyze_print_report()
+analyze_print_report(void)
 {
 	fprintf(stderr, "Operating System Statistics\n");
 	make_report(&oses, os_report_file, os_key_extract, os_key_print);
@@ -830,7 +830,7 @@ analyze_report_cb(int fd, short what, void *unused)
 #define OS_NUM_OSES	12
 
 void
-os_test()
+os_test(void)
 {
 	char *fingerprints[OS_NUM_OSES] = {
 		"Linux",
