@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright (c) 2004 Niels Provos <provos@citi.umich.edu>
 # All rights reserved.
@@ -6,26 +6,27 @@
 import os
 import sys
 import regress
-import time
 import re
+
 
 def get_ipaddr(count):
     octet1 = count % 254
-    octet2 = count / 254
+    octet2 = count // 254
 
     return "10.0.%d.%d" % (octet2 + 1, octet1 + 1)
+
 
 def nmap(count):
     ipaddr = get_ipaddr(count)
 
     log = open("/tmp/nmap.log", "a")
-    file = os.popen('nmap -S 127.0.0.1 -e lo0 -sS -O -p1,23 %s 2>/dev/null' % ipaddr)
+    file = os.popen("nmap -S 127.0.0.1 -e lo0 -sS -O -p1,23 %s 2>/dev/null" % ipaddr)
 
     oses = ""
 
     output = ""
     for line in file:
-#        if re.match("^(SInfo|TSeq|T[0-9]|PU)", line):
+        #        if re.match("^(SInfo|TSeq|T[0-9]|PU)", line):
         output += line
         res = re.match("OS (guesses|details): (.*)", line)
         if res:
@@ -36,38 +37,43 @@ def nmap(count):
     res = 0
     if oses:
         if oses == prints[count]:
-            print "+",
+            print("+", end=" ")
             res = 1
         elif oses.find(prints[count]) != -1:
-            print "-",
+            print("-", end=" ")
             res = 2
         else:
-            print "?",
-            print >>log, "Wanted: '%s' but got '%s':\n%s" % \
-                  (prints[count], oses, output)
+            print("?", end=" ")
+            print(
+                "Wanted: '%s' but got '%s':\n%s" % (prints[count], oses, output),
+                file=log,
+            )
             failures.append("%d:" % count + prints[count] + oses + ":\n" + output)
     else:
-        print >>log, "Wanted: '%s' but got nothing:\n%s" % \
-              (prints[count], output)
+        print("Wanted: '%s' but got nothing:\n%s" % (prints[count], output), file=log)
         failures.append("%d:" % count + prints[count] + "No match:\n" + output)
-        print "_",
+        print("_", end=" ")
 
     sys.stdout.flush()
     file.close()
     log.close()
     return res
-    
+
+
 def make_configuration(filename, fingerprints):
     output = open(filename, "w")
     input = open(fingerprints, "r")
 
-    print >>output, """create template
+    print(
+        """create template
 set template default tcp action closed
 add template tcp port 23 open
-"""
+""",
+        file=output,
+    )
     count = 0
-    r = re.compile('\s*$')
-    m = re.compile("^Fingerprint ([^#]*)$")
+    r = re.compile(r"\s*$")
+    m = re.compile(r"^Fingerprint ([^#]*)$")
     for line in input:
         line = r.sub("", line)
         res = m.match(line)
@@ -80,8 +86,8 @@ add template tcp port 23 open
         ipaddr = get_ipaddr(count)
 
         # Create template
-        print >>output, 'bind %s template' % ipaddr
-        print >>output, 'set %s personality "%s"' % (ipaddr, fname)
+        print("bind %s template" % ipaddr, file=output)
+        print('set %s personality "%s"' % (ipaddr, fname), file=output)
 
         count += 1
 
@@ -89,6 +95,7 @@ add template tcp port 23 open
     input.close()
 
     return count
+
 
 # Main
 
@@ -117,6 +124,9 @@ for count in range(0, number):
 
 reg.stop_honeyd()
 
-print "\nSuccesses: %d, Partials: %d, Nothing: %d of %d" % (success, partial, nothing, number)
+print(
+    "\nSuccesses: %d, Partials: %d, Nothing: %d of %d"
+    % (success, partial, nothing, number)
+)
 for line in failures:
-    print line
+    print(line)
