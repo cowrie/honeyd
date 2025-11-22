@@ -3,8 +3,8 @@
 # Copyright (c) 2004 Niels Provos <provos@citi.umich.edu>
 # All rights reserved.
 #
-import os
 import sys
+import subprocess
 import regress
 import re
 
@@ -20,12 +20,17 @@ def nmap(count):
     ipaddr = get_ipaddr(count)
 
     log = open("/tmp/nmap.log", "a")
-    file = os.popen("nmap -S 127.0.0.1 -e lo0 -sS -O -p1,23 %s 2>/dev/null" % ipaddr)
+    result = subprocess.run(
+        ["nmap", "-S", "127.0.0.1", "-e", "lo0", "-sS", "-O", "-p1,23", ipaddr],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
 
     oses = ""
 
     output = ""
-    for line in file:
+    for line in result.stdout.splitlines():
         #        if re.match("^(SInfo|TSeq|T[0-9]|PU)", line):
         output += line
         res = re.match("OS (guesses|details): (.*)", line)
@@ -55,7 +60,6 @@ def nmap(count):
         print("_", end=" ")
 
     sys.stdout.flush()
-    file.close()
     log.close()
     return res
 

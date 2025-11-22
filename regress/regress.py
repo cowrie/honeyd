@@ -7,7 +7,7 @@
 #
 import os
 import sys
-import popen2
+import subprocess
 import time
 import fcntl
 import re
@@ -128,13 +128,21 @@ class regress:
 
     def find_running_proc(self, name):
         # XXX - is this portable enough?
-        file = os.popen("ps -o pid=,command= 2>/dev/null", "r")
-        # XXX - we only read a line, but there might be more than
-        # one instances there
-        for line in file:
-            res = re.search(r"\s*(\d+) %s" % name, line)
-            if res:
-                return int(res.group(1))
+        try:
+            result = subprocess.run(
+                ["ps", "-o", "pid=,command="],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            # XXX - we only read a line, but there might be more than
+            # one instances there
+            for line in result.stdout.splitlines():
+                res = re.search(r"\s*(\d+) %s" % name, line)
+                if res:
+                    return int(res.group(1))
+        except Exception:
+            pass
         return None
 
     def AddRoute(self, network, gw):
@@ -368,10 +376,17 @@ class regress:
         fcntl.fcntl(fd, fcntl.F_SETFL, flags)
 
     def start_honeyd(self, filename):
-        (fw, fr, self.fe) = popen2.popen3(self.command % filename, 0)
+        self.honeyd_proc = subprocess.Popen(
+            self.command % filename,
+            shell=True,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
 
-        fw.close()
-        fr.close()
+        self.honeyd_proc.stdin.close()
+        self.honeyd_proc.stdout.close()
+        self.fe = self.honeyd_proc.stderr
         self.set_nonblock(self.fe.fileno())
         time.sleep(2)
 
@@ -416,10 +431,13 @@ class regress:
 
     def exists_pid(self, pid):
         # XXX - is this portable enough?
-        file = os.popen("ps -o pid= -p %s" % pid, "r")
-        pid = file.readline()
-        file.close()
-        if len(pid):
+        result = subprocess.run(
+            ["ps", "-o", "pid=", "-p", str(pid)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if len(result.stdout.strip()):
             return True
         else:
             return False
