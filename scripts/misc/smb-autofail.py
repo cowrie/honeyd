@@ -260,7 +260,7 @@ def SendError(error_code, status, pid, mid):
 
 
 #Read Arguments
-for line in open(sys.argv[2],'r'):
+for line in open(sys.argv[2]):
     if(line.split(' ', 1)[0] == "NATIVE_OS"):
         native_os = line.split(' ', 1)[1].rstrip()
     if(line.split(' ', 1)[0] == "PRIMARY_DOMAIN"):

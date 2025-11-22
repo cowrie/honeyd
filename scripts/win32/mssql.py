@@ -92,7 +92,7 @@ class TDSPacket:
 		ret += "Window: " + str(self.window) + "\n\n"
 
 		ret += "Payload: ";
-		ret += ":".join("{0:x}".format(ord(c)) for c in self.payload)
+		ret += ":".join("{:x}".format(ord(c)) for c in self.payload)
 		ret += "\n"
 
 		ret += "First byte is " + str(ord(self.payload[0])) + "\n"

@@ -25,7 +25,7 @@ RCODE_SERVER_FAILURE = 2
 RCODE_NAME_ERROR = 3
 RCODE_REFUSED = 4
 
-class DNSHeader(object):
+class DNSHeader:
 	def __init__(self):
 		self.qdcount = 0
 		self.ancount = 0
