@@ -6,10 +6,10 @@
 
 import sys
 import os
-import SimpleHTTPServer
-import StringIO
+import http.server
+import io
 import posixpath
-import urllib
+import urllib.parse
 import time
 import honeyd
 
@@ -30,7 +30,7 @@ class HoneydServer:
             self.close_request(request)
 
     def verify_request(self, request, client_address):
-        return 1
+        return True
 
     def finish_request(self, request, client_address):
         """Finish one request by instantiating RequestHandlerClass."""
@@ -42,7 +42,7 @@ class HoneydServer:
         pass
         
 
-class HoneydRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+class HoneydRequestHandler(http.server.SimpleHTTPRequestHandler):
     """A wrapper to use the generic HTTP Request Handler."""
 
     server_version = "HoneydHTTP/" + __version__
@@ -81,7 +81,7 @@ class HoneydRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             mode = 'rb'
         try:
             f = open(path, mode)
-        except IOError:
+        except OSError:
             self.send_error(404, "File not found")
             return None
         self.send_response(200)
@@ -132,11 +132,12 @@ class HoneydRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             self.send_error(404, "File not found")
             return
 
-        execfile(scriptname)
+        with open(scriptname) as f:
+            exec(f.read(), {'__name__': '__main__', '__file__': scriptname})
 
     def log_message(self, format, *args):
         """Logs a message to Honeyd via syslog."""
-        message = "%s - - [%s] %s" % (self.address_string(),
+        message = "{} - - [{}] {}".format(self.address_string(),
                                       self.log_date_time_string(),
                                       format%args)
         try:
@@ -150,8 +151,8 @@ class HoneydRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         return self.client_address
 
     def setup(self):
-        self.rfile = StringIO.StringIO(self.request)
-        self.wfile = StringIO.StringIO()
+        self.rfile = io.BytesIO(self.request.encode() if isinstance(self.request, str) else self.request)
+        self.wfile = io.BytesIO()
 
     def translate_path(self, path):
         """Translate a /-separated PATH to the local filename syntax.
@@ -161,9 +162,9 @@ class HoneydRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         probably be diagnosed.)
 
         """
-        path = posixpath.normpath(urllib.unquote(path))
+        path = posixpath.normpath(urllib.parse.unquote(path))
         words = path.split('/')
-        words = filter(None, words)
+        words = list(filter(None, words))
         path = self.root
         for word in words:
             drive, word = os.path.splitdrive(word)
@@ -199,11 +200,11 @@ def test():
     request = "GET / HTTP/1.0\r\n\r\n"
     server = HoneydServer(HoneydRequestHandler)
     server.handle_request(request, "127.0.0.1")
-    print server.result
+    print(server.result)
 
     request = "GET /test.py HTTP/1.0\r\n\r\n"
     server.handle_request(request, "127.0.0.1")
-    print server.result
+    print(server.result)
 
 if __name__ == '__main__':
     test()

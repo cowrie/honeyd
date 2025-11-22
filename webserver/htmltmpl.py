@@ -1,4 +1,3 @@
-
 """ A templating engine for separation of code and HTML.
 
     The documentation of this templating engine is separated to two parts:
@@ -164,8 +163,8 @@ class TemplateManager:
         # multitask/thread safe. Currently it works only on UNIX
         # and Windows. Anyone willing to implement it on Mac ?
         if precompile and not LOCKTYPE:
-                raise TemplateError, "Template precompilation is not "\
-                                     "available on this platform."
+                raise TemplateError("Template precompilation is not "\
+                                     "available on this platform.")
         self.DEB("INIT DONE")
 
     def prepare(self, file):
@@ -202,7 +201,7 @@ class TemplateManager:
             if self.is_precompiled(file):
                 try:
                     precompiled = self.load_precompiled(file)
-                except PrecompiledError, template:
+                except PrecompiledError as template:
                     print >> sys.stderr, "Htmltmpl: bad precompiled "\
                                          "template '%s' removed" % template
                     compiled = self.compile(file)
@@ -273,7 +272,7 @@ class TemplateManager:
             elif lock == LOCK_UN:
                 fcntl.flock(fd, fcntl.LOCK_UN)
             else:
-                raise TemplateError, "BUG: bad lock in lock_file"
+                raise TemplateError("BUG: bad lock in lock_file")
         elif LOCKTYPE == LOCKTYPE_MSVCRT:
             if lock == LOCK_SH:
                 # msvcrt does not support shared locks :-(
@@ -283,9 +282,9 @@ class TemplateManager:
             elif lock == LOCK_UN:
                 msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
             else:
-                raise TemplateError, "BUG: bad lock in lock_file"
+                raise TemplateError("BUG: bad lock in lock_file")
         else:
-            raise TemplateError, "BUG: bad locktype in lock_file"
+            raise TemplateError("BUG: bad locktype in lock_file")
 
     def compile(self, file):
         """ Compile the template.
@@ -324,13 +323,14 @@ class TemplateManager:
                 file = open(filename, "rb")
                 self.lock_file(file, LOCK_SH)
                 precompiled = cPickle.load(file)
-            except IOError, (errno, errstr):
-                raise TemplateError, "IO error in load precompiled "\
+            except IOError as e:
+                errno, errstr = e.args
+                raise TemplateError("IO error in load precompiled "\
                                      "template '%s': (%d) %s"\
-                                     % (filename, errno, errstr)
+                                     % (filename, errno, errstr))
             except cPickle.UnpicklingError:
                 remove_bad = 1
-                raise PrecompiledError, filename
+                raise PrecompiledError(filename)
             except:
                 remove_bad = 1
                 raise
@@ -361,9 +361,9 @@ class TemplateManager:
         # Check if we have write permission to the template's directory.
         template_dir = os.path.dirname(os.path.abspath(filename))
         if not os.access(template_dir, os.W_OK):
-            raise TemplateError, "Cannot save precompiled templates "\
+            raise TemplateError("Cannot save precompiled templates "\
                                  "to '%s': write permission denied."\
-                                 % template_dir
+                                 % template_dir)
         try:
             remove_bad = 0
             file = None
@@ -376,16 +376,17 @@ class TemplateManager:
                     cPickle.dump(template, file, READABLE)
                 else:
                     cPickle.dump(template, file, BINARY)
-            except IOError, (errno, errstr):
+            except IOError as e:
+                errno, errstr = e.args
                 remove_bad = 1
-                raise TemplateError, "IO error while saving precompiled "\
+                raise TemplateError("IO error while saving precompiled "\
                                      "template '%s': (%d) %s"\
-                                      % (filename, errno, errstr)
-            except cPickle.PicklingError, error:
+                                      % (filename, errno, errstr))
+            except pickle.PicklingError as error:
                 remove_bad = 1
-                raise TemplateError, "Pickling error while saving "\
+                raise TemplateError("Pickling error while saving "\
                                      "precompiled template '%s': %s"\
-                                     % (filename, error)
+                                     % (filename, error))
             except:
                 remove_bad = 1
                 raise
@@ -490,14 +491,14 @@ class TemplateProcessor:
         if self.is_ordinary_var(value):
             # template top-level ordinary variable
             if not var.islower():
-                raise TemplateError, "Invalid variable name '%s'." % var
+                raise TemplateError("Invalid variable name '%s'." % var)
         elif type(value) == ListType:
             # template top-level loop
             if var != var.capitalize():
-                raise TemplateError, "Invalid loop name '%s'." % var
+                raise TemplateError("Invalid loop name '%s'." % var)
         else:
-            raise TemplateError, "Value of toplevel variable '%s' must "\
-                                 "be either a scalar or a list." % var
+            raise TemplateError("Value of toplevel variable '%s' must "\
+                                 "be either a scalar or a list." % var)
         self._vars[var] = value
         self.DEB("VALUE SET: " + str(var))
         
@@ -552,7 +553,7 @@ class TemplateProcessor:
         self.DEB("APP INPUT:")
         if self._debug: pprint.pprint(self._vars, sys.stderr)
         if part != None and (part == 0 or part < self._current_part):
-            raise TemplateError, "process() - invalid part number"
+            raise TemplateError("process() - invalid part number")
 
         # This flag means "jump behind the end of current statement" or
         # "skip the parameters of current statement".
@@ -595,7 +596,7 @@ class TemplateProcessor:
                     # TMPL_VARs should be first. They are the most common.
                     var = tokens[i + PARAM_NAME]
                     if not var:
-                        raise TemplateError, "No identifier in <TMPL_VAR>."
+                        raise TemplateError("No identifier in <TMPL_VAR>.")
                     escape = tokens[i + PARAM_ESCAPE]
                     globalp = tokens[i + PARAM_GLOBAL]
                     skip_params = 1
@@ -611,7 +612,7 @@ class TemplateProcessor:
                 elif token == "<TMPL_LOOP":
                     var = tokens[i + PARAM_NAME]
                     if not var:
-                        raise TemplateError, "No identifier in <TMPL_LOOP>."
+                        raise TemplateError("No identifier in <TMPL_LOOP>.")
                     skip_params = 1
 
                     # Find total number of passes in this loop.
@@ -638,7 +639,7 @@ class TemplateProcessor:
                 elif token == "<TMPL_IF":
                     var = tokens[i + PARAM_NAME]
                     if not var:
-                        raise TemplateError, "No identifier in <TMPL_IF>."
+                        raise TemplateError("No identifier in <TMPL_IF>.")
                     globalp = tokens[i + PARAM_GLOBAL]
                     skip_params = 1
                     if self.find_value(var, loop_name, loop_pass,
@@ -652,7 +653,7 @@ class TemplateProcessor:
                 elif token == "<TMPL_UNLESS":
                     var = tokens[i + PARAM_NAME]
                     if not var:
-                        raise TemplateError, "No identifier in <TMPL_UNLESS>."
+                        raise TemplateError("No identifier in <TMPL_UNLESS>.")
                     globalp = tokens[i + PARAM_GLOBAL]
                     skip_params = 1
                     if self.find_value(var, loop_name, loop_pass,
@@ -666,7 +667,7 @@ class TemplateProcessor:
                 elif token == "</TMPL_LOOP":
                     skip_params = 1
                     if not loop_name:
-                        raise TemplateError, "Unmatched </TMPL_LOOP>."
+                        raise TemplateError("Unmatched </TMPL_LOOP>.")
                     
                     # If this loop was not disabled, then record the pass.
                     if loop_total[-1] > 0: loop_pass[-1] += 1
@@ -689,21 +690,21 @@ class TemplateProcessor:
                 elif token == "</TMPL_IF":
                     skip_params = 1
                     if not output_control:
-                        raise TemplateError, "Unmatched </TMPL_IF>."
+                        raise TemplateError("Unmatched </TMPL_IF>.")
                     output_control.pop()
                     self.DEB("IF: END")
      
                 elif token == "</TMPL_UNLESS":
                     skip_params = 1
                     if not output_control:
-                        raise TemplateError, "Unmatched </TMPL_UNLESS>."
+                        raise TemplateError("Unmatched </TMPL_UNLESS>.")
                     output_control.pop()
                     self.DEB("UNLESS: END")
      
                 elif token == "<TMPL_ELSE":
                     skip_params = 1
                     if not output_control:
-                        raise TemplateError, "Unmatched <TMPL_ELSE>."
+                        raise TemplateError("Unmatched <TMPL_ELSE>.")
                     if output_control[-1] == DISABLE_OUTPUT:
                         # Condition was false, activate the ELSE block.
                         output_control[-1] = ENABLE_OUTPUT
@@ -713,7 +714,7 @@ class TemplateProcessor:
                         output_control[-1] = DISABLE_OUTPUT
                         self.DEB("ELSE: DISABLE")
                     else:
-                        raise TemplateError, "BUG: ELSE: INVALID FLAG"
+                        raise TemplateError("BUG: ELSE: INVALID FLAG")
 
                 elif token == "<TMPL_BOUNDARY":
                     if part and part == self._current_part:
@@ -750,7 +751,7 @@ class TemplateProcessor:
                     
                 else:
                     # Unknown processing directive.
-                    raise TemplateError, "Invalid statement %s>." % token
+                    raise TemplateError("Invalid statement %s>." % token)
                      
             elif DISABLE_OUTPUT not in output_control:
                 # Raw textual template data.
@@ -762,8 +763,8 @@ class TemplateProcessor:
             # end of the big while loop
         
         # Check whether all opening statements were closed.
-        if loop_name: raise TemplateError, "Missing </TMPL_LOOP>."
-        if output_control: raise TemplateError, "Missing </TMPL_IF> or </TMPL_UNLESS>"
+        if loop_name: raise TemplateError("Missing </TMPL_LOOP>.")
+        if output_control: raise TemplateError("Missing </TMPL_IF> or </TMPL_UNLESS>")
         return out
 
     ##############################################
@@ -882,12 +883,12 @@ class TemplateProcessor:
                 try:
                     every = int(var[9:])   # nine is length of "__EVERY__"
                 except ValueError:
-                    raise TemplateError, "Magic variable __EVERY__x: "\
-                                         "Invalid pass number."
+                    raise TemplateError("Magic variable __EVERY__x: "\
+                                         "Invalid pass number.")
                 else:
                     if not every:
-                        raise TemplateError, "Magic variable __EVERY__x: "\
-                                             "Pass number cannot be zero."
+                        raise TemplateError("Magic variable __EVERY__x: "\
+                                             "Pass number cannot be zero.")
                     elif (loop_pass + 1) % every == 0:
                         self.DEB("MAGIC: EVERY: " + str(every))
                         return 1
@@ -896,7 +897,7 @@ class TemplateProcessor:
             else:
                 return 0
         else:
-            raise TemplateError, "Invalid magic variable '%s'." % var
+            raise TemplateError("Invalid magic variable '%s'." % var)
 
     def escape(self, str, override=""):
         """ Escape a string either by HTML escaping or by URL escaping.
@@ -1033,9 +1034,10 @@ class TemplateCompiler:
             try:
                 f = open(filename, "r")
                 data = f.read()
-            except IOError, (errno, errstr):
-                raise TemplateError, "IO error while reading template '%s': "\
-                                     "(%d) %s" % (filename, errno, errstr)
+            except IOError as e:
+                errno, errstr = e.args
+                raise TemplateError("IO error while reading template '%s': "\
+                                     "(%d) %s" % (filename, errno, errstr))
             else:
                 return data
         finally:
@@ -1086,7 +1088,7 @@ class TemplateCompiler:
             if token == "<TMPL_INCLUDE":
                 filename = tokens[i + PARAM_NAME]
                 if not filename:
-                    raise TemplateError, "No filename in <TMPL_INCLUDE>."
+                    raise TemplateError("No filename in <TMPL_INCLUDE>.")
                 self._include_level += 1
                 if self._include_level > self._max_include:
                     # Do not include the template.
@@ -1274,7 +1276,7 @@ class TemplateCompiler:
         for pair in params:
             name, value = pair.split("=")
             if not name or not value:
-                raise TemplateError, "Syntax error in template."
+                raise TemplateError("Syntax error in template.")
             if name == param:
                 if value[0] == '"':
                     # The value is in double quotes.
@@ -1329,15 +1331,15 @@ class Template:
         if os.path.isfile(file):
             self._mtime = os.path.getmtime(file)
         else:
-            raise TemplateError, "Template: file does not exist: '%s'" % file
+            raise TemplateError("Template: file does not exist: '%s'" % file)
 
         # Save modificaton times of all included template files.
         for inc_file in include_files:
             if os.path.isfile(inc_file):
                 self._include_mtimes[inc_file] = os.path.getmtime(inc_file)
             else:
-                raise TemplateError, "Template: file does not exist: '%s'"\
-                                     % inc_file
+                raise TemplateError("Template: file does not exist: '%s'"\
+                                     % inc_file)
             
         self.DEB("NEW TEMPLATE CREATED")
 

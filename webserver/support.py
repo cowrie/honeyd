@@ -1,28 +1,27 @@
 import honeyd
-import urllib
-import cgi
+import urllib.parse
+import html
 import sys
 from htmltmpl import TemplateManager, TemplateProcessor
 
 def quote(data):
     """Escapes a string so that it can safely be displayed
     in an HTML document"""
-    escape_quotes = 1
-    return cgi.escape(data, escape_quotes)
+    return html.escape(data, quote=True)
 
 def parse_query(query):
     if not query:
         return None
-    
-    if query.has_key('delete_ip'):
+
+    if 'delete_ip' in query:
         address = quote(query['delete_ip'])
         if honeyd.delete_template(address):
             message = 'Successfully removed %s from database' % address
         else:
             message = 'Address %s does not exist' % address
         return message
-    if query.has_key('delete_connection'):
-        arguments = urllib.unquote(query['delete_connection']).split(',')
+    if 'delete_connection' in query:
+        arguments = urllib.parse.unquote(query['delete_connection']).split(',')
         if len(arguments) != 5:
             return None
         name = quote('%s %s:%s - %s:%s' % tuple(arguments))
@@ -36,20 +35,20 @@ def parse_query(query):
 def uptime():
     uptime = honeyd.uptime()
     seconds = uptime % 60
-    uptime /= 60
+    uptime //= 60
     minutes = uptime % 60
-    uptime /= 60
+    uptime //= 60
     hours = uptime % 24
-    uptime /= 24
+    uptime //= 24
     days = uptime
 
     return "%d days %02d:%02d:%02d" % (days, hours, minutes, seconds)
 
 def table_head(title, explanation):
     content = '''<div class="status">
-<h1>%s</h1>
-<p>%s</p>
-''' % (title, explanation)
+<h1>{}</h1>
+<p>{}</p>
+'''.format(title, explanation)
 
     return content
 
@@ -69,8 +68,8 @@ def config_table():
 
     for name in config.keys():
         content += '''<tr>
-<td>%s</td><td>%s</td>
-</tr>''' % (name, config[name])
+<td>{}</td><td>{}</td>
+</tr>'''.format(name, config[name])
 
     content += table_end()
 
@@ -95,7 +94,7 @@ def humanize(number, postfix):
     elif scale >= 5 :
         symbol = 'xx'
 
-    return '%.2f %s%s' % (number, symbol, postfix)
+    return '{:.2f} {}{}'.format(number, symbol, postfix)
 
 def stats_table(root):
     raw_stats = honeyd.stats_network()
@@ -174,7 +173,7 @@ def status_connections(root, which):
         id = "%s,%s,%d,%s,%d" % (which.lower(),
                                    connection['src'], connection['sport'],
                                    connection['dst'], connection['dport'])
-        connection['id'] = urllib.quote(id)
+        connection['id'] = urllib.parse.quote(id)
 
     template = TemplateManager().prepare(root +
                                          "/templates/status_connections.tmpl")
