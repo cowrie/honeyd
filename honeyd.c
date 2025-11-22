@@ -1077,12 +1077,7 @@ determine_path(char *abspath, char **input)
 			err(1, "malloc");
 		}
 		snprintf(buffer, size, "%s/%s", abspath, *input);
-		char *new_input = strdup(buffer);
-		if (new_input == NULL) {
-			err(1, "strdup");
-		}
-		*input = new_input;
-		free(buffer);
+		*input = buffer;
 	}
 }
 
