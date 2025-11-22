@@ -10,7 +10,7 @@ self.end_headers()
 message = support.parse_query(self.query)
 
 # Compile or load already precompiled template.
-template = TemplateManager().prepare(self.root+"/templates/index.tmpl")
+template = TemplateManager().prepare(self.root + "/templates/index.tmpl")
 tproc = TemplateProcessor(0)
 
 # Set the title.

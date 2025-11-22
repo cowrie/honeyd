@@ -3,33 +3,36 @@ import urllib.parse
 import html
 from htmltmpl import TemplateManager, TemplateProcessor
 
+
 def quote(data):
     """Escapes a string so that it can safely be displayed
     in an HTML document"""
     return html.escape(data, quote=True)
 
+
 def parse_query(query):
     if not query:
         return None
 
-    if 'delete_ip' in query:
-        address = quote(query['delete_ip'])
+    if "delete_ip" in query:
+        address = quote(query["delete_ip"])
         if honeyd.delete_template(address):
-            message = 'Successfully removed %s from database' % address
+            message = "Successfully removed %s from database" % address
         else:
-            message = 'Address %s does not exist' % address
+            message = "Address %s does not exist" % address
         return message
-    if 'delete_connection' in query:
-        arguments = urllib.parse.unquote(query['delete_connection']).split(',')
+    if "delete_connection" in query:
+        arguments = urllib.parse.unquote(query["delete_connection"]).split(",")
         if len(arguments) != 5:
             return None
-        name = quote('%s %s:%s - %s:%s' % tuple(arguments))
+        name = quote("%s %s:%s - %s:%s" % tuple(arguments))
         if honeyd.delete_connection(*arguments):
-            message = 'Successfully terminated connection %s.' % name
+            message = "Successfully terminated connection %s." % name
         else:
-            message = 'Could not remove connection %s.' % name
+            message = "Could not remove connection %s." % name
         return message
     return None
+
 
 def uptime():
     uptime = honeyd.uptime()
@@ -43,36 +46,41 @@ def uptime():
 
     return "%d days %02d:%02d:%02d" % (days, hours, minutes, seconds)
 
+
 def table_head(title, explanation):
-    content = '''<div class="status">
+    content = """<div class="status">
 <h1>{}</h1>
 <p>{}</p>
-'''.format(title, explanation)
+""".format(title, explanation)
 
     return content
 
+
 def table_end():
-    return '''</table></div>\n'''
+    return """</table></div>\n"""
+
 
 def config_table():
     config = honeyd.config()
 
-    content = table_head("Honeyd Static Configuration",
-                         "This table shows the configuration of Honeyd.")
+    content = table_head(
+        "Honeyd Static Configuration", "This table shows the configuration of Honeyd."
+    )
 
-    content += '''<table>
+    content += """<table>
   <tr><td class="tableHeadingInside">Key</td>
       <td class="tableHeadingInside">Value</td>
-</tr>'''
+</tr>"""
 
     for name in config.keys():
-        content += '''<tr>
+        content += """<tr>
 <td>{}</td><td>{}</td>
-</tr>'''.format(name, config[name])
+</tr>""".format(name, config[name])
 
     content += table_end()
 
     return content
+
 
 def humanize(number, postfix):
     number = float(number)
@@ -81,19 +89,20 @@ def humanize(number, postfix):
         scale += 1
         number /= 1000
 
-    symbol = 'B'
+    symbol = "B"
     if scale == 1:
-        symbol = 'KB'
+        symbol = "KB"
     elif scale == 2:
-        symbol = 'MB'
+        symbol = "MB"
     elif scale == 3:
-        symbol = 'GB'
+        symbol = "GB"
     elif scale == 4:
-        symbol = 'TB'
-    elif scale >= 5 :
-        symbol = 'xx'
+        symbol = "TB"
+    elif scale >= 5:
+        symbol = "xx"
 
-    return '{:.2f} {}{}'.format(number, symbol, postfix)
+    return "{:.2f} {}{}".format(number, symbol, postfix)
+
 
 def stats_table(root):
     raw_stats = honeyd.stats_network()
@@ -103,49 +112,50 @@ def stats_table(root):
     # Convert the dictionary into something that the template manager
     # can understand.
     for key in raw_stats.keys():
-        minute = humanize(raw_stats[key][0], '/s')
-        hour = humanize(raw_stats[key][1], '/s')
-        day = humanize(raw_stats[key][2], '/s')
-            
-        stats.append({ "name" : key,
-                       "minute" : minute,
-                       "hour" : hour,
-                       "day" : day })
+        minute = humanize(raw_stats[key][0], "/s")
+        hour = humanize(raw_stats[key][1], "/s")
+        day = humanize(raw_stats[key][2], "/s")
 
-    template = TemplateManager().prepare(root +
-                                         "/templates/status_stats.tmpl")
+        stats.append({"name": key, "minute": minute, "hour": hour, "day": day})
+
+    template = TemplateManager().prepare(root + "/templates/status_stats.tmpl")
     tproc = TemplateProcessor(0)
 
     tproc.set("title", "Honeyd Statistics")
-    tproc.set("explanation",("This table shows current statistics collected "
-                             "by Honeyd."))
+    tproc.set(
+        "explanation", ("This table shows current statistics collected by Honeyd.")
+    )
     tproc.set("Stats", stats)
 
     content = tproc.process(template)
 
     return content
 
+
 def interface_table():
     interfaces = honeyd.interfaces()
 
-    content = table_head("Interface&nbsp;Information",
-                         "This table shows the interface that Honeyd has been configured to listen to.")
+    content = table_head(
+        "Interface&nbsp;Information",
+        "This table shows the interface that Honeyd has been configured to listen to.",
+    )
 
-    content += '''<table>
+    content += """<table>
 <tr><td class="tableHeadingInside">Name</td>
       <td class="tableHeadingInside">Address</td>
       <td class="tableHeadingInside">MTU</td>
       <td class="tableHeadingInside">Link Address</td>
-</tr>'''
+</tr>"""
 
     for inter in interfaces:
-        content += '''<tr>
+        content += """<tr>
 <td>%s</td><td>%s</td><td>%d</td><td>%s</td>
-</tr>\n''' % (inter['name'], inter['address'], inter['mtu'], inter['link'])
+</tr>\n""" % (inter["name"], inter["address"], inter["mtu"], inter["link"])
 
     content += table_end()
 
     return content
+
 
 def config_ips(root):
     ips = honeyd.config_ips()
@@ -154,13 +164,17 @@ def config_ips(root):
     tproc = TemplateProcessor(0)
 
     tproc.set("title", "Bound IP addresses")
-    tproc.set("explanation", "This table shows the IP addresses of the " +
-                                "currently configured virtual honeypots.")
+    tproc.set(
+        "explanation",
+        "This table shows the IP addresses of the "
+        + "currently configured virtual honeypots.",
+    )
     tproc.set("Ips", ips)
 
     content = tproc.process(template)
 
     return content
+
 
 def status_connections(root, which):
     connections = honeyd.status_connections(which.lower())
@@ -169,18 +183,23 @@ def status_connections(root, which):
         return "There are currently no active %s connections." % which.upper()
 
     for connection in connections:
-        id = "%s,%s,%d,%s,%d" % (which.lower(),
-                                   connection['src'], connection['sport'],
-                                   connection['dst'], connection['dport'])
-        connection['id'] = urllib.parse.quote(id)
+        id = "%s,%s,%d,%s,%d" % (
+            which.lower(),
+            connection["src"],
+            connection["sport"],
+            connection["dst"],
+            connection["dport"],
+        )
+        connection["id"] = urllib.parse.quote(id)
 
-    template = TemplateManager().prepare(root +
-                                         "/templates/status_connections.tmpl")
+    template = TemplateManager().prepare(root + "/templates/status_connections.tmpl")
     tproc = TemplateProcessor(0)
 
     tproc.set("title", "Active %s Connections" % which.upper())
-    tproc.set("explanation",
-              "This table shows the currently active %s connections" % which.upper())
+    tproc.set(
+        "explanation",
+        "This table shows the currently active %s connections" % which.upper(),
+    )
     tproc.set("Connections", connections)
 
     content = tproc.process(template)

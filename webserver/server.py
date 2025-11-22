@@ -14,6 +14,7 @@ import time
 
 __version__ = "0.1"
 
+
 class HoneydServer:
     """Base Honeyd Web Server."""
 
@@ -39,7 +40,7 @@ class HoneydServer:
     def close_request(self, request):
         """Called to clean up an individual request."""
         pass
-        
+
 
 class HoneydRequestHandler(http.server.SimpleHTTPRequestHandler):
     """A wrapper to use the generic HTTP Request Handler."""
@@ -74,10 +75,10 @@ class HoneydRequestHandler(http.server.SimpleHTTPRequestHandler):
             else:
                 return self.list_directory(path)
         ctype = self.guess_type(path)
-        if ctype.startswith('text/'):
-            mode = 'r'
+        if ctype.startswith("text/"):
+            mode = "r"
         else:
-            mode = 'rb'
+            mode = "rb"
         try:
             f = open(path, mode)
         except OSError:
@@ -91,23 +92,28 @@ class HoneydRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         return f
 
-    def date_time_string(self,now=0):
+    def date_time_string(self, now=0):
         """Return the current date and time formatted for a message header."""
         if not now:
             now = time.time()
         year, month, day, hh, mm, ss, wd, y, z = time.gmtime(now)
         s = "%s, %02d %3s %4d %02d:%02d:%02d GMT" % (
-                self.weekdayname[wd],
-                day, self.monthname[month], year,
-                hh, mm, ss)
+            self.weekdayname[wd],
+            day,
+            self.monthname[month],
+            year,
+            hh,
+            mm,
+            ss,
+        )
         return s
 
     def is_python(self):
         """Determines if the request is for a python script."""
         path = self.translate_path(self.path)
-        i = path.rfind('?')
+        i = path.rfind("?")
         if i >= 0:
-            path, query = path[:i], path[i+1:]
+            path, query = path[:i], path[i + 1 :]
         head, tail = os.path.splitext(path)
         return tail.lower() in (".py", ".pyw")
 
@@ -115,32 +121,33 @@ class HoneydRequestHandler(http.server.SimpleHTTPRequestHandler):
         path = self.translate_path(self.path)
         head, tail = os.path.split(path)
 
-        i = tail.rfind('?')
+        i = tail.rfind("?")
         if i >= 0:
-            tail, query = tail[:i], tail[i+1:]
-            entries = query.split('&')
+            tail, query = tail[:i], tail[i + 1 :]
+            entries = query.split("&")
             self.query = {}
             for entry in entries:
                 kv = entry.split("=")
-                self.query[kv[0]] = '='.join(kv[1:])
+                self.query[kv[0]] = "=".join(kv[1:])
         else:
             self.query = None
 
-        scriptname = head + '/' + tail
+        scriptname = head + "/" + tail
         if not os.path.exists(scriptname):
             self.send_error(404, "File not found")
             return
 
         with open(scriptname) as f:
-            exec(f.read(), {'__name__': '__main__', '__file__': scriptname})
+            exec(f.read(), {"__name__": "__main__", "__file__": scriptname})
 
     def log_message(self, format, *args):
         """Logs a message to Honeyd via syslog."""
-        message = "{} - - [{}] {}".format(self.address_string(),
-                                      self.log_date_time_string(),
-                                      format%args)
+        message = "{} - - [{}] {}".format(
+            self.address_string(), self.log_date_time_string(), format % args
+        )
         try:
             import honeyd
+
             honeyd.raw_log(message)
         except:
             sys.stderr.write(message + "\n")
@@ -150,7 +157,9 @@ class HoneydRequestHandler(http.server.SimpleHTTPRequestHandler):
         return self.client_address
 
     def setup(self):
-        self.rfile = io.BytesIO(self.request.encode() if isinstance(self.request, str) else self.request)
+        self.rfile = io.BytesIO(
+            self.request.encode() if isinstance(self.request, str) else self.request
+        )
         self.wfile = io.BytesIO()
 
     def translate_path(self, path):
@@ -162,13 +171,14 @@ class HoneydRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         """
         path = posixpath.normpath(urllib.parse.unquote(path))
-        words = path.split('/')
+        words = path.split("/")
         words = list(filter(None, words))
         path = self.root
         for word in words:
             drive, word = os.path.splitdrive(word)
             head, word = os.path.split(word)
-            if word in (os.curdir, os.pardir): continue
+            if word in (os.curdir, os.pardir):
+                continue
             path = os.path.join(path, word)
         if os.path.isdir(path):
             for index in "index.py", "index.html", "index.htm":
@@ -188,13 +198,16 @@ class HoneydRequestHandler(http.server.SimpleHTTPRequestHandler):
     def finish(self):
         self.server.result = self.wfile.getvalue()
 
+
 def make_server(root):
     return HoneydServer(HoneydRequestHandler, root)
+
 
 def handle_request(server, request, client_address):
     server.handle_request(request, client_address)
     return server.result
-    
+
+
 def test():
     request = "GET / HTTP/1.0\r\n\r\n"
     server = HoneydServer(HoneydRequestHandler)
@@ -205,5 +218,6 @@ def test():
     server.handle_request(request, "127.0.0.1")
     print(server.result)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     test()
