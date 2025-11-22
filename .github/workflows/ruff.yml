@@ -32,20 +32,18 @@ jobs:
         ruff check webserver/ scripts/ *.py \
           --exclude pypcap \
           --output-format=github
-      continue-on-error: true
 
     - name: Run ruff format check
       run: |
         ruff format --check webserver/ scripts/ *.py \
           --exclude pypcap
-      continue-on-error: true
 
     - name: Generate ruff report
-      if: always()
+      if: failure()
       run: |
         echo "## Ruff Linting Summary" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### Check Results" >> $GITHUB_STEP_SUMMARY
         ruff check webserver/ scripts/ *.py \
           --exclude pypcap \
-          --statistics || true >> $GITHUB_STEP_SUMMARY
+          --statistics >> $GITHUB_STEP_SUMMARY || true
