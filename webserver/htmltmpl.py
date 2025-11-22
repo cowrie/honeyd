@@ -32,7 +32,7 @@ __author__ = "Tomas Styblo (tripie@cpan.org)"
 
 # All imported modules are part of the standard Python library.
 
-from types import *
+# types module not needed in Python 3 - use built-in types directly
 import re
 import os
 import os.path
