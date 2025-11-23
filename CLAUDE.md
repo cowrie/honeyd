@@ -10,18 +10,65 @@ Honeyd is a small daemon that creates virtual hosts on a network. It can simulat
 
 The project uses **CMake** (modern build system, as of recent migration from autotools).
 
+**IMPORTANT**: The build directory is `build/` at the project root. Always run cmake commands from this directory, not from the project root.
+
 ### Building from Source
 
 ```bash
-# Configure
+# Initial configuration (from project root)
 mkdir -p build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo
 
-# Build
+# Build (from build/ directory)
+cmake --build .
+
+# Or use make directly
 make -j4
 
 # Install (requires root)
 sudo make install
+```
+
+### Development Workflow
+
+When working on the code, you're typically in the `build/` directory:
+
+```bash
+# Check current directory
+pwd  # Should show: /home/michel/src/honeyd/build
+
+# Rebuild after code changes
+cmake --build .
+
+# Clean build
+cmake --build . --target clean
+
+# Rebuild specific target
+cmake --build . --target honeyd
+
+# View build warnings/errors
+cmake --build . 2>&1 | less
+
+# Check for specific types of warnings
+cmake --build . 2>&1 | grep "warning:"
+cmake --build . 2>&1 | grep "error:"
+```
+
+### CMake Targets
+
+Main executables:
+- `honeyd` - Main daemon
+- `honeydctl` - Control utility
+- `honeydstats` - Statistics analyzer
+- `hsniff` - Packet sniffer
+
+Libraries:
+- `libhoneyd` - Overload library
+
+Build specific target:
+```bash
+cmake --build . --target honeyd
+cmake --build . --target hsniff
 ```
 
 ### Build Outputs
@@ -235,6 +282,39 @@ Configuration and data files use CMake variables:
 - `PATH_HONEYDINCLUDE` - Include files (default: `/usr/include/honeyd/`)
 
 These are set in `CMakeLists.txt` and should never be hardcoded with absolute paths.
+
+## Development Environment
+
+### Virtual Environment
+
+The project uses direnv for environment management. The Python virtual environment is located in `.direnv/python-3.13.5/`.
+
+To activate manually (if direnv is not active):
+```bash
+source .direnv/python-3.13.5/bin/activate
+```
+
+### Code Refactoring Tools
+
+**IMPORTANT**: When performing code refactoring or systematic code changes, **always prefer ast-grep over sed/awk**.
+
+ast-grep is available in the virtual environment and provides structural code understanding:
+```bash
+# Activate environment first
+source .direnv/python-3.13.5/bin/activate
+
+# Example: Find all atoi() calls
+ast-grep --pattern 'atoi($$$)'
+
+# Example: Replace pattern
+ast-grep --pattern 'atoi($ARG)' --rewrite 'safe_atoi($ARG, &result, "context")' --update-all
+```
+
+**Why ast-grep over sed**:
+- Understands code structure (AST-based)
+- Handles variable whitespace and formatting
+- Avoids false positives in comments/strings
+- More reliable for C code transformations
 
 ## Development Notes
 

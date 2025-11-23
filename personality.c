@@ -64,6 +64,7 @@
 #include "xprobe_assoc.h"
 #include "template.h"
 #include "debug.h"
+#include "util.h"
 
 /* ET - Moved SPLAY_HEAD to personality.h so xprobe_assoc.c could use it. */
 perstree_t personalities;
@@ -2506,7 +2507,16 @@ parse_and_load_ttl_pair(char *p)
 		to_load.gt_lt = 2;
 		strsep (&tmp_p, "<");
 	}
-	to_load.ttl_val = atoi (tmp_p);
+	{
+		int ttl_tmp;
+		if (safe_atoi(tmp_p, &ttl_tmp, "TTL value") != 0 ||
+		    ttl_tmp < 0 || ttl_tmp > 511) {
+			syslog(LOG_ERR, "Invalid TTL value: %s", tmp_p);
+			to_load.ttl_val = 0;
+		} else {
+			to_load.ttl_val = ttl_tmp;
+		}
+	}
 
 	return (to_load);
 }

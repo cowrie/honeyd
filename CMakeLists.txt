@@ -230,9 +230,10 @@ target_link_libraries (hsniff pcap dumbnet event z dl)
 add_executable(honeydctl
     honeydctl.c
     ${COMPAT_SOURCES}
+    util.c
     sha1.c
 )
-target_link_libraries(honeydctl readline termcap dl)
+target_link_libraries(honeydctl readline termcap event dumbnet pcap dl)
 
 add_library(libhoneyd
     honeyd_overload.c

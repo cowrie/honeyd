@@ -79,6 +79,7 @@
 #include "tagging.h"
 #include "stats.h"
 #include "debug.h"
+#include "util.h"
 
 int			honeyd_debug;
 struct event_base *libevent_base;
@@ -564,10 +565,15 @@ main(int argc, char *argv[])
 				    address);
 				usage();
 			}
-			if ((stats_port = atoi(strport)) == 0) {
-				fprintf(stderr, "Bad destination port %s\n",
-				    strport);
-				usage();
+			{
+				int port_tmp;
+				if (safe_atoi(strport, &port_tmp, "destination port") != 0 ||
+				    port_tmp <= 0 || port_tmp > 65535) {
+					fprintf(stderr, "Bad destination port %s\n",
+					    strport);
+					usage();
+				}
+				stats_port = (u_short)port_tmp;
 			}
 
 			stats_username = strdup(name);

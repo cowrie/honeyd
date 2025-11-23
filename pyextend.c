@@ -73,6 +73,7 @@
 #include "histogram.h"
 #include "osfp.h"
 #include "debug.h"
+#include "util.h"
 
 int make_socket(int (*f)(int, const struct sockaddr *, socklen_t), int type,
     char *, uint16_t);
@@ -509,8 +510,19 @@ pyextend_delete_connection(PyObject *self, PyObject *args)
 
 	tmp.ip_src = src.addr_ip;
 	tmp.ip_dst = dst.addr_ip;
-	tmp.sport = atoi(asport);
-	tmp.dport = atoi(adport);
+	{
+		int sport_tmp, dport_tmp;
+		if (safe_atoi(asport, &sport_tmp, "source port") != 0 ||
+		    sport_tmp < 0 || sport_tmp > 65535 ||
+		    safe_atoi(adport, &dport_tmp, "destination port") != 0 ||
+		    dport_tmp < 0 || dport_tmp > 65535) {
+			syslog(LOG_ERR, "Invalid port in connection close: sport=%s dport=%s",
+			    asport, adport);
+			goto done;
+		}
+		tmp.sport = sport_tmp;
+		tmp.dport = dport_tmp;
+	}
 
 	if (!strcmp(protocol, "tcp")) {
 		hdr = tuple_find(&tcpcons, &tmp);

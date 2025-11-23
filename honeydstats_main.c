@@ -77,6 +77,7 @@
 #include "honeydstats.h"
 #include "analyze.h"
 #include "keycount.h"
+#include "util.h"
 
 struct event_base *libevent_base;
 struct event_base *stats_libevent_base;
@@ -274,11 +275,16 @@ main(int argc, char *argv[])
 			address = optarg;
 			break;
 		case 'p':
-			if ((port = atoi(optarg)) == 0) {
-				syslog(LOG_ERR, "Bad port number: %s\n",optarg);
-				fprintf(stderr, "Bad port number: %s\n",
-				    optarg);
-				usage();
+			{
+				int port_tmp;
+				if (safe_atoi(optarg, &port_tmp, "port number") != 0 ||
+				    port_tmp <= 0 || port_tmp > 65535) {
+					syslog(LOG_ERR, "Bad port number: %s\n",optarg);
+					fprintf(stderr, "Bad port number: %s\n",
+					    optarg);
+					usage();
+				}
+				port = (u_short)port_tmp;
 			}
 			break;
 		case 0:

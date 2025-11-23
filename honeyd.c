@@ -1360,10 +1360,13 @@ proxy_connect(struct tuple *hdr, struct command *cmd, struct addrinfo *ai,
 	if (ai == NULL) {
 		char *name, *strport = line;
 		u_short nport;
+		int port_tmp;
 
 		name = strsep(&strport, ":");
-		if (strport == NULL || (nport = atoi(strport)) == 0)
+		if (strport == NULL || safe_atoi(strport, &port_tmp, "proxy port") != 0 ||
+		    port_tmp <= 0 || port_tmp > 65535)
 			return (-1);
+		nport = (u_short)port_tmp;
 
 		if ((ai = cmd_proxy_getinfo(name, hdr->type, nport)) == NULL)
 			return (-1);
@@ -3587,8 +3590,8 @@ main(int argc, char *argv[])
 			break;
 
 		case 'W':
-			honeyd_webserver_port = atoi(optarg);
-			if (honeyd_webserver_port == 0) {
+			if (safe_atoi(optarg, &honeyd_webserver_port, "webserver port") != 0 ||
+			    honeyd_webserver_port <= 0 || honeyd_webserver_port > 65535) {
 				fprintf(stderr, "Bad port number: %s\n",
 				    optarg);
 				usage();
@@ -3602,7 +3605,10 @@ main(int argc, char *argv[])
 			break;
 		case 'R':
 			/* For regression testing */
-			setrand = atoi(optarg);
+			if (safe_atoi(optarg, &setrand, "random seed") != 0) {
+				fprintf(stderr, "Bad random seed: %s\n", optarg);
+				usage();
+			}
 			break;
 		case 'c': {
 			char line[1024], *p = line;
@@ -3629,10 +3635,15 @@ main(int argc, char *argv[])
 				    address);
 				usage();
 			}
-			if ((stats_port = atoi(strport)) == 0) {
-				fprintf(stderr, "Bad destination port %s\n",
-				    strport);
-				usage();
+			{
+				int port_tmp;
+				if (safe_atoi(strport, &port_tmp, "stats port") != 0 ||
+				    port_tmp <= 0 || port_tmp > 65535) {
+					fprintf(stderr, "Bad destination port %s\n",
+					    strport);
+					usage();
+				}
+				stats_port = (u_short)port_tmp;
 			}
 
 			stats_username = strdup(name);

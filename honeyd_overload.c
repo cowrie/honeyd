@@ -100,6 +100,7 @@
 #include "subsystem.h"
 #include "fdpass.h"
 #include "honeyd_overload.h"
+#include "util.h"
 
 #undef DEBUG
 #ifdef DEBUG
@@ -226,9 +227,10 @@ static void
 honeyd_init(void)
 {
 	void *dh;
+	const char *env_fd = getenv(SUBSYSTEM_MAGICFD);
 
-	magic_fd = atoi(getenv(SUBSYSTEM_MAGICFD));
-	if (magic_fd <= 0)
+	if (env_fd == NULL || safe_atoi(env_fd, &magic_fd, "magic fd") != 0 ||
+	    magic_fd <= 0)
 	{
 		syslog(LOG_ERR, "[honeyd_overload] cannot find magic fd");
 		exit(EXIT_FAILURE);

@@ -56,6 +56,7 @@
  */
 
 #include <sys/types.h>
+#include <sys/queue.h>
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -79,6 +80,8 @@
 #include <time.h>
 #include <unistd.h>
 #include <syslog.h>
+
+#include "util.h"
 
 #ifdef HAVE_LIBREADLINE
 #include <readline/readline.h>
@@ -273,7 +276,15 @@ main(int argc, char **argv)
 	while ((ch = getopt(argc, argv, "t:v")) != -1) {
 		switch (ch) {
 		case 't':
-			TimeoutVal = (unsigned)atoi(optarg);
+			{
+				int tmp_timeout;
+				if (safe_atoi(optarg, &tmp_timeout, "timeout") != 0 ||
+				    tmp_timeout < 0) {
+					fprintf(stderr, "Bad timeout value: %s\n", optarg);
+					usage();
+				}
+				TimeoutVal = (unsigned)tmp_timeout;
+			}
 			break;
     
 		case 'v':
