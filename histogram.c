@@ -125,7 +125,7 @@ count_new(void)
 	return (count);
 }
 
-void
+static void
 count_entry_free(struct entryq *entries)
 {
 	struct entry *entry;
@@ -146,7 +146,7 @@ count_free(struct count *count)
 	count_entry_free(&count->hours);
 }
 
-void
+static void
 count_move_entries(struct entryq *current, struct entryq *future,
     int incr, int max)
 {
@@ -278,7 +278,7 @@ count_print(FILE *fout, struct count *count, char *name)
 	count_internal_print(fout, count, name);
 }
 
-uint32_t
+static uint32_t
 count_get_sum(struct entryq *entries)
 {
 	struct entry *entry;
@@ -311,7 +311,7 @@ count_get_day(struct count *count)
 	return (count_get_sum(&count->hours));
 }
 
-void
+static void
 count_test(void)
 {
 	struct count *count = count_new();

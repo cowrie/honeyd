@@ -111,7 +111,7 @@ struct ui_command commands[] = {
 
 char tmpbuf[1024];
 
-char *
+static char *
 make_prompt(void)
 {
 	static char tmp[128];
@@ -125,7 +125,7 @@ make_prompt(void)
 	return (tmp);
 }
 
-int
+static int
 ui_write_prompt(struct uiclient *client)
 {
 	char *tmp = make_prompt();
@@ -136,7 +136,7 @@ ui_write_prompt(struct uiclient *client)
 	return (0);
 }
 
-int
+static int
 ui_buffer_prompt(struct uiclient *client)
 {
 	char *tmp = make_prompt();
@@ -145,7 +145,7 @@ ui_buffer_prompt(struct uiclient *client)
 	return (0);
 }
 
-void
+static void
 ui_dead(struct uiclient *client)
 {
 	syslog(LOG_NOTICE, "%s: ui on fd %d is gone", __func__, client->fd);
@@ -203,7 +203,7 @@ ui_command_help(struct evbuffer *buf, char *line)
 	return (0);
 }
 
-void
+static void
 ui_handle_command(struct evbuffer *buf, char *original)
 {
 	char output[1024];
@@ -238,7 +238,7 @@ ui_handle_command(struct evbuffer *buf, char *original)
 	return;
 }
 
-void
+static void
 ui_writer(int fd, short what, void *arg)
 {
 	struct uiclient *client = arg;
@@ -263,7 +263,7 @@ ui_writer(int fd, short what, void *arg)
 		event_add(client->ev_write, NULL);
 }
 
-void
+static void
 ui_handler(int fd, short what, void *arg)
 {
 	struct uiclient *client = arg;
@@ -291,7 +291,7 @@ ui_handler(int fd, short what, void *arg)
 	event_add(client->ev_read, NULL);
 }
 
-void
+static void
 ui_greeting(struct uiclient *client)
 {
 	struct timeval tv;
@@ -307,7 +307,7 @@ ui_greeting(struct uiclient *client)
 	    VERSION, tv.tv_sec);
 }
 
-void
+static void
 ui_new(int fd, short what, void *arg)
 {
 	int newfd;

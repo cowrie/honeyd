@@ -91,7 +91,7 @@ struct callback subsystem_cb = {
 #define SOCKET_LOCAL		1
 #define SOCKET_MAYBELOCAL	2
 
-int
+static int
 subsystem_socket(struct subsystem_command *cmd, int local,
     char *ip, size_t iplen, u_short *port, int *proto)
 {
@@ -121,7 +121,7 @@ subsystem_socket(struct subsystem_command *cmd, int local,
 	return (0);
 }
 
-struct template *
+static struct template *
 subsystem_template_find(struct subsystem *sub, char *name)
 {
 	struct template tmp;
@@ -154,7 +154,7 @@ subsystem_insert_template(struct subsystem *sub, struct template *tmpl)
 		SPLAY_INSERT(subtmpltree, &sub->root, cont);
 }
 
-void
+static void
 subsystem_restart(int fd, short what, void *arg)
 {
 	struct subsystem *sub = arg;
@@ -166,7 +166,7 @@ subsystem_restart(int fd, short what, void *arg)
 	template_subsystem_start(tmpl, sub);
 }
 
-void
+static void
 subsystem_cleanup(struct subsystem *sub)
 {
 	syslog(LOG_INFO, "Subsystem \"%s\" died", sub->cmdstring);
@@ -196,7 +196,7 @@ subsystem_cleanup(struct subsystem *sub)
 	template_subsystem_free(sub);
 }
 
-void
+static void
 subsystem_readyport(struct port *port, struct subsystem *sub,
     struct template *tmpl)
 {
@@ -215,7 +215,7 @@ subsystem_readyport(struct port *port, struct subsystem *sub,
  * is going on.
  */
 
-int
+static int
 subsystem_findport(struct subsystem *sub, char *name, int proto)
 {
 	struct template_container *cont;
@@ -280,7 +280,7 @@ subsystem_findport(struct subsystem *sub, char *name, int proto)
 	return (port);
 }
 
-int
+static int
 subsystem_bind(int fd, struct template *tmpl, struct subsystem *sub,
     int proto, u_short port)
 {
@@ -304,7 +304,7 @@ subsystem_bind(int fd, struct template *tmpl, struct subsystem *sub,
 	return (0);
 }
 
-int
+static int
 subsystem_listen(struct port *sub_port, char *ip, int nfd)
 {
 	syslog(LOG_DEBUG, "Listen: %s:%d -> fd %d", 
@@ -322,7 +322,7 @@ subsystem_listen(struct port *sub_port, char *ip, int nfd)
 	return (0);
 }
 
-int
+static int
 subsystem_cmd_listen(int fd,
     struct subsystem *sub, struct subsystem_command *cmd)
 {
