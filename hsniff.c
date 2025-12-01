@@ -101,7 +101,7 @@ struct tree tcpcons;
 SPLAY_PROTOTYPE(tree, tuple, node, conhdr_compare);
 SPLAY_GENERATE(tree, tuple, node, conhdr_compare);
 
-void
+static void
 usage(void)
 {
 	fprintf(stderr,
@@ -115,7 +115,7 @@ usage(void)
 	exit(1);
 }
 
-void
+static void
 hsniff_settcp(struct tcp_track *con, struct ip_hdr *ip, struct tcp_hdr *tcp,
     int local)
 {
@@ -132,7 +132,7 @@ hsniff_settcp(struct tcp_track *con, struct ip_hdr *ip, struct tcp_hdr *tcp,
 	TAILQ_INIT(&con->segments);
 }
 
-void
+static void
 hsniff_setudp(struct udp_con *con, struct ip_hdr *ip, struct udp_hdr *udp,
     int local)
 {
@@ -180,14 +180,14 @@ syslog_init(int argc, char *argv[])
 	syslog(LOG_NOTICE, "started with %s", buf);
 }
 
-void
+static void
 hsniff_init(void)
 {
 	/* Initalize ongoing connection state */
 	SPLAY_INIT(&tcpcons);
 }
 
-void
+static void
 hsniff_exit(int status)
 {
 	interface_close_all();
@@ -207,7 +207,7 @@ generic_timeout(struct event *ev, int seconds)
 	evtimer_add(ev, &tv);
 }
 
-struct tcp_track *
+static struct tcp_track *
 tcp_track_new(struct ip_hdr *ip, struct tcp_hdr *tcp, int local)
 {
 	struct tcp_track *con;
@@ -227,7 +227,7 @@ tcp_track_new(struct ip_hdr *ip, struct tcp_hdr *tcp, int local)
 	return (con);
 }
 
-void
+static void
 tcp_track_free(struct tcp_track *con)
 {
 	struct tcp_segment *seg;
@@ -257,7 +257,7 @@ hsniff_tcp_timeout(int fd, short event, void *arg)
 	tcp_track_free(con);
 }
 
-void
+static void
 tcp_insert(struct tcp_track *con, uint32_t th_seq, void *data, size_t dlen)
 {
 	struct tcp_segment *seg, *newseg;
@@ -291,7 +291,7 @@ tcp_insert(struct tcp_track *con, uint32_t th_seq, void *data, size_t dlen)
 	}
 }
 
-void
+static void
 tcp_drop_subsumed(struct tcp_track *con)
 {
 	struct tcp_segment *seg;
@@ -333,7 +333,7 @@ tcp_drop_subsumed(struct tcp_track *con)
 	}
 }
 
-void
+static void
 tcp_recv_cb(u_char *pkt, u_short pktlen)
 {
 	struct ip_hdr *ip;
@@ -440,7 +440,7 @@ tcp_recv_cb(u_char *pkt, u_short pktlen)
 	}
 }
 
-void
+static void
 udp_recv_cb(u_char *pkt, u_short pktlen)
 {
 	struct ip_hdr *ip = NULL;
@@ -475,7 +475,7 @@ udp_recv_cb(u_char *pkt, u_short pktlen)
 	hooks_dispatch(ip->ip_p, HD_INCOMING_STREAM, &tmp.conhdr, data, dlen);
 }
 
-void
+static void
 hsniff_recv_cb(u_char *ag, const struct pcap_pkthdr *pkthdr, const u_char *pkt)
 {
 	const struct interface *inter = (const struct interface *)ag;
@@ -509,7 +509,7 @@ hsniff_recv_cb(u_char *ag, const struct pcap_pkthdr *pkthdr, const u_char *pkt)
 	}
 }
 
-void
+static void
 hsniff_signal(int fd, short what, void *arg)
 {
 	syslog(LOG_NOTICE, "exiting on signal %d", fd);
