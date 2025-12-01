@@ -51,8 +51,45 @@ check_struct_has_member("struct msghdr" msg_control sys/socket.h HAVE_CONTROL_IN
 check_function_exists(daemon HAVE_DAEMON)
 check_include_files(dlfcn.h HAVE_DLFCN_H)
 # HAVE_DOPRNT
-set(HAVE_DUMBNET 1)
-# HAVE_DUMBNET
+
+# Find libdnet/libdumbnet - Debian uses libdumbnet, others use libdnet
+# Try dumbnet first (Debian), then dnet (others)
+# Use find_library for better cross-platform support (handles homebrew, etc.)
+find_library(DNET_LIBRARY
+    NAMES dumbnet dnet
+    HINTS
+        /opt/homebrew/opt/libdnet/lib
+        /usr/local/opt/libdnet/lib
+        ENV DNET_ROOT
+)
+
+if(DNET_LIBRARY)
+    get_filename_component(DNET_LIB_NAME ${DNET_LIBRARY} NAME_WE)
+    if(DNET_LIB_NAME MATCHES "dumbnet")
+        set(HAVE_DUMBNET 1)
+        message(STATUS "Found libdumbnet: ${DNET_LIBRARY}")
+    else()
+        set(HAVE_DUMBNET 0)
+        message(STATUS "Found libdnet: ${DNET_LIBRARY}")
+    endif()
+
+    # Find include directory
+    find_path(DNET_INCLUDE_DIR
+        NAMES dnet.h dumbnet.h
+        HINTS
+            /opt/homebrew/opt/libdnet/include
+            /usr/local/opt/libdnet/include
+            ENV DNET_ROOT
+        PATH_SUFFIXES include
+    )
+    if(DNET_INCLUDE_DIR)
+        include_directories(${DNET_INCLUDE_DIR})
+    endif()
+else()
+    message(FATAL_ERROR "Neither libdnet nor libdumbnet found. "
+        "Install libdumbnet-dev (Debian/Ubuntu), libdnet-dev, or 'brew install libdnet' (macOS)")
+endif()
+
 check_function_exists(dup2 HAVE_DUP2)
 check_function_exists(err HAVE_ERR)
 check_include_files(errno.h HAVE_ERRNO_H)
@@ -225,7 +262,7 @@ add_executable(hsniff
 )
 
 # link the libraries to the executable
-target_link_libraries (hsniff pcap dumbnet event z dl)
+target_link_libraries (hsniff pcap ${DNET_LIBRARY} event z dl)
 
 add_executable(honeydctl
     honeydctl.c
@@ -257,7 +294,7 @@ add_executable(honeydstats
 )
 
 # link the libraries to the executable
-target_link_libraries (honeydstats  dumbnet event z dl)
+target_link_libraries (honeydstats ${DNET_LIBRARY} event z dl)
 
 # Generate parser and lexer
 BISON_TARGET(HoneydParser parse.y ${CMAKE_CURRENT_BINARY_DIR}/parse.c
@@ -316,7 +353,7 @@ if(Python3_FOUND AND HAVE_PYTHON)
 endif()
 
 # link the libraries to the executable
-target_link_libraries (honeyd pcap dumbnet event m z dl)
+target_link_libraries (honeyd pcap ${DNET_LIBRARY} event m z dl)
 
 # Link Python 3 libraries if available
 if(Python3_FOUND AND HAVE_PYTHON)
