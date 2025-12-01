@@ -65,9 +65,7 @@
 #include "network.h"
 #include "router.h"			/* for network compare */
 #include "debug.h"
-
-/* Prototypes */
-int pcap_dloff(pcap_t *);
+#include "util.h"
 
 void honeyd_recv_cb(u_char *, const struct pcap_pkthdr *, const u_char *);
 
@@ -262,7 +260,7 @@ interface_close_all(void)
 		interface_close(inter);
 }
 
-void
+static void
 interface_ether_filter(struct interface *inter,
     int naddresses, char **addresses)
 {
@@ -293,7 +291,7 @@ interface_ether_filter(struct interface *inter,
 	strlcat(inter->if_filter, line, sizeof(inter->if_filter));
 }
 
-void
+static void
 interface_regular_filter(struct interface *inter,
     int naddresses, char **addresses)
 {

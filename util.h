@@ -87,6 +87,9 @@ int kv_remove(struct keyvalueq *head, char *key);
 void kv_replace(struct keyvalueq *head, char *key, char *value);
 
 /* Other misc stuff */
+struct pcap;
+typedef struct pcap pcap_t;
+int pcap_dloff(pcap_t *pd);
 int make_bound_connect(int, char *, uint16_t, char *);
 int make_socket(int (*f)(int, const struct sockaddr *, socklen_t), int type,
     char *address, uint16_t port);

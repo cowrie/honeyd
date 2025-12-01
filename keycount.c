@@ -169,7 +169,7 @@ timeseries_init()
 	SPLAY_INIT(&timeupdates);
 }
 
-struct timeseries *
+static struct timeseries *
 timeseries_new(char *name, struct kctree *kct, 	void (*extract)(struct keycount *, void **, size_t *),	void (*print)(void *, size_t), struct timeval *update)
 {
 	struct timeseries tmp, *ts;
@@ -205,7 +205,7 @@ timeseries_new(char *name, struct kctree *kct, 	void (*extract)(struct keycount 
 	return (ts);
 }
 
-struct timekey *
+static struct timekey *
 timekey_new(const void *key, size_t keylen)
 {
 	struct timekey *tk;
@@ -228,7 +228,7 @@ timekey_new(const void *key, size_t keylen)
 	return (tk);
 }
 
-void
+static void
 timeseries_update_item(struct timeseries *ts)
 {
 	struct keycount *kc;

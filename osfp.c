@@ -75,7 +75,7 @@ static struct osfp *honeyd_osfp_cache(const struct ip_hdr *);
 
 SPLAY_HEAD(osfptree, osfp) osfp_buckets[OSFP_HASHSIZE];
 
-int
+static int
 osfp_compare(struct osfp *a, struct osfp *b)
 {
 	if (a->src < b->src)
@@ -124,7 +124,7 @@ honeyd_osfp_hash(const struct ip_hdr *ip)
 	return (root);
 }
 
-void
+static void
 honeyd_osfp_timeout(int fd, short what, void *arg)
 {
 	struct osfp *entry = arg;

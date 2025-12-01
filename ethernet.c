@@ -371,7 +371,7 @@ ethernetcode_clone(struct addr *src)
 		}\
 } while (0)
 
-void
+static void
 ethernetcode_test(void)
 {
 	TEST("cisco", 0x00000c);

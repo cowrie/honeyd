@@ -229,7 +229,7 @@ fgetln(FILE *stream, size_t *len)
 
 /* Either connect or bind */
 
-int
+static int
 make_socket_ai(int (*f)(int, const struct sockaddr *, socklen_t), int type,
     struct addrinfo *ai)
 {

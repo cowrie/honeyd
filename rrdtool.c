@@ -71,7 +71,7 @@ static void rrdtool_write_command(struct rrdtool_drv *, char *);
  * Very simple RRDTOOL driver
  */
 
-void
+static void
 rrdtool_evb_readcb(struct bufferevent *bev, void *parameter)
 {
 	struct rrdtool_drv *req = parameter;
@@ -105,7 +105,7 @@ rrdtool_evb_readcb(struct bufferevent *bev, void *parameter)
 	return;
 }
 
-void
+static void
 rrdtool_evb_writecb(struct bufferevent *bev, void *parameter)
 {
 	/* We wrote all of the command - now read the response */
@@ -163,7 +163,7 @@ rrdtool_restart(int fd, short what, void *arg)
 	}
 }
 
-void
+static void
 rrdtool_evb_errcb(struct bufferevent *bev, short what, void *parameter)
 {
 	struct rrdtool_drv *drv = parameter;
@@ -554,7 +554,7 @@ rrdtool_fork(struct rrdtool_drv *drv)
  * -----------
  */
 
-void
+static void
 rrdtool_test_done(char *something, void *arg)
 {
 	struct timeval tv;
