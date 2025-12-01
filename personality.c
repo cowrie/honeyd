@@ -110,7 +110,7 @@ personality_init(void)
 	evtimer_add(ev, &tv);
 }
 
-struct personality *
+static struct personality *
 personality_new(const char *name)
 {
 	struct personality *pers, tmp;
@@ -492,7 +492,7 @@ tcp_personality_test(const struct tcp_con *con, struct personality *person,
 	return (NULL);
 }
 
-double rand_normal(double mean, double stddev)
+static double rand_normal(double mean, double stddev)
 {
     static double n2 = 0.0;
     static int n2_cached = 0;
@@ -609,7 +609,7 @@ get_next_isn(struct template *tmpl, const struct personality *person)
 
 /* Get the correct time for this personality */
 
-void
+static void
 personality_time(struct template *tmpl, struct timeval *diff)
 {
 	uint32_t ms;
@@ -626,7 +626,7 @@ personality_time(struct template *tmpl, struct timeval *diff)
 	timeradd(&tmpl->tv, diff, &tmpl->tv);
 }
 
-int
+static int
 tcp_personality_time(struct template *tmpl, struct timeval *diff)
 {
 	extern rand_t *honeyd_rand;
@@ -679,7 +679,7 @@ tcp_personality_time(struct template *tmpl, struct timeval *diff)
 	return (slowhz);
 }
 
-uint32_t
+static uint32_t
 tcp_personality_seq(struct tcp_con * con, struct template *tmpl, struct personality *person)
 {
 	struct timeval tmp;
@@ -1011,7 +1011,7 @@ icmp_error_personality(struct template *tmpl,
  * gcd values and selecting the smallest one.
  */
 
-void
+static void
 parse_seq_gcd(char *s, char *end, struct personality *pers)
 {
 	char *next, *endptr, *quantifier, *secondValue;
@@ -1090,7 +1090,7 @@ parse_seq_gcd(char *s, char *end, struct personality *pers)
 	pers->TCP_ISN_gcd = ((pers->TCP_ISN_gcd_max - pers->TCP_ISN_gcd_min)/2) + pers->TCP_ISN_gcd_min;
 }
 
-int
+static int
 parse_seq(struct personality *pers, int off, char *line)
 {
 	char *p = line, *p2 = line, *end;
@@ -1410,7 +1410,7 @@ parse_seq(struct personality *pers, int off, char *line)
 	return (0);
 }
 
-int
+static int
 parse_tl(struct personality *pers, int off, char *line)
 {
 	struct personate *test = &pers->t_tests[off];
@@ -1674,7 +1674,7 @@ parse_tl(struct personality *pers, int off, char *line)
 		return (-1); \
 } while (0)
 
-int
+static int
 parse_u1(struct personality *pers, int off, char *line)
 {
 
@@ -1856,7 +1856,7 @@ parse_u1(struct personality *pers, int off, char *line)
 	return 0;
 }
 
-int
+static int
 parse_ops(struct personality *pers, int off, char *line)
 {
 	char *p = line, *p2 = line, *end;
@@ -1983,7 +1983,7 @@ CountCharsInString(char *string, char *chars)
 	return count;
 }
 
-int
+static int
 parse_win(struct personality *pers, int off, char *line)
 {
 	//This line is very uniform, W1 through W6 followed by = then 1-4 hex digits denoting the value
@@ -2024,7 +2024,7 @@ parse_win(struct personality *pers, int off, char *line)
 	return 0;
 }
 
-int
+static int
 parse_ecn(struct personality *pers, int off, char *line)
 {
 	char *p = line, *p2 = line, *end;
@@ -2172,7 +2172,7 @@ parse_ecn(struct personality *pers, int off, char *line)
 	else return -1;
 }
 
-int
+static int
 parse_ie(struct personality *pers, int off, char *line)
 {
 	char *p = line, *p2 = line, *end;
@@ -2296,7 +2296,7 @@ struct parse_test {
 	{NULL, 0, NULL}
 };
 
-int
+static int
 personality_line(struct personality *pers, char *line)
 {
 	struct parse_test *pt = parse_tests;
@@ -2329,7 +2329,7 @@ personality_line(struct personality *pers, char *line)
 
 /* Creates a new personality and details on how to deal with duplicates */
 
-struct personality *
+static struct personality *
 personality_config_new(const char *name, int lineno)
 {
 	struct personality *pers;
