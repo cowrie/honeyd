@@ -36,7 +36,6 @@
 struct interface {
 	TAILQ_ENTRY(interface) next;
 
-	struct intf_entry if_ent;
 	int if_addrbits;
 	uint32_t subnetBcastAddress;
 	struct event *if_recvev;
@@ -45,6 +44,9 @@ struct interface {
 	int if_dloff;
 
 	char if_filter[1024];
+
+	/* Must be last - contains flexible array member */
+	struct intf_entry if_ent;
 };
 
 /* disables event methods that do not work with bpf */

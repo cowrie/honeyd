@@ -285,7 +285,7 @@ tcp_insert(struct tcp_track *con, uint32_t th_seq, void *data, size_t dlen)
 
 			off = seg->seq + seg->len - th_seq;
 			th_seq += off;
-			data += off;
+			data = (char *)data + off;
 			dlen -= off;
 		}
 	}

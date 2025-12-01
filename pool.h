@@ -72,7 +72,7 @@ pool_alloc(struct pool *pool)
 static __inline void
 pool_free(struct pool *pool, void *addr)
 {
-	struct pool_entry *entry = addr - sizeof(struct pool_entry);
+	struct pool_entry *entry = (struct pool_entry *)((char *)addr - sizeof(struct pool_entry));
 
 	if (entry->data != addr)
 	{

@@ -891,7 +891,7 @@ recvmsg(int sock, struct msghdr *msg, int flags)
 		ssize_t avail = msg->msg_iov[i].iov_len;
 		if (avail > ret - off)
 			avail = ret - off;
-		memcpy(msg->msg_iov[i].iov_base, data + off, avail);
+		memcpy(msg->msg_iov[i].iov_base, (char *)data + off, avail);
 		off += avail;
 	}
 
@@ -939,7 +939,7 @@ sendmsg(int sock, const struct msghdr *msg, int flags)
 
 	/* Copy all the data into our single buffer */
 	for ( i = 0, off = 0; i < msg->msg_iovlen; i++ ) {
-		memcpy(data + off,
+		memcpy((char *)data + off,
 		    msg->msg_iov[i].iov_base,
 		    msg->msg_iov[i].iov_len);
 		off += msg->msg_iov[i].iov_len;

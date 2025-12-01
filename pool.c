@@ -81,7 +81,7 @@ pool_alloc_size(struct pool *pool, size_t size)
 			exit(EXIT_FAILURE);
 		}
 		
-		entry->data = (void *)entry + sizeof(struct pool_entry);;
+		entry->data = (char *)entry + sizeof(struct pool_entry);
 		entry->size = size;
 		pool->nalloc++;
 	} else {
@@ -99,13 +99,13 @@ pool_alloc_size(struct pool *pool, size_t size)
 		pool->nalloc += max;
 		for (i = 0; i < max; i++) {
 			entry = p;
-			entry->data = (void *)entry+ sizeof(struct pool_entry);
+			entry->data = (char *)entry + sizeof(struct pool_entry);
 			entry->size = size;
 
 			/* We want to use the last one as return */
 			if (i < max - 1) {
 				SLIST_INSERT_HEAD(&pool->entries, entry, next);
-				p += sizeof(struct pool_entry) + size;
+				p = (char *)p + sizeof(struct pool_entry) + size;
 			}
 		}
 	}
