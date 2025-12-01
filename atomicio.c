@@ -39,9 +39,10 @@ ssize_t
 atomicio(ssize_t (*f)(int, void *, size_t), int fd, void *_s, size_t n)
 {
 	char *s = _s;
-	ssize_t res, pos = 0;
+	ssize_t res;
+	size_t pos = 0;
 
-	while (n > pos) {
+	while (pos < n) {
 		res = (f) (fd, s + pos, n - pos);
 		switch (res) {
 		case -1:

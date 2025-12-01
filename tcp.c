@@ -112,7 +112,7 @@ tcp_drain_payload(struct tcp_con *con, u_int len)
 int
 tcp_add_readbuf(struct tcp_con *con, u_char *dat, u_int datlen)
 {
-	int space;
+	u_int space;
 
 	hooks_dispatch(IP_PROTO_TCP, HD_INCOMING_STREAM, &con->conhdr,
 	    dat, datlen);

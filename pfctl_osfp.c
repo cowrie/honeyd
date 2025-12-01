@@ -97,7 +97,8 @@ pfctl_file_fingerprints(int dev, int opts, const char *fp_filename)
 	FILE *in;
 	char *line;
 	size_t len;
-	int i, lineno = 0;
+	size_t i;
+	int lineno = 0;
 	int window, w_mod, ttl, df, psize, p_mod, mss, mss_mod, wscale,
 	    wscale_mod, optcnt, ts0;
 	pf_tcpopts_t packed_tcpopts;

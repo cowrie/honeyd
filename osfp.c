@@ -112,10 +112,10 @@ static struct osfptree *
 honeyd_osfp_hash(const struct ip_hdr *ip)
 {
 	struct osfptree *root;
-	int i;
+	size_t i;
 	u_char *bin;
 	u_char h = 0;
-	
+
 	bin = (u_char *)&ip->ip_src;
 	for (i = 0; i < sizeof(ip->ip_src); i++)
 		h ^= *bin++;

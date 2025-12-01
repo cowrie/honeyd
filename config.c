@@ -549,7 +549,7 @@ port_free(struct template *tmpl, struct port *port)
 
 // Callback for honeyd script broadcasts
 void bcast_trigger(int fd, short what, void *ptr) {
-	int i;
+	size_t i;
 	struct udp_con *con = (struct udp_con*)ptr;
 	struct port *bport = con->port;
 	struct template *tmpl = template_find((const char *)&bport->templateName);

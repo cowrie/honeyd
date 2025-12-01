@@ -41,7 +41,7 @@ struct interface {
 	struct event *if_recvev;
 	pcap_t *if_pcap;
 	eth_t *if_eth;
-	int if_dloff;
+	unsigned int if_dloff;
 
 	char if_filter[1024];
 

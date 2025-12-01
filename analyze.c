@@ -390,6 +390,7 @@ analyze_country_enter_cb(int result, char type, int count, int ttl,
 	} else {
 		const char *hostname = *(char **)addresses;
 		int i;
+		size_t j;
 		/* Extract the country key */
 		for (i = strlen(hostname) - 1; i >= 0; --i) {
 			if (hostname[i] == '.') {
@@ -399,12 +400,12 @@ analyze_country_enter_cb(int result, char type, int count, int ttl,
 		}
 
 		strlcpy(tld, hostname + i, sizeof(tld));
-		for (i = 0; i < strlen(tld); i++) {
-			if (isdigit(tld[i])) {
+		for (j = 0; j < strlen(tld); j++) {
+			if (isdigit(tld[j])) {
 				strlcpy(tld, "unknown", sizeof(tld));
 				break;
 			}
-			tld[i] = tolower(tld[i]);
+			tld[j] = tolower(tld[j]);
 		}
 	}
 

@@ -848,7 +848,7 @@ recvmsg(int sock, struct msghdr *msg, int flags)
 {
 	struct fd *nfd;
 	ssize_t ret = -1;
-	size_t len, off;
+	size_t len, off, nread;
 	int i;
 	void *data;
 
@@ -886,11 +886,12 @@ recvmsg(int sock, struct msghdr *msg, int flags)
 	if (ret == -1)
 		goto out;
 
+	nread = ret;
 	/* Copy the data back into the provided memory buffers */
-	for ( i = 0, off = 0; i < msg->msg_iovlen && off < ret; i++ ) {
-		ssize_t avail = msg->msg_iov[i].iov_len;
-		if (avail > ret - off)
-			avail = ret - off;
+	for ( i = 0, off = 0; i < msg->msg_iovlen && off < nread; i++ ) {
+		size_t avail = msg->msg_iov[i].iov_len;
+		if (avail > nread - off)
+			avail = nread - off;
 		memcpy(msg->msg_iov[i].iov_base, (char *)data + off, avail);
 		off += avail;
 	}

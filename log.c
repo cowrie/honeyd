@@ -276,7 +276,7 @@ honeyd_log_service(FILE *fp, int proto, const struct tuple *hdr,
 {
 	static char myline[1024];
 	char *p;
-	int len;
+	size_t len;
 
 	syslog(LOG_NOTICE, "E%s: %s", honeyd_contoa(hdr), line);
 
@@ -287,8 +287,8 @@ honeyd_log_service(FILE *fp, int proto, const struct tuple *hdr,
 		len = sizeof(myline);
 		p = strchr(line, '\n');
 		if (p != NULL) {
-			if ((int)(p - line) < sizeof(myline))
-				len = (int)(p - line) + 1;
+			if (p - line < sizeof(myline))
+				len = (p - line) + 1;
 		}
 		strlcpy(myline, line, len);
 

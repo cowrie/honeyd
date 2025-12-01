@@ -1429,7 +1429,7 @@ generic_connect(struct template *tmpl, struct tuple *hdr,
 	struct action *action = NULL;
 	struct port *port;
 	int proto = 0;
-	int i;
+	size_t i;
 
 	if (hdr->type == SOCK_STREAM)
 		proto = IP_PROTO_TCP;

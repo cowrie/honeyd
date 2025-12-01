@@ -229,7 +229,8 @@ static uint32_t
 ethernetcode_find_best(struct etherindex **results, int size, int random)
 {
 	extern rand_t *honeyd_rand;
-	int i, j, max = 0, count = 0;
+	int i, max = 0, count = 0;
+	size_t j;
 	struct ethernetcode *code = NULL;
 
 	if (!size)
@@ -274,7 +275,7 @@ ethernetcode_find_prefix(char *vendor, int random) {
 
 	/* Walk through every single word and find the codes for it */
 	while ((p = strsep(&e, " ")) != NULL && pos < 20) {
-		int i;
+		size_t i;
 
 		/* Change the string to lower case for the match */
 		for (i = 0; i < strlen(p); i++)
@@ -297,7 +298,7 @@ ethernetcode_make_address(char *vendor)
 	uint32_t prefix = 0;
 	u_char address[ETH_ADDR_LEN], *p;
 	struct addr *ea;
-	int i;
+	size_t i;
 
 	/* Check if it is a regular mac address: xx:xx:xx:xx:xx:xx */
 	p = address;

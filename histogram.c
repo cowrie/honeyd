@@ -148,11 +148,9 @@ count_free(struct count *count)
 
 static void
 count_move_entries(struct entryq *current, struct entryq *future,
-    int incr, int max)
+    uint32_t incr, uint32_t max)
 {
 	struct entry *entry, *next;
-
-	assert(incr >= 0);
 
 	if (!incr)
 		return;

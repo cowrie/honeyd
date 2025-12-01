@@ -124,7 +124,7 @@ SPLAY_GENERATE(statstree, stats, node, compare);
 void
 hmac_init(struct hmac_state *hmac, const char *key)
 {
-	int i;
+	size_t i;
 
 	memset(hmac->ipad, 0x36, sizeof(hmac->ipad));
 	memset(hmac->opad, 0x5c, sizeof(hmac->opad));
@@ -280,7 +280,7 @@ stats_shingle_data(struct stats *stats)
 	while (evbuffer_get_length(stats->evbuf) >= SHINGLE_MIN)
 	{
 		u_char *data = evbuffer_pullup(stats->evbuf, -1);
-		int i;
+		size_t i;
 
 		/* So, we are wasting some time here, but that's alright */
 		for (i = SHINGLE_MIN;
@@ -641,7 +641,7 @@ record_add_hash(struct hashq *hashes, void *data, size_t len)
 	struct hash *hash, *tmp;
 	u_char digest[SHA1_DIGESTSIZE];
 	SHA1_CTX ctx;
-	int i;
+	size_t i;
 
 	SHA1Init(&ctx);
 	SHA1Update(&ctx, data, len);
@@ -907,7 +907,8 @@ stats_compress_test(void)
 {
 	u_char something[1024];
 	struct evbuffer *buf = evbuffer_new();
-	int i;
+	size_t i;
+	int j;
 
 	/* Just create some stupid data */
 	for (i = 0; i < sizeof(something); i++) {
@@ -916,7 +917,7 @@ stats_compress_test(void)
 		something[i] = i + something[i-1];
 	}
 
-	for (i = 0; i < 3; i++) {
+	for (j = 0; j < 3; j++) {
 		evbuffer_drain(buf, evbuffer_get_length(buf));
 		evbuffer_add(buf, something, sizeof(something));
 		stats_compress(buf);
