@@ -304,7 +304,7 @@ add_executable(honeydctl
     util.c
     sha1.c
 )
-target_link_libraries(honeydctl readline termcap event dumbnet pcap dl)
+target_link_libraries(honeydctl readline termcap ${LIBEVENT_LIBRARY} ${DNET_LIBRARY} pcap dl)
 
 add_library(libhoneyd
     honeyd_overload.c
