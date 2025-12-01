@@ -155,7 +155,7 @@ template_find(const char *name)
 }
 
 // Dumps IP addresses of DHCP
-void template_dump_ips(char* filePath)
+void template_dump_ips(const char *filePath)
 {
 	FILE *fp;
 

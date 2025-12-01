@@ -104,7 +104,36 @@ check_include_files(inttypes.h HAVE_INTTYPES_H)
 check_function_exists(isblank HAVE_ISBLANK)
 check_function_exists(kqueue HAVE_KQUEUE)
 # libedit
-set(HAVE_LIBEVENT 1)
+
+# Find libevent
+find_library(LIBEVENT_LIBRARY
+    NAMES event
+    HINTS
+        /opt/homebrew/opt/libevent/lib
+        /usr/local/opt/libevent/lib
+        ENV LIBEVENT_ROOT
+)
+
+if(LIBEVENT_LIBRARY)
+    message(STATUS "Found libevent: ${LIBEVENT_LIBRARY}")
+    set(HAVE_LIBEVENT 1)
+
+    find_path(LIBEVENT_INCLUDE_DIR
+        NAMES event.h
+        HINTS
+            /opt/homebrew/opt/libevent/include
+            /usr/local/opt/libevent/include
+            ENV LIBEVENT_ROOT
+        PATH_SUFFIXES include
+    )
+    if(LIBEVENT_INCLUDE_DIR)
+        include_directories(${LIBEVENT_INCLUDE_DIR})
+    endif()
+else()
+    message(FATAL_ERROR "libevent not found. "
+        "Install libevent-dev (Debian/Ubuntu) or 'brew install libevent' (macOS)")
+endif()
+
 set(HAVE_LIBREADLINE 1)
 if (ZLIB_FOUND)
   set(HAVE_LIBZ 1)
@@ -209,6 +238,11 @@ link_directories(/usr/lib)
 
 add_definitions(-DHAVE_CONFIG_H)
 add_definitions(-D_GNU_SOURCE)
+
+# On macOS, expose BSD types (u_int, u_char, etc.) needed by pcap.h
+if(APPLE)
+    add_definitions(-D_DARWIN_C_SOURCE)
+endif()
 add_definitions(-DPATH_HONEYDINCLUDE=\"${PATH_HONEYDINCLUDE}\")
 add_definitions(-DPATH_HONEYDLIB=\"${PATH_HONEYDLIB}\")
 add_definitions(-DPATH_HONEYDDATA=\"${PATH_HONEYDDATA}\")
@@ -262,7 +296,7 @@ add_executable(hsniff
 )
 
 # link the libraries to the executable
-target_link_libraries (hsniff pcap ${DNET_LIBRARY} event z dl)
+target_link_libraries (hsniff pcap ${DNET_LIBRARY} ${LIBEVENT_LIBRARY} z dl)
 
 add_executable(honeydctl
     honeydctl.c
@@ -294,7 +328,7 @@ add_executable(honeydstats
 )
 
 # link the libraries to the executable
-target_link_libraries (honeydstats ${DNET_LIBRARY} event z dl)
+target_link_libraries (honeydstats ${DNET_LIBRARY} ${LIBEVENT_LIBRARY} z dl)
 
 # Generate parser and lexer
 BISON_TARGET(HoneydParser parse.y ${CMAKE_CURRENT_BINARY_DIR}/parse.c
@@ -353,7 +387,7 @@ if(Python3_FOUND AND HAVE_PYTHON)
 endif()
 
 # link the libraries to the executable
-target_link_libraries (honeyd pcap ${DNET_LIBRARY} event m z dl)
+target_link_libraries (honeyd pcap ${DNET_LIBRARY} ${LIBEVENT_LIBRARY} m z dl)
 
 # Link Python 3 libraries if available
 if(Python3_FOUND AND HAVE_PYTHON)
