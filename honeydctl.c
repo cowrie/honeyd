@@ -198,7 +198,7 @@ receive(int fd, int display)
 int data = -1;
 jmp_buf pppdead;
 
-void
+static void
 check_fd(int sig)
 {
 	if (data != -1) {
@@ -226,7 +226,7 @@ check_fd(int sig)
 	}
 }
 
-const char *
+static const char *
 #ifdef HAVE_LIBEDIT
 smartgets(EditLine *e, int *count, int fd)
 #else

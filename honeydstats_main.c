@@ -137,7 +137,7 @@ struct _unittest {
 	{ NULL, NULL}
 };
 
-void
+static void
 unittest(void)
 {
 	struct _unittest *ut;
@@ -151,7 +151,7 @@ unittest(void)
 	exit(0);
 }
 
-void
+static void
 usage(void)
 {
 	fprintf(stderr,
@@ -173,7 +173,7 @@ usage(void)
 	exit(1);
 }
 
-void
+static void
 setup_socket(char *address, int port)
 {
 	if ((evbuf_recv = evbuffer_new()) == NULL){
@@ -192,14 +192,14 @@ setup_socket(char *address, int port)
 	event_add(ev_recv, NULL);
 }
 
-void
+static void
 honeydstats_signal(int fd, short what, void *arg)
 {
 	syslog(LOG_NOTICE, "exiting on signal %d", fd);
 	exit(EXIT_SUCCESS);
 }
 
-void
+static void
 honeydstats_sighup(int fd, short what, void *arg)
 {
 	syslog(LOG_NOTICE,

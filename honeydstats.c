@@ -104,7 +104,7 @@ struct evbuffer *checkpoint_evbuf;
 static struct timeval checkpoint_tv;
 static int checkpoint_doreplay = 0;
 
-void
+static void
 user_new(const char *name, const char *password)
 {
 	struct user *user = NULL, tmp;
@@ -176,7 +176,7 @@ user_read_config(const char *filename)
  * stats structures.
  */
 
-int
+static int
 record_process(struct user *user, struct evbuffer *evbuf)
 {
 	struct record *record;
@@ -204,7 +204,7 @@ record_process(struct user *user, struct evbuffer *evbuf)
 	return (res);
 }
 
-int
+static int
 measurement_process(struct user *user, struct evbuffer *evbuf)
 {
 	uint32_t counter;

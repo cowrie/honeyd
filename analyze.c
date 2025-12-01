@@ -104,7 +104,7 @@ port_hash(const struct addr *src, const struct addr *dst)
 	return ((uint32_t)(longhash1(((uint64_t)a << 32) | b)));
 }
 
-void
+static void
 port_key_extract(struct keycount *keycount, void **pkey, size_t *pkeylen)
 {
 	if ((*pkey = calloc(1, sizeof(uint16_t))) == NULL)
@@ -116,7 +116,7 @@ port_key_extract(struct keycount *keycount, void **pkey, size_t *pkeylen)
 	*pkeylen = sizeof(uint16_t);
 }
 
-char *
+static char *
 port_key_print(void *key, size_t keylen)
 {
 	static char sport[7];
@@ -124,7 +124,7 @@ port_key_print(void *key, size_t keylen)
 	return (sport);
 }
 
-void
+static void
 spammer_key_extract(struct keycount *keycount, void **pkey, size_t *pkeylen)
 {
 	if ((*pkey = calloc(1, keycount->keylen)) == NULL)
@@ -136,7 +136,7 @@ spammer_key_extract(struct keycount *keycount, void **pkey, size_t *pkeylen)
 	*pkeylen = keycount->keylen;
 }
 
-char *
+static char *
 spammer_key_print(void *key, size_t keylen)
 {
 	struct addr addr;
@@ -144,7 +144,7 @@ spammer_key_print(void *key, size_t keylen)
 	return (addr_ntoa(&addr));
 }
 
-void
+static void
 country_key_extract(struct keycount *keycount, void **pkey, size_t *pkeylen)
 {
 	if ((*pkey = calloc(1, keycount->keylen)) == NULL)
@@ -156,7 +156,7 @@ country_key_extract(struct keycount *keycount, void **pkey, size_t *pkeylen)
 	*pkeylen = keycount->keylen;
 }
 
-char *
+static char *
 country_key_print(void *key, size_t keylen)
 {
 	return (key);
@@ -182,7 +182,7 @@ aux_compare(struct auxkey *a, struct auxkey *b)
 SPLAY_PROTOTYPE(auxtree, auxkey, node, aux_compare);
 SPLAY_GENERATE(auxtree, auxkey, node, aux_compare);
 
-void *
+static void *
 aux_create(void)
 {
 	struct aux *aux;
@@ -199,7 +199,7 @@ aux_create(void)
 	return (aux);
 }
 
-void
+static void
 aux_free(void *arg)
 {
 	struct aux *aux = arg;
@@ -215,7 +215,7 @@ aux_free(void *arg)
 
 /* Returns one if the key is new */
 
-int
+static int
 aux_enter(struct aux *aux, uint32_t value)
 {
 	struct auxtree *tree = &aux->tree;
@@ -255,7 +255,7 @@ aux_enter(struct aux *aux, uint32_t value)
 	return (1);
 }
 
-void
+static void
 os_key_extract(struct keycount *keycount, void **pkey, size_t *pkeylen)
 {
 	const char *key = keycount->key;
@@ -268,7 +268,7 @@ os_key_extract(struct keycount *keycount, void **pkey, size_t *pkeylen)
 	*pkeylen = strlen(key) + 1;
 }
 
-char *
+static char *
 os_key_print(void *key, size_t keylen)
 {
 	return (key);
@@ -361,7 +361,7 @@ struct country_state {
 	int result_from_cache;
 };
 
-void
+static void
 analyze_country_enter_cb(int result, char type, int count, int ttl,
     void *addresses, void *arg)
 {
@@ -511,7 +511,7 @@ analyze_port_enter(uint16_t port,
 		count_increment(key->count, 1);
 }
 
-void
+static void
 report_to_file(struct reporttree *tree, char *filename,
     char *(*print)(void *, size_t))
 {
@@ -638,7 +638,7 @@ struct filterarg {
 	struct reporttree *dst;
 };
 
-void
+static void
 analyze_filter_cb(void *reparg, void *treearg)
 {
 	struct report *report = reparg;
@@ -651,7 +651,7 @@ analyze_filter_cb(void *reparg, void *treearg)
 	SPLAY_INSERT(reporttree, fa->dst, report);
 }
 
-void
+static void
 analyze_print_port_report(void)
 {
 	struct reporttree *tree, *filtered_tree;
@@ -704,7 +704,7 @@ analyze_print_port_report(void)
 	report_free(filtered_tree);
 }
 
-void
+static void
 analyze_print_spammer_report(void)
 {
 	struct reporttree *tree, *filtered_tree;
@@ -757,7 +757,7 @@ analyze_print_spammer_report(void)
 	report_free(filtered_tree);
 }
 
-void
+static void
 analyze_print_country_report(void)
 {
 	struct reporttree *tree, *filtered_tree;
@@ -829,7 +829,7 @@ analyze_report_cb(int fd, short what, void *unused)
 
 #define OS_NUM_OSES	12
 
-void
+static void
 os_test(void)
 {
 	char *fingerprints[OS_NUM_OSES] = {

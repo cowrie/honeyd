@@ -140,7 +140,7 @@ hmac_init(struct hmac_state *hmac, const char *key)
 	SHA1Update(&hmac->octx, hmac->opad, sizeof(hmac->opad));
 }
 
-void
+static void
 hmac_sign(const struct hmac_state *hmac, u_char *dst, size_t dstlen,
     const void *data, size_t len)
 {
@@ -465,7 +465,7 @@ stats_package_measurement(void)
 	stats_prepare_send(evbuf);
 }
 
-void
+static void
 measurement_marshal(struct evbuffer *evbuf, struct measurement *m)
 {
 	evtag_marshal_int(sc.evbuf_measure, M_COUNTER, m->counter);
@@ -598,7 +598,7 @@ stats_timeout_cb(int fd, short what, void *arg)
 	stats_free(stats);
 }
 
-struct stats *
+static struct stats *
 stats_new(const struct tuple *conhdr)
 {
 	struct stats *stats;
@@ -876,7 +876,7 @@ stats_init(void)
 	stats_measure_timeout();
 }
 
-void
+static void
 stats_hmac_test(void)
 {
 	u_char digest[SHA1_DIGESTSIZE];
@@ -902,7 +902,7 @@ stats_hmac_test(void)
 	fprintf(stderr, "\t%s: OK\n", __func__);
 }
 
-void
+static void
 stats_compress_test(void)
 {
 	u_char something[1024];
