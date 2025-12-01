@@ -105,7 +105,7 @@ static int  _unicast(struct template *,
 static void _dhcp_timeout_cb(int, short, void *);
 static void _dhcp_renew_timeout_cb(int, short, void *);
 static void _dhcp_reply(struct template *, u_char *, size_t);
-static struct template * _dhcp_dequeue();
+static struct template * _dhcp_dequeue(void);
 int 		 _dhcp_getconf(struct template *);
 
 //DHCP Queue type definitions
@@ -164,7 +164,7 @@ queue_dhcp_discover(struct template *tmpl)
 	dhcp_queue->m_rear = nextQueueNode;
 }
 
-struct template *_dhcp_dequeue()
+struct template *_dhcp_dequeue(void)
 {
 	if(dhcp_queue == NULL)
 	{
@@ -185,7 +185,7 @@ struct template *_dhcp_dequeue()
 }
 
 void
-dhcp_send_discover()
+dhcp_send_discover(void)
 {
 	//This will start the chain of discoveries. We only need to start it
 	//	out with the front of the queue if this is the first run

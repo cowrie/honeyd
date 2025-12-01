@@ -163,7 +163,7 @@ SPLAY_PROTOTYPE(timeupdatetree, timeseries, update_node, timeupdate_compare);
 SPLAY_GENERATE(timeupdatetree, timeseries, update_node, timeupdate_compare);
 
 void
-timeseries_init()
+timeseries_init(void)
 {
 	SPLAY_INIT(&timeviews);
 	SPLAY_INIT(&timeupdates);

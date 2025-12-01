@@ -209,5 +209,5 @@ include		{ BEGIN(incl); }
 .        { yyerror("illegal token"); }
 %%
 #ifndef hydwrap
-int hydwrap() { return 1; }
+int hydwrap(void) { return 1; }
 #endif
