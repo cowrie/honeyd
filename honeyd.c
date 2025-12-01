@@ -222,7 +222,7 @@ static struct option honeyd_long_opts[] = {
 	{0, 0, 0, 0}
 };
 
-void
+static void
 usage(void)
 {
 	fprintf(stderr,
@@ -261,7 +261,7 @@ usage(void)
 }
 
 /* XXX ches debug */
-void
+static void
 print_spoof(char *msg, struct spoof s) {
 	char buf2[100], buf3[100];
 
@@ -283,7 +283,7 @@ print_spoof(char *msg, struct spoof s) {
  * 		tcp    : TCP header of the initial packet
  * 		local  : source of this connection, INITIATED_BY_EXTERNAL or INITIATED_BY_SUBSYSTEM
  */
-void
+static void
 honeyd_settcp(struct tcp_con *con, const struct interface *iface, const struct ip_hdr *ip, const struct tcp_hdr *tcp,
     int local)
 {
@@ -309,7 +309,7 @@ honeyd_settcp(struct tcp_con *con, const struct interface *iface, const struct i
  * 		tcp    : TCP header of the initial packet
  * 		local  : source of this connection, INITIATED_BY_EXTERNAL or INITIATED_BY_SUBSYSTEM
  */
-void
+static void
 honeyd_setudp(struct udp_con *con, const struct ip_hdr *ip, const struct udp_hdr *udp,
     int local)
 {
@@ -385,7 +385,7 @@ syslog_init(int argc, char *argv[])
  * Update traffic statistics for honeyd.
  */
 
-void
+static void
 honeyd_rrd_cb(int fd, short what, void *unused)
 {
 	static int count;
@@ -430,7 +430,7 @@ honeyd_rrd_cb(int fd, short what, void *unused)
 	}
 }
 
-void
+static void
 honeyd_rrd_start(const char *rrdtool_path)
 {
 	/* Initialize our traffic stats for rrdtool */
@@ -466,7 +466,7 @@ honeyd_rrd_start(const char *rrdtool_path)
  * Initializes data structures pertaining to the daemon
  */
 
-void
+static void
 honeyd_init(void)
 {
 	struct rlimit rl;
@@ -607,7 +607,7 @@ honeyd_is_webserver_enabled(void)
 }
 #endif
 
-void
+static void
 honeyd_exit(int status)
 {
 	honeyd_logend(honeyd_logfp);
@@ -631,7 +631,7 @@ honeyd_exit(int status)
 }
 
 /* Encapsulate a packet into Ethernet */
-void
+static void
 honeyd_ether_send_cb(struct arp_req *req, int success, void *arg)
 {
 
@@ -680,7 +680,7 @@ honeyd_ether_send_cb(struct arp_req *req, int success, void *arg)
  * Delivers an IP packet to a specific interface.
  * Generates ARP request if necessary.
  */
-void
+static void
 honeyd_send_ethernet(struct interface *inter,
     struct addr *src_pa, struct addr *src_ha,
     struct addr *dst_pa, struct ip_hdr *ip, u_int iplen)
@@ -719,7 +719,7 @@ honeyd_send_ethernet(struct interface *inter,
  * memory or just make our own copy.
  */
 
-struct ip_hdr *
+static struct ip_hdr *
 honeyd_delay_own_memory(struct delay *delay, struct ip_hdr *ip, u_int iplen)
 {
 	/* If we are not supposed to free the buffer then we do not own it */
@@ -900,7 +900,7 @@ honeyd_delay_cb(int fd, short which, void *arg)
  * Host is used for the router that might generate a XCEED message.
  */
 
-void
+static void
 honeyd_delay_packet(struct template *tmpl, const struct interface* iface, struct ip_hdr *ip, u_int iplen,
     const struct addr *src, const struct addr *dst, int ms, int flags,
     struct spoof spoof)
@@ -1066,7 +1066,7 @@ connection_update(struct conlru *head, struct tuple *hdr)
 
 /* Transforms the second variable into an absolute path, unless it is already one */
 
-void
+static void
 determine_path(char *abspath, char **input)
 {
 	char *buffer = NULL;
@@ -1277,7 +1277,7 @@ honeyd_protocol(struct template *tmpl, int proto)
 }
 
 /* Specifies if we should drop the packet or not */
-int
+static int
 honeyd_block(struct template *tmpl, int proto, int number)
 {
 	struct port *port;
@@ -1295,7 +1295,7 @@ honeyd_block(struct template *tmpl, int proto, int number)
 	return (action->status == PORT_FILTERED);
 }
 
-void
+static void
 honeyd_varexpand(struct tcp_con *con, char *line, u_int linesize)
 {
 	char asc[32], *p;
@@ -1327,7 +1327,7 @@ honeyd_varexpand(struct tcp_con *con, char *line, u_int linesize)
  * at the default template of connections.
  */
 
-struct action *
+static struct action *
 honeyd_port(struct template *tmpl, int proto, u_short number)
 {
 	struct port *port;
@@ -1350,7 +1350,7 @@ honeyd_port(struct template *tmpl, int proto, u_short number)
  * generate correct address information.
  */
 
-int
+static int
 proxy_connect(struct tuple *hdr, struct command *cmd, struct addrinfo *ai,
     char *line, void *arg)
 {
@@ -1420,7 +1420,7 @@ tcp_setupconnect(struct tcp_con *con)
 	return (-1);
 }
 
-void
+static void
 generic_connect(struct template *tmpl, struct tuple *hdr,
     struct command *cmd, void *con)
 {
@@ -1739,7 +1739,7 @@ tcp_sendfin(struct tcp_con *con)
 	}
 }
 
-void
+static void
 icmp_send(struct template *tmpl,
     u_char *pkt, uint8_t tos, u_int iplen, uint16_t df, uint8_t ttl,
     int proto, ip_addr_t src, ip_addr_t dst, struct spoof spoof)
@@ -1997,7 +1997,7 @@ icmp_info_reply(struct template *tmpl, struct ip_hdr *rip,
 	    IP_PROTO_ICMP, rip->ip_dst, rip->ip_src, spoof);
 }
 
-void
+static void
 tcp_do_options(struct tcp_con *con, struct tcp_hdr *tcp, int isonsyn)
 {
 	u_char *p, *end;
@@ -2126,7 +2126,7 @@ generic_timeout(struct event *ev, int seconds)
 		} \
 } while (0)
 
-void
+static void
 tcp_recv_cb(struct template *tmpl, const struct interface* iface, u_char *pkt, u_short pktlen)
 {
 	char *comment = NULL;
@@ -2568,7 +2568,7 @@ struct packet_wrapper {
 	u_char unicast;
 };
 
-int
+static int
 handle_udp_packet(struct template *tmpl, void *wrapper)
 {
 	u_char *pkt;
@@ -2737,7 +2737,7 @@ handle_udp_packet(struct template *tmpl, void *wrapper)
 }
 
 
-void
+static void
 udp_recv_cb(struct template *tmpl, const struct interface* iface, u_char *pkt, u_short pktlen)
 {
 	struct ip_hdr *ip = NULL;
@@ -2762,7 +2762,7 @@ udp_recv_cb(struct template *tmpl, const struct interface* iface, u_char *pkt, u
 	}
 }
 
-void
+static void
 icmp_recv_cb(struct template *tmpl, u_char *pkt, u_short pktlen)
 {
 	struct ip_hdr *ip = NULL;
@@ -3454,7 +3454,7 @@ honeyd_recv_cb(u_char *ag, const struct pcap_pkthdr *pkthdr, const u_char *pkt)
 	honeyd_input(inter, ip, iplen);
 }
 
-void
+static void
 honeyd_sigchld(int fd, short what, void *arg)
 {
 	pid_t pid;
@@ -3466,7 +3466,7 @@ honeyd_sigchld(int fd, short what, void *arg)
 	}
 }
 
-void
+static void
 honeyd_signal(int fd, short what, void *arg)
 {
 	syslog(LOG_NOTICE, "exiting on signal %d", fd);
@@ -3487,7 +3487,7 @@ honeyd_signal(int fd, short what, void *arg)
 	honeyd_exit(0);
 }
 
-void
+static void
 honeyd_sighup(int fd, short what, void *arg)
 {
 	syslog(LOG_NOTICE, "rereading configuration on signal %d", fd);
@@ -3498,7 +3498,7 @@ honeyd_sighup(int fd, short what, void *arg)
 		config_read(config.config);
 }
 
-void
+static void
 honeyd_sigusr(int fd, short what, void *arg)
 {
 	syslog(LOG_NOTICE, "rotating log files on signal %d", fd);
@@ -3528,7 +3528,7 @@ struct _unittest {
 	{ NULL, NULL}
 };
 
-void
+static void
 unittest(void)
 {
 	struct _unittest *ut;
