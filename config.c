@@ -96,7 +96,7 @@ templ_compare(struct template *a, struct template *b)
 
 SPLAY_GENERATE(templtree, template, node, templ_compare);
 
-int
+static int
 port_compare(struct port *a, struct port *b)
 {
 	int diff;
@@ -231,7 +231,7 @@ template_list_glob(struct evbuffer *buffer, const char *pattern)
  * Return the first template that we match.
  */
 
-struct template *
+static struct template *
 template_dynamic(const struct template *tmpl, const struct ip_hdr *ip,
     u_short iplen)
 {
@@ -668,7 +668,7 @@ template_add(struct template *tmpl, int proto, int number,
 	return (port_insert(tmpl, proto, number, action) == NULL ? -1 : 0);
 }
 
-void
+static void
 template_insert_subsystem(struct template *tmpl, struct subsystem *sub)
 {
 	struct subsystem_container *container;
@@ -685,7 +685,7 @@ template_insert_subsystem(struct template *tmpl, struct subsystem *sub)
 
 /* This function is slow, but should only called on SIGHUP */
 
-void
+static void
 template_remove_subsystem(struct template *tmpl, struct subsystem *sub)
 {
 	struct subsystem_container *container;
@@ -919,7 +919,7 @@ template_subsystem_free_ports(struct subsystem *sub)
 	}
 }
 
-struct subsystem *
+static struct subsystem *
 template_subsystem_find(const char *name)
 {
 	struct subsystem *sub;
@@ -1174,7 +1174,7 @@ template_print(struct evbuffer *buffer, struct template *tmpl)
  * Everything is unittest related below this
  ***************************************************************************/
 
-void
+static void
 template_delay_cb(int fd, short which, void *arg)
 {
 	extern struct pool *pool_pkt;
@@ -1210,7 +1210,7 @@ template_delay_cb(int fd, short which, void *arg)
 		pool_free(pool_delay, delay);
 }
 
-void
+static void
 template_test_parse_error(char *line, struct evbuffer *evbuf)
 {
 	char *p = (char*)evbuffer_pullup(evbuf, -1);
@@ -1226,7 +1226,7 @@ template_test_parse_error(char *line, struct evbuffer *evbuf)
 		template_test_parse_error(p, evbuf); \
 } while (0)
 	
-int
+static int
 template_test_add(struct evbuffer *evbuf, struct addr *addr, int count)
 {
 	char line[128];
@@ -1244,7 +1244,7 @@ template_test_add(struct evbuffer *evbuf, struct addr *addr, int count)
 	return (count);
 }
 
-void
+static void
 template_test_measure(int count)
 {
 	extern void
@@ -1295,7 +1295,7 @@ template_test_measure(int count)
 	    count, msperpkt);
 }
 
-void
+static void
 template_packet_test(void)
 {
 	extern void (*honeyd_delay_callback)(int, short, void *);

@@ -63,7 +63,7 @@
 /* Structure for routers */
 static SPLAY_HEAD(routetree, router) routers;
 
-int
+static int
 routercompare(struct router *a, struct router *b)
 {
 	return (addr_cmp(&a->addr, &b->addr));
@@ -74,7 +74,7 @@ SPLAY_GENERATE(routetree, router, node, routercompare);
 
 /* Structure for links */
 
-int
+static int
 linkcompare(struct link_entry *a, struct link_entry *b)
 {
 	return (addr_cmp(&a->dst, &b->dst));
@@ -87,7 +87,7 @@ SPLAY_GENERATE(linktree, link_entry, node, linkcompare);
 
 static SPLAY_HEAD(tunneltree, router_entry) tunnels;
 
-int
+static int
 tunnelcompare(struct router_entry *a, struct router_entry *b)
 {
 	int res;
@@ -262,7 +262,7 @@ network_addnode(struct network **root, struct network *new,
 /*
  * Add a route to the structure.  a and mask must be in host byte order.
  */
-void
+static void
 network_add(struct network **root, struct addr *addr, void *data)
 {
 	struct network *netqueue = NULL;
@@ -312,7 +312,7 @@ network_lookup(struct network *root, struct addr *addr)
 	return (last != NULL ? last->data : NULL);
 }
 
-void
+static void
 network_cleanup(struct network *net, int needfree)
 {
 	if (net->mid != NULL)
@@ -466,7 +466,7 @@ link_entry_new(struct addr *dst)
 	return (link);
 }
 
-struct router_entry *
+static struct router_entry *
 router_entry_new(struct addr *net, struct router *parent,
     struct router *gw, enum route_type type)
 {

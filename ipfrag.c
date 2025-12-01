@@ -75,7 +75,7 @@ SPLAY_HEAD(fragtree, fragment) fragments;
 	if ((a) > (b)) return 1; \
 } while (0)
 
-int
+static int
 fragcompare(struct fragment *a, struct fragment *b)
 {
 	DIFF(a->ip_src, b->ip_src);
@@ -105,7 +105,7 @@ ip_fragment_init(void)
 	nfragmem = 0;
 }
 
-struct fragment *
+static struct fragment *
 ip_fragment_find(ip_addr_t src, ip_addr_t dst, u_short id, u_char proto)
 {
 	struct fragment tmp, *frag;
@@ -126,7 +126,7 @@ ip_fragment_find(ip_addr_t src, ip_addr_t dst, u_short id, u_char proto)
 }
 
 /* Free a fragment by removing it from all lists, etc... */
-void
+static void
 ip_fragent_free(struct fragent *ent)
 {
 	nfragmem -= ent->size;
@@ -135,7 +135,7 @@ ip_fragent_free(struct fragent *ent)
 	free(ent);
 }
 
-void
+static void
 ip_fragment_free(struct fragment *tmp)
 {
 	struct fragent *ent;
@@ -155,7 +155,7 @@ ip_fragment_free(struct fragment *tmp)
 	free(tmp);
 }
 
-void
+static void
 ip_fragment_timeout(int fd, short which, void *arg)
 {
 	struct fragment *tmp = arg;
@@ -169,7 +169,7 @@ ip_fragment_timeout(int fd, short which, void *arg)
 	ip_fragment_free(tmp);
 }
 
-void
+static void
 ip_fragment_reclaim(int count)
 {
 	struct fragment *tmp;
@@ -180,7 +180,7 @@ ip_fragment_reclaim(int count)
 	}
 }
 
-struct fragment *
+static struct fragment *
 ip_fragment_new(ip_addr_t src, ip_addr_t dst, u_short id, u_char proto,
     enum fragpolicy pl)
 {
@@ -219,7 +219,7 @@ ip_fragment_new(ip_addr_t src, ip_addr_t dst, u_short id, u_char proto,
 	return (tmp);
 }
 
-int
+static int
 ip_fragment_insert(struct fragment *fragq, struct fragent *ent, short mf)
 {
 	struct fragent *prev, *after;
