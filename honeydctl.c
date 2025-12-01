@@ -98,7 +98,7 @@ char Buffer[LINELEN];
 #define CTLNAME		"honeydctl"
 #define HONEYD_SOCK	"/var/run/honeyd.sock"
 
-int
+static int
 usage(void)
 {
     fprintf(stderr,
@@ -111,7 +111,7 @@ usage(void)
 
 int TimedOut = 0;
 
-void
+static void
 Timeout(int Sig)
 {
     TimedOut = 1;
@@ -133,7 +133,7 @@ getprompt(EditLine *e)
 }
 #endif
 
-int
+static int
 receive(int fd, int display)
 {
     int Result;

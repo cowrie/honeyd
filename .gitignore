@@ -188,3 +188,5 @@ env/
 # direnv
 /.envrc
 /.direnv/
+
+CMakeCache.txt
