@@ -100,7 +100,7 @@ struct pyextend {
 
 SPLAY_HEAD(pyetree, pyextend) pyextends;
 
-int
+static int
 pye_compare(struct pyextend *a, struct pyextend *b)
 {
 	return (strcmp(a->name, b->name));
@@ -242,7 +242,7 @@ pyextend_status_connections(PyObject *self, PyObject *args)
  * Returns 1 if the template name corresponds to an IP address
  */
 
-int
+static int
 pyextend_is_ipaddress(struct template *tmpl)
 {
 	ip_addr_t addr;
@@ -250,7 +250,7 @@ pyextend_is_ipaddress(struct template *tmpl)
 	return (ip_pton(tmpl->name, &addr) != -1);
 }
 
-int
+static int
 pyextend_count_ips(struct template *tmpl, void *arg)
 {
 	int *num_ips = arg;
@@ -263,7 +263,7 @@ pyextend_count_ips(struct template *tmpl, void *arg)
 	return (0);
 }
 
-void
+static void
 pyextend_humanreadable_action(struct action *action, char *buffer, size_t len)
 {
 	char *flags = NULL;
@@ -320,7 +320,7 @@ pyextend_humanreadable_action(struct action *action, char *buffer, size_t len)
 	}
 }
 
-int
+static int
 pyextend_populate_ips(struct template *tmpl, void *arg)
 {
 	struct pyextend_count *count = arg;
@@ -1141,7 +1141,7 @@ static struct event ev_accept;
 
 void pyextend_request_free(struct pyextend_request *);
 
-void
+static void
 pyextend_evb_readcb(struct bufferevent *bev, void *parameter)
 {
 	struct pyextend_request *req = parameter;
@@ -1195,7 +1195,7 @@ pyextend_evb_readcb(struct bufferevent *bev, void *parameter)
 	pyextend_request_free(req);
 }
 
-void
+static void
 pyextend_evb_writecb(struct bufferevent *bev, void *parameter)
 {
 	/* 
@@ -1206,7 +1206,7 @@ pyextend_evb_writecb(struct bufferevent *bev, void *parameter)
 	pyextend_request_free(req);
 }
 
-void
+static void
 pyextend_evb_errcb(struct bufferevent *bev, short what, void *parameter)
 {
 	struct pyextend_request *req = parameter;
@@ -1225,7 +1225,7 @@ pyextend_request_free(struct pyextend_request *req)
 
 /* Creates a request object that can be used for streaming data */
 
-struct pyextend_request *
+static struct pyextend_request *
 pyextend_request_new(int fd, struct addr *src)
 {
 	struct pyextend_request *req = NULL;
@@ -1250,7 +1250,7 @@ pyextend_request_new(int fd, struct addr *src)
 	return (req);
 }
 
-void
+static void
 pyextend_accept(int fd, short what, void *arg)
 {
 	struct sockaddr_storage ss;

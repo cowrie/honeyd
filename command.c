@@ -213,7 +213,7 @@ cmd_proxy_connect(struct tuple *hdr, struct command *cmd, struct addrinfo *ai,
 	return (0);
 }
 
-void
+static void
 cmd_environment(struct template *tmpl, struct tuple *hdr)
 {
 	char line[256];
@@ -337,7 +337,7 @@ cmd_droppriv(uid_t uid, gid_t gid)
  exit(EXIT_FAILURE);
 }
 
-int
+static int
 cmd_setpriv(struct template *tmpl)
 {
 	extern uid_t honeyd_uid;

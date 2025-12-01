@@ -85,7 +85,7 @@
   ((float)(x)->tv_sec + (float)(x)->tv_usec / (float)1000000L)
 	
 
-PyObject* PyConvertRecord(struct record *record)
+static PyObject* PyConvertRecord(struct record *record)
 {
 	PyObject *pValue = NULL;
 	pValue = Py_BuildValue("{sfsfssssshshsbsbsisi}",
@@ -169,7 +169,7 @@ static unsigned char record_data[] = {
 0x72, 0x30, 0x06, 0x02, 0x11, 0x10, 0x07, 0x01,   0x01, 0x0a, 0x02, 0x1a, 0x80, 0x0b, 0x01, 0x01,    // 0x00d0  r0......  ........
 };
 
-void
+static void
 pyrecord_test(void)
 {
 	char *some_code =
@@ -227,7 +227,7 @@ pyrecord_test(void)
 	fprintf(stderr, "\t%s: OK\n", __func__);
 }
 
-void
+static void
 pydatahoneyd_test(void)
 {
 	if (!Py_IsInitialized())

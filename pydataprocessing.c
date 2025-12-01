@@ -68,7 +68,7 @@
 
 #include "pydataprocessing.h"
 
-int
+static int
 mkv_compare(struct MergedKeyValue *a, struct MergedKeyValue *b)
 {
 	if (a->keylen < b->keylen)
@@ -81,7 +81,7 @@ mkv_compare(struct MergedKeyValue *a, struct MergedKeyValue *b)
 SPLAY_PROTOTYPE(mkvtree, MergedKeyValue, node, mkv_compare);
 SPLAY_GENERATE(mkvtree, MergedKeyValue, node, mkv_compare);
 
-struct MergedKeyValue *
+static struct MergedKeyValue *
 MergedKeyValueNew(struct mkvtree *tree, u_char *key, size_t keylen)
 {
 	struct MergedKeyValue *mkv, tmp;
@@ -112,7 +112,7 @@ MergedKeyValueNew(struct mkvtree *tree, u_char *key, size_t keylen)
 	return (mkv);
 }
 
-void
+static void
 MergedKeyValueFree(struct mkvtree *tree, struct MergedKeyValue *mkv)
 {
 	struct SingleValue *sv;
@@ -128,7 +128,7 @@ MergedKeyValueFree(struct mkvtree *tree, struct MergedKeyValue *mkv)
 	free(mkv);
 }
 
-int
+static int
 MergedKeyValueInsert(struct mkvtree *tree,
     u_char *key, size_t keylen, u_char *value, size_t vallen)
 {
@@ -293,7 +293,7 @@ PyFilterFromCode(char *code)
 	return (NULL);
 }
 
-PyObject *
+static PyObject *
 PyUnmarshalString(char *input, size_t len)
 {
 	PyObject *record = PyMarshal_ReadObjectFromString(input, len);
@@ -370,7 +370,7 @@ PyFilterRun(struct PyFilter *filter, PyObject *record)
  * Everything is unittest related below this
  ***************************************************************************/
 
-void
+static void
 pyfilter_test(void)
 {
 	char *some_code =
