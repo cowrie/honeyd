@@ -182,19 +182,19 @@ record_unmarshal(struct record *record, struct evbuffer *evbuf)
 			break;
 
 		case REC_HASH: {
-			struct hash *tmp;
+			struct hash *hash_entry;
 
-			if ((tmp = calloc(1, sizeof(struct hash))) == NULL)
+			if ((hash_entry = calloc(1, sizeof(struct hash))) == NULL)
 			{
 				syslog(LOG_ERR, "%s: calloc", __func__);
 				exit(EXIT_FAILURE);
 			}
-			if (evtag_unmarshal_fixed(evbuf, REC_HASH, tmp->digest,
-				sizeof(tmp->digest)) == -1) {
-				free(tmp);
+			if (evtag_unmarshal_fixed(evbuf, REC_HASH, hash_entry->digest,
+				sizeof(hash_entry->digest)) == -1) {
+				free(hash_entry);
 				goto error;
 			}
-			TAILQ_INSERT_TAIL(&record->hashes, tmp, next);
+			TAILQ_INSERT_TAIL(&record->hashes, hash_entry, next);
 		}
 			break;
 		case REC_BYTES:

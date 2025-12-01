@@ -3248,14 +3248,14 @@ honeyd_route_packet(struct ip_hdr *ip, u_int iplen,
 	}
 
 	if (!external) {
-		struct template *tmpl;
+		struct template *drop_tmpl;
 
 		/* Check if a template specific drop rate applies */
-		tmpl = template_find_best(addr_ntoa(addr), ip, iplen);
-		if (tmpl != NULL && tmpl->drop_inrate) {
+		drop_tmpl = template_find_best(addr_ntoa(addr), ip, iplen);
+		if (drop_tmpl != NULL && drop_tmpl->drop_inrate) {
 			uint16_t value;
 			value = rand_uint16(honeyd_rand) % (100*100);
-			if (value < tmpl->drop_inrate)
+			if (value < drop_tmpl->drop_inrate)
 				return (FW_DROP);
 		}
 	}
@@ -3964,12 +3964,12 @@ main(int argc, char *argv[])
 	// Clear/create the IP list file if we're using it
 	if (templateDump != NULL)
 	{
-		FILE *fp;
-		if ((fp = fopen(templateDump , "w+")) == NULL)
+		FILE *dump_fp;
+		if ((dump_fp = fopen(templateDump , "w+")) == NULL)
 			syslog(LOG_WARNING, "Error opening the DHCP IP address dump file");
 			//warn("Error opening the DHCP IP address dump file");
 		else
-			fclose(fp);
+			fclose(dump_fp);
 	}
 
 #ifdef HAVE_PYTHON

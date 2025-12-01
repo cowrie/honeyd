@@ -71,22 +71,22 @@ cmd_udp_eread(int fd, short which, void *arg)
 {
 	extern FILE *honeyd_servicefp;
 	struct udp_con *con = arg;
-	char line[1024];
+	char errbuf[1024];
 	int nread;
 	struct command *cmd = &con->cmd;
 
-	TRACE(fd, nread = read(fd, line, sizeof(line)));
+	TRACE(fd, nread = read(fd, errbuf, sizeof(errbuf)));
 
 	if (nread <= 0) {
 		udp_free(con);
 		return;
 	}
 
-	if (nread == sizeof(line))
+	if (nread == sizeof(errbuf))
 		nread--;
-	line[nread] = '\0';
-	
-	honeyd_log_service(honeyd_servicefp, IP_PROTO_UDP, &con->conhdr, line);
+	errbuf[nread] = '\0';
+
+	honeyd_log_service(honeyd_servicefp, IP_PROTO_UDP, &con->conhdr, errbuf);
 
 	event_add(cmd->peread, NULL);
 }

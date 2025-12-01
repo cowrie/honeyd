@@ -541,13 +541,13 @@ main(int argc, char *argv[])
 			hsniff_useudp = 1;
 			break;
 		case 'c': {
-			char line[1024], *p = line;
+			char optline[1024], *p = optline;
 			char *address;
 			char *strport;
 			char *name;
 			char *password;
 
-			strlcpy(line, optarg, sizeof(line));
+			strlcpy(optline, optarg, sizeof(optline));
 
 			if ((address = strsep(&p, ":")) == NULL)
 				usage();

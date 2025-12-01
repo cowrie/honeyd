@@ -141,17 +141,17 @@ cmd_tcp_eread(int fd, short which, void *arg)
 {
 	extern FILE *honeyd_servicefp;
 	struct tcp_con *con = arg;
-	char line[1024];
+	char errbuf[1024];
 	int nread;
 	struct command *cmd = &con->cmd;
 
-	TRACE(fd, nread = read(fd, line, sizeof(line)));
+	TRACE(fd, nread = read(fd, errbuf, sizeof(errbuf)));
 
 	if (nread <= 0) {
 		if (cmd->fdwantclose) {
 			/* Stdin is already closed */
 			cmd_free(&con->cmd);
-			
+
 			tcp_sendfin(con);
 		} else {
 			/* Now stdin will takes us down */
@@ -160,11 +160,11 @@ cmd_tcp_eread(int fd, short which, void *arg)
 		return;
 	}
 
-	if (nread == sizeof(line))
+	if (nread == sizeof(errbuf))
 		nread--;
-	line[nread] = '\0';
-	
-	honeyd_log_service(honeyd_servicefp, IP_PROTO_TCP, &con->conhdr, line);
+	errbuf[nread] = '\0';
+
+	honeyd_log_service(honeyd_servicefp, IP_PROTO_TCP, &con->conhdr, errbuf);
 
 	TRACE(event_get_fd(cmd->peread), event_add(cmd->peread, NULL));
 }

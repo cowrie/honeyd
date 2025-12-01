@@ -79,19 +79,19 @@ SPLAY_PROTOTYPE(ethertree, etherindex, node, compare);
 SPLAY_GENERATE(ethertree, etherindex, node, compare);
 
 static int
-ethernetcode_index(struct ethertree *etherroot, struct ethernetcode *code)
+ethernetcode_index(struct ethertree *tree, struct ethernetcode *ecode)
 {
-	struct etherindex tmp, *entry;
+	struct etherindex ei_tmp, *entry;
 	char line[1024], *p, *e;
 
 
-	strlcpy(line, code->vendor, sizeof(line));
+	strlcpy(line, ecode->vendor, sizeof(line));
 	e = line;
 
 	/* Walk through every single word and index it */
 	while ((p = strsep(&e, " ")) != NULL) {
-		tmp.index_word = p;
-		if ((entry = SPLAY_FIND(ethertree, etherroot, &tmp)) == NULL) {
+		ei_tmp.index_word = p;
+		if ((entry = SPLAY_FIND(ethertree, tree, &ei_tmp)) == NULL) {
 			/* Generate a new entry for this word */
 			entry = calloc(1, sizeof(struct etherindex));
 			if (entry == NULL)
@@ -114,25 +114,25 @@ ethernetcode_index(struct ethertree *etherroot, struct ethernetcode *code)
 				exit(EXIT_FAILURE);
 			}
 
-			SPLAY_INSERT(ethertree, etherroot, entry);
+			SPLAY_INSERT(ethertree, tree, entry);
 		}
 
 		if (entry->list_size >= entry->list_mem) {
-			struct ethernetcode **tmp;
+			struct ethernetcode **new_list;
 
 			/* We require more memory for this key word */
 			entry->list_mem <<= 1;
-			tmp = realloc(entry->list,
+			new_list = realloc(entry->list,
 					entry->list_mem * sizeof(struct ethernetcode *));
-			if (tmp == NULL)
+			if (new_list == NULL)
 			{
 				syslog(LOG_ERR, "%s: realloc", __func__);
 				exit(EXIT_FAILURE);
 			}
-			entry->list = tmp;
+			entry->list = new_list;
 		}
 
-		entry->list[entry->list_size++] = code;
+		entry->list[entry->list_size++] = ecode;
 	}
 
 	return (0);
