@@ -88,7 +88,7 @@
 #cmakedefine HAVE_LIBREADLINE
 
 /* Define to 1 if you have the 'z' library (-lz). */
-#undef HAVE_LIBZ
+#cmakedefine HAVE_LIBZ
 
 /* Define to 1 if you have the 'memmove' function. */
 #cmakedefine HAVE_MEMMOVE
@@ -109,7 +109,7 @@
 #undef HAVE_PYDNET
 
 /* Define if we want to link with Python support */
-#undef HAVE_PYTHON
+#cmakedefine HAVE_PYTHON
 
 /* Define to 1 if you have the 'recvmsg' function. */
 #cmakedefine HAVE_RECVMSG
@@ -211,7 +211,7 @@
 #cmakedefine HAVE_SYS_TYPES_H
 
 /* Define to 1 if you have <sys/wait.h> that is POSIX.1 compatible. */
-#undef HAVE_SYS_WAIT_H
+#cmakedefine HAVE_SYS_WAIT_H
 
 /* Define if timeradd is define in <sys/time.h> */
 #cmakedefine HAVE_TIMERADD
