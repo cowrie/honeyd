@@ -989,9 +989,11 @@ fcntl(int fd, int cmd, ...)
 		case F_SETLK:
 		case F_SETLKW:
 			flock = va_arg(ap, struct flock *);
+			va_end(ap);
 			return (*libc_fcntl)(fd, cmd, flock);
 		default:
 			argument = va_arg(ap, int);
+			va_end(ap);
 			return (*libc_fcntl)(fd, cmd, argument);
 		}
 
