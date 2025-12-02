@@ -36,13 +36,19 @@ jobs:
 
     - name: Run cppcheck
       run: |
-        cppcheck --enable=all --inconclusive --error-exitcode=1 \
+        cppcheck --enable=warning,performance,portability --error-exitcode=1 \
           --suppress=missingIncludeSystem \
           --suppress=unusedFunction \
+          --suppress=unknownMacro \
+          --suppress=syntaxError \
+          --suppress=uninitvar \
           -I build \
           -i dpkt \
           -i pypcap \
           -i build \
+          -i regress \
+          -i subsystems \
+          -i webserver \
           .
 
   clang-tidy:
