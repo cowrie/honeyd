@@ -71,6 +71,7 @@
 #include "untagging.h"
 #include "stats.h"
 #include "pydataprocessing.h"
+#include "pydatahoneyd.h"
 
 /*
  * Data conversion functions use to interface Honeyd data with the
@@ -227,7 +228,7 @@ pyrecord_test(void)
 	fprintf(stderr, "\t%s: OK\n", __func__);
 }
 
-static void
+void
 pydatahoneyd_test(void)
 {
 	if (!Py_IsInitialized())

@@ -411,6 +411,7 @@ struct port *port_insert(struct template *, int, int, struct action *);
 struct port *port_random(struct template *, int, struct action *, int, int);
 struct port *port_find(struct template *, int, int);
 void port_free(struct template *, struct port *);
+void port_action_clone(struct action *, const struct action *);
 void port_encapsulation_free(struct port_encapsulate *);
 
 void icmp_echo_reply(struct template *, struct ip_hdr *, uint8_t,
