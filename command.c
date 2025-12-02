@@ -162,7 +162,7 @@ cmd_proxy_connect(struct tuple *hdr, struct command *cmd, struct addrinfo *ai,
     void *con)
 {
 	char ntop[NI_MAXHOST], strport[NI_MAXSERV];
-	char *host = ntop, *port = strport;
+	const char *host = ntop, *port = strport;
 	struct callback *cb;
 	struct timeval tv = {10, 0};
         int fd;

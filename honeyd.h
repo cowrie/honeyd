@@ -59,12 +59,12 @@
 extern struct event_base *libevent_base;
 
 struct config {
-	char *config;	 /* Name of configuration file */
-	char *pers;
-	char *xprobe;
-	char *assoc;
-	char *osfp;
-	char *nmapMac;
+	const char *config;	 /* Name of configuration file */
+	const char *pers;
+	const char *xprobe;
+	const char *assoc;
+	const char *osfp;
+	const char *nmapMac;
 };
 
 struct count;

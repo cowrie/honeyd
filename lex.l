@@ -67,14 +67,14 @@ int hyderror(const char *fmt, ...);
 #define yyerror hyderror
 
 extern int lineno;
-extern char *filename;
+extern const char *filename;
 extern int curtype;
 
 #define MAX_INCLUDE_DEPTH 10
 
 YY_BUFFER_STATE includes[MAX_INCLUDE_DEPTH];
 int linenos[MAX_INCLUDE_DEPTH];
-char *filenames[MAX_INCLUDE_DEPTH];
+const char *filenames[MAX_INCLUDE_DEPTH];
 int includes_index = 0;
 
 %}

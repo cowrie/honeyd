@@ -174,7 +174,7 @@ usage(void)
 }
 
 static void
-setup_socket(char *address, int port)
+setup_socket(const char *address, int port)
 {
 	if ((evbuf_recv = evbuffer_new()) == NULL){
 		syslog(LOG_ERR, "%s: evbuffer_new", __func__);
@@ -234,7 +234,7 @@ main(int argc, char *argv[])
 		{0, 0, 0, 0}
 	};
 	char *replay_filename = NULL;
-	char *address = "0.0.0.0";
+	const char *address = "0.0.0.0";
 	char **orig_argv;
 	int orig_argc;
 	int debug = 0;

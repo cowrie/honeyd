@@ -98,7 +98,7 @@ static void dhcp_template(struct template *tmpl,
 
 static struct evbuffer *buffer = NULL;
 int lineno;
-char *filename;
+const char *filename;
 int errors = 0;
 int curtype = -1;	/* Lex sets it to SOCK_STREAM or _DGRAM */
 

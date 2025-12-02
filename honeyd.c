@@ -173,11 +173,11 @@ int					honeyd_disable_webserver = 0;
 int					honeyd_ignore_parse_errors = 0;
 int					honeyd_verify_config = 0;
 int					honeyd_webserver_fix_permissions = 0;
-char				*honeyd_webserver_address = "127.0.0.1";
+const char			*honeyd_webserver_address = "127.0.0.1";
 int					honeyd_webserver_port = 80;
-char				*honeyd_webserver_root = PATH_HONEYDDATA \
+const char			*honeyd_webserver_root = PATH_HONEYDDATA \
 						"/webserver/htdocs";
-char				*honeyd_rrdtool_path = PATH_RRDTOOL;
+const char			*honeyd_rrdtool_path = PATH_RRDTOOL;
 
 /* can be used by unittests to do bad stuff */
 void (*honeyd_delay_callback)(int, short, void *) = honeyd_delay_cb;
@@ -434,7 +434,7 @@ static void
 honeyd_rrd_start(const char *rrdtool_path)
 {
 	/* Initialize our traffic stats for rrdtool */
-	char *honeyd_traffic_filename = "/tmp/honeyd_traffic.rrd";
+	const char *honeyd_traffic_filename = "/tmp/honeyd_traffic.rrd";
 	if ((honeyd_rrd_drv = rrdtool_init(rrdtool_path)) == NULL)
 	{
 		syslog(LOG_ERR, "%s: cannot start rrdtool", __func__);
@@ -2130,7 +2130,7 @@ generic_timeout(struct event *ev, int seconds)
 static void
 tcp_recv_cb(struct template *tmpl, const struct interface* iface, u_char *pkt, u_short pktlen)
 {
-	char *comment = NULL;
+	const char *comment = NULL;
 	struct ip_hdr *ip;
 	struct tcp_hdr *tcp;
 	struct tcp_con *con;
@@ -3514,7 +3514,7 @@ honeyd_sigusr(int fd, short what, void *arg)
 }
 
 struct _unittest {
-	char *name;
+	const char *name;
 	void (*cb)(void);
 } unittests[] = {
 #ifdef HAVE_PYTHON
