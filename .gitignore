@@ -9,8 +9,6 @@
 *.so
 *.swp
 *.guess
-*.h
-*.h.in
 *.sub
 *.status
 *.m4
