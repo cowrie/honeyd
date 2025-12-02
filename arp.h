@@ -33,7 +33,7 @@
 #ifndef _ARP_
 #define _ARP_
 
-#define ARP_REQUEST_SUCESS -1
+#define ARP_REQUEST_SUCESS (-1)
 
 struct arp_req {
 	SPLAY_ENTRY(arp_req)	next_pa;

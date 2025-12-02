@@ -55,9 +55,9 @@ int safe_atoi(const char *str, int *result, const char *context);
 		if(asprintf(&line, "%s:%d: fd %d: %s", \
 		    __FILE__, __LINE__, (x), #y) == -1) \
 			{perror("ERROR: Could not allocate memory for asprintf()\n");} \
-		trace_enter(x, line, 0); \
+		trace_enter((x), line, 0); \
 	} \
-	y; \
+	(y); \
 } while (0)
 
 #define TRACE_RESET(x, y) do { \
@@ -66,9 +66,9 @@ int safe_atoi(const char *str, int *result, const char *context);
 		if(asprintf(&line, "%s:%d: fd %d: %s", \
 		    __FILE__, __LINE__, (x), #y)) \
 			{perror("ERROR: Could not allocate memory for asprintf()\n");}  \
-		trace_enter(x, line, 1); \
+		trace_enter((x), line, 1); \
 	} \
-	y; \
+	(y); \
 } while (0)
 
 /* Dictionary functions */
