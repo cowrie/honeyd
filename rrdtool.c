@@ -593,7 +593,7 @@ rrdtool_test(void)
 		in += (i*5) % 500;
 		out += i % 400 + rand_uint16(honeyd_rand) % 1000;
 
-		snprintf(line, sizeof(line), "%u:%u", in, out);
+		snprintf(line, sizeof(line), "%d:%d", in, out);
 		rrdtool_db_update(db, &tv, line);
 	}
 

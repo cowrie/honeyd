@@ -2684,59 +2684,59 @@ print_xprobe_struct(struct xp_fingerprint *pers)
 {
 	printf ("OS_ID:                             %s\n", pers->os_id);
 	printf ("-- Module A --\n");
-	printf ("icmp_echo_code:                    %d\n",
+	printf ("icmp_echo_code:                    %u\n",
             pers->flags.icmp_echo_code);
-	printf ("icmp_echo_ip_id:                   %d\n",
+	printf ("icmp_echo_ip_id:                   %u\n",
             pers->flags.icmp_echo_ip_id);
-	printf ("icmp_echo_tos_bits:                %d\n",
+	printf ("icmp_echo_tos_bits:                %u\n",
             pers->flags.icmp_echo_tos_bits);
-	printf ("icmp_echo_df_bit:                  %d\n",
+	printf ("icmp_echo_df_bit:                  %u\n",
             pers->flags.icmp_echo_df_bit);
-	printf ("icmp_reply_ttl.gt_lt:              %d\n",
+	printf ("icmp_reply_ttl.gt_lt:              %u\n",
             pers->ttl_vals.icmp_echo_reply_ttl.gt_lt);
-	printf ("icmp_reply_ttl.ttl_vals:           %d\n",
+	printf ("icmp_reply_ttl.ttl_vals:           %u\n",
             pers->ttl_vals.icmp_echo_reply_ttl.ttl_val);
 	printf ("-- Module B --\n");
-	printf ("icmp_timestamp_reply:              %d\n",
+	printf ("icmp_timestamp_reply:              %u\n",
             pers->flags.icmp_timestamp_reply);
-	printf ("icmp_timestamp_reply_ttl.gt_lt:    %d\n",
+	printf ("icmp_timestamp_reply_ttl.gt_lt:    %u\n",
             pers->ttl_vals.icmp_timestamp_reply_ttl.gt_lt);
-	printf ("icmp_timestamp_reply_ttl.ttl_vals: %d\n",
+	printf ("icmp_timestamp_reply_ttl.ttl_vals: %u\n",
             pers->ttl_vals.icmp_timestamp_reply_ttl.ttl_val);
 	printf ("-- Module C --\n");
-	printf ("icmp_addrmask_reply:               %d\n",
+	printf ("icmp_addrmask_reply:               %u\n",
             pers->flags.icmp_addrmask_reply);
-	printf ("icmp_addrmask_reply_ttl.gt_lt:     %d\n",
+	printf ("icmp_addrmask_reply_ttl.gt_lt:     %u\n",
             pers->ttl_vals.icmp_addrmask_reply_ttl.gt_lt);
-	printf ("icmp_addrmask_reply_ttl.ttl_vals:  %d\n",
+	printf ("icmp_addrmask_reply_ttl.ttl_vals:  %u\n",
             pers->ttl_vals.icmp_addrmask_reply_ttl.ttl_val);
 	printf ("-- Module D --\n");
-	printf ("icmp_info_reply:                   %d\n",
+	printf ("icmp_info_reply:                   %u\n",
             pers->flags.icmp_info_reply);
-	printf ("icmp_info_reply_ttl.gt_lt:         %d\n",
+	printf ("icmp_info_reply_ttl.gt_lt:         %u\n",
             pers->ttl_vals.icmp_info_reply_ttl.gt_lt);
-	printf ("icmp_info_reply_ttl.ttl_vals:      %d\n",
+	printf ("icmp_info_reply_ttl.ttl_vals:      %u\n",
             pers->ttl_vals.icmp_info_reply_ttl.ttl_val);
 	printf ("-- Module E --\n");
-	printf ("icmp_unreach_echoed_dtsize:        %d\n",
+	printf ("icmp_unreach_echoed_dtsize:        %u\n",
             pers->flags.icmp_unreach_echoed_dtsize);
-	printf ("icmp_u_reply_ttl.gt_lt:            %d\n",
+	printf ("icmp_u_reply_ttl.gt_lt:            %u\n",
             pers->ttl_vals.icmp_unreach_reply_ttl.gt_lt);
-	printf ("icmp_u_reply_ttl.ttl_vals:         %d\n",
+	printf ("icmp_u_reply_ttl.ttl_vals:         %u\n",
             pers->ttl_vals.icmp_unreach_reply_ttl.ttl_val);
 	printf ("icmp_unreach_precedence_bits:      0x%x\n",
             pers->flags.icmp_unreach_precedence_bits);
-	printf ("icmp_unreach_df_bit:               %d\n",
+	printf ("icmp_unreach_df_bit:               %u\n",
             pers->flags.icmp_unreach_df_bit);
-	printf ("icmp_unreach_echoed_udp_cksum:     %d\n",
+	printf ("icmp_unreach_echoed_udp_cksum:     %u\n",
             pers->flags.icmp_unreach_echoed_udp_cksum);
-	printf ("icmp_unreach_echoed_ip_cksum:      %d\n",
+	printf ("icmp_unreach_echoed_ip_cksum:      %u\n",
             pers->flags.icmp_unreach_echoed_ip_cksum);
-	printf ("icmp_unreach_echoed_ip_id:         %d\n",
+	printf ("icmp_unreach_echoed_ip_id:         %u\n",
             pers->flags.icmp_unreach_echoed_ip_id);
-	printf ("icmp_unreach_echoed_total_len:     %d\n",
+	printf ("icmp_unreach_echoed_total_len:     %u\n",
             pers->flags.icmp_unreach_echoed_total_len);
-	printf ("icmp_unreach_echoed_3bit_flags:    %d\n",
+	printf ("icmp_unreach_echoed_3bit_flags:    %u\n",
             pers->flags.icmp_unreach_echoed_3bit_flags);
 }
 

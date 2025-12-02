@@ -346,6 +346,6 @@ honeyd_log_flowend(FILE *fp, int proto, const struct tuple *hdr)
 	logtime = honeyd_logtime();
 	tuple = honeyd_logtuple(hdr);
 	protoname = honeyd_logproto(proto);
-	fprintf(fp, "%s %s E %s: %d %d\n", logtime, protoname, tuple,
+	fprintf(fp, "%s %s E %s: %u %u\n", logtime, protoname, tuple,
 	    hdr->received, hdr->sent);
 }

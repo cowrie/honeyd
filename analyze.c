@@ -546,7 +546,7 @@ report_print(struct reporttree *tree, FILE *out,
 
 	/* Now print the information in alphabetical order */
 	SPLAY_FOREACH(report, reporttree, tree) {
-		fprintf(out, "%25s: %7d %7d %7d\n",
+		fprintf(out, "%25s: %7u %7u %7u\n",
 		    print(report->key, report->keylen),
 		    report->minute, report->hour, report->day);
 	}

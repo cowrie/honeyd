@@ -921,7 +921,7 @@ stats_compress_test(void)
 		evbuffer_drain(buf, evbuffer_get_length(buf));
 		evbuffer_add(buf, something, sizeof(something));
 		stats_compress(buf);
-		fprintf(stderr, "\t\t Decompressed: %zd, Compressed: %zd\n",
+		fprintf(stderr, "\t\t Decompressed: %zu, Compressed: %zu\n",
 		    sizeof(something), evbuffer_get_length(buf));
 
 		/* Simulate packet loss */
