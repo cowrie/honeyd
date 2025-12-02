@@ -14,14 +14,32 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install cppcheck
-      run: sudo apt-get update && sudo apt-get install -y cppcheck
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          cppcheck \
+          cmake \
+          libevent-dev \
+          libpcap-dev \
+          libdumbnet-dev \
+          flex \
+          bison \
+          libreadline-dev \
+          zlib1g-dev
+
+    - name: Configure with CMake
+      run: |
+        mkdir -p build
+        cd build
+        cmake ..
 
     - name: Run cppcheck
       run: |
         cppcheck --enable=all --inconclusive --error-exitcode=1 \
           --suppress=missingIncludeSystem \
           --suppress=unusedFunction \
+          -I build \
           -i dpkt \
           -i pypcap \
           -i build \
