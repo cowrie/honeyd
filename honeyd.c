@@ -553,13 +553,14 @@ honeyd_init(void)
 
 	char config_suffix[] = "/.config";
 	char honeyd_suffix[] = "/honeyd/";
-	char *full_path = malloc(strlen(home_path) + strlen(config_suffix) + strlen(honeyd_suffix) + 1);
+	size_t full_path_len = strlen(home_path) + strlen(config_suffix) + strlen(honeyd_suffix) + 1;
+	char *full_path = malloc(full_path_len);
 	if (full_path == NULL) {
 		syslog(LOG_ERR, "%s: malloc failed for full_path", __func__);
 		exit(EXIT_FAILURE);
 	}
-	strcpy(full_path, home_path);
-	strcat(full_path, config_suffix);
+	strlcpy(full_path, home_path, full_path_len);
+	strlcat(full_path, config_suffix, full_path_len);
 
 	//Try to make ~/.config/
 	if(mkdir(full_path, S_IRWXU|S_IRWXO) != 0)
@@ -570,7 +571,7 @@ honeyd_init(void)
 		}
 	}
 
-	strcat(full_path, honeyd_suffix);
+	strlcat(full_path, honeyd_suffix, full_path_len);
 	//Try to make ~/.config/honeyd
 	if(mkdir(full_path, S_IRWXU|S_IRWXO) != 0)
 	{
@@ -1479,7 +1480,7 @@ generic_connect(struct template *tmpl, struct tuple *hdr,
 		strlcpy(line, action->action, sizeof(line));
 		honeyd_varexpand(con, line, sizeof(line));
 		/* Copy for print out */
-		strlcpy(command, line, sizeof(line));
+		strlcpy(command, line, sizeof(command));
 	}
 
 	/* Setup a proxy connection, no need to fork a new process */
