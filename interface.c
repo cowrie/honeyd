@@ -498,7 +498,7 @@ interface_expandips(int naddresses, char **addresses, int dstonly)
 					ip_addr_t bit = 1 << count;
 					ip_addr_t mask;
 
-					mask = ~(~0 << count);
+					mask = ~(~0U << count);
 					tmp = istart | mask;
 
 					if (istart & bit)
@@ -506,7 +506,7 @@ interface_expandips(int naddresses, char **addresses, int dstonly)
 
 					if (iend < tmp) {
 						count--;
-						mask = ~(~0 << count);
+						mask = ~(~0U << count);
 						tmp = istart | mask;
 						break;
 					} else if (done)
