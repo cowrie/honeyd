@@ -79,15 +79,4 @@ jobs:
         find .. -name "*.c" ! -path "../build/*" ! -path "../dpkt/*" ! -path "../pypcap/*" > files.txt
 
         # Run clang-tidy on each file
-        cat files.txt | xargs -I {} clang-tidy -p . {} 2>&1 | tee clang-tidy.log || true
-
-        # Show first 50 issues in the workflow log
-        echo "=== First 50 clang-tidy issues ==="
-        head -50 clang-tidy.log || true
-
-    - name: Upload clang-tidy results
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: clang-tidy-report
-        path: build/clang-tidy.log
+        cat files.txt | xargs -I {} clang-tidy -p . {}
