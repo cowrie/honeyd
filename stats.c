@@ -606,7 +606,11 @@ stats_new(const struct tuple *conhdr)
 	syslog(LOG_DEBUG, "Creating new stats buffer for %s",
 	    honeyd_contoa(conhdr));
 
-	assert(stats_find(conhdr) == NULL);
+	if (stats_find(conhdr) != NULL) {
+		syslog(LOG_ERR, "%s: stats already exist for %s", __func__,
+		    honeyd_contoa(conhdr));
+		return NULL;
+	}
 	if ((stats = calloc(1, sizeof(struct stats))) == NULL)
 	{
 		syslog(LOG_ERR, "%s: calloc", __func__);
@@ -818,7 +822,10 @@ void
 stats_register_cb(int (*cb)(const struct record *, void *), void *cb_arg)
 {
 	struct statscb *statscb = calloc(1, sizeof(struct statscb));
-	assert(statscb != NULL);
+	if (statscb == NULL) {
+		syslog(LOG_ERR, "%s: calloc", __func__);
+		return;
+	}
 
 	statscb->cb = cb;
 	statscb->cb_arg = cb_arg;

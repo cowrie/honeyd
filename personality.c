@@ -1222,7 +1222,7 @@ parse_seq(struct personality *pers, int off, char *line)
 				{
 					char *temp;
 					uint32_t IPID_constant = strtol(p2, &temp, 16);
-					if ( (*temp == '\0') && (p2 != NULL) ) /* IE: Conversion was successful */
+					if (*temp == '\0') /* IE: Conversion was successful */
 					{
 						pers->IPID_type_TI = ID_CONSTANT;
 						pers->IPID_constant_val_TI = IPID_constant;
@@ -1274,7 +1274,7 @@ parse_seq(struct personality *pers, int off, char *line)
 				{
 					char *temp;
 					uint32_t IPID_constant = strtol(p2, &temp, 16);
-					if ( (*temp == '\0') && (p2 != NULL) ) /* IE: Conversion was successful */
+					if (*temp == '\0') /* IE: Conversion was successful */
 					{
 						pers->IPID_type_CI = ID_CONSTANT;
 						pers->IPID_constant_val_CI = IPID_constant;
@@ -1325,7 +1325,7 @@ parse_seq(struct personality *pers, int off, char *line)
 				{
 					char *temp;
 					uint32_t IPID_constant = strtol(p2, &temp, 16);
-					if ( (*temp == '\0') && (p2 != NULL) ) /* IE: Conversion was successful */
+					if (*temp == '\0') /* IE: Conversion was successful */
 					{
 						pers->IPID_type_II = ID_CONSTANT;
 						pers->IPID_constant_val_II = IPID_constant;
