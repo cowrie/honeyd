@@ -30,6 +30,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/* Python.h must be included first per Python documentation */
+#ifdef HAVE_PYTHON
+#include <Python.h>
+#endif
+
 #include <sys/param.h>
 #include <sys/types.h>
 
@@ -104,7 +109,6 @@
 #include "personality.h"
 
 #ifdef HAVE_PYTHON
-#include <Python.h>
 #include "pyextend.h"
 #include "pydataprocessing.h"
 #include "pydatahoneyd.h"

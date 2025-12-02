@@ -30,6 +30,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/* Python.h must be included first per Python documentation */
+#include <Python.h>
+#include <marshal.h>
+
 #include <sys/types.h>
 #include <sys/param.h>
 #ifdef HAVE_CONFIG_H
@@ -62,9 +66,6 @@
 #undef timeout_initialized
 
 #include <event.h>
-
-#include <Python.h>
-#include <marshal.h>
 
 #include "honeyd.h"
 #include "tagging.h"

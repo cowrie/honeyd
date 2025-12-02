@@ -34,6 +34,8 @@ if(Python3_FOUND)
     message(STATUS "Python 3 found: ${Python3_EXECUTABLE} (version ${Python3_VERSION})")
     set(HAVE_PYTHON 1)
     include_directories(${Python3_INCLUDE_DIRS})
+    # Add compile definition so honeyd.c can include Python.h before config.h
+    add_compile_definitions(HAVE_PYTHON=1)
 else()
     message(STATUS "Python 3 not found - Python support disabled")
     set(HAVE_PYTHON 0)

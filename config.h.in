@@ -108,8 +108,7 @@
 /* Define if Python knows about the dnet modules */
 #undef HAVE_PYDNET
 
-/* Define if we want to link with Python support */
-#cmakedefine HAVE_PYTHON
+/* HAVE_PYTHON is defined via compile definitions in CMakeLists.txt */
 
 /* Define to 1 if you have the 'recvmsg' function. */
 #cmakedefine HAVE_RECVMSG
