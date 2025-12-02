@@ -386,6 +386,7 @@ void tcp_connectfail(struct tcp_con *con);
 void generic_timeout(struct event *, int);
 
 /* Network protocol related prototypes */
+struct pcap_pkthdr;
 struct action *honeyd_protocol(struct template *, int);
 void honeyd_recv_cb(u_char *, const struct pcap_pkthdr *, const u_char *);
 int conhdr_compare(struct tuple *, struct tuple *);
