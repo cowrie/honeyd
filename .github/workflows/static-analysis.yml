@@ -26,7 +26,8 @@ jobs:
           flex \
           bison \
           libreadline-dev \
-          zlib1g-dev
+          zlib1g-dev \
+          python3-dev
 
     - name: Configure with CMake
       run: |
@@ -42,6 +43,7 @@ jobs:
           --suppress=unknownMacro \
           --suppress=syntaxError \
           --suppress=uninitvar \
+          -DHAVE_PYTHON=1 \
           -I build \
           -i dpkt \
           -i pypcap \
@@ -70,7 +72,8 @@ jobs:
           flex \
           bison \
           libreadline-dev \
-          zlib1g-dev
+          zlib1g-dev \
+          python3-dev
 
     - name: Configure with CMake
       run: |
