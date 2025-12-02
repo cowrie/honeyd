@@ -1915,8 +1915,18 @@ parse_option(struct tcp_options *options, char *line)
 
 	//Allocate memory for the Options array
 	uint numOptions = CountCharsInString(line, "LNSMWT");
+	if (numOptions == 0) {
+		options->options = NULL;
+		options->count = 0;
+		return 0;
+	}
 	uint dataSize = sizeof(struct tcp_option) * numOptions;
 	options->options = (struct tcp_option *)malloc(dataSize);
+	if (options->options == NULL) {
+		syslog(LOG_ERR, "%s: malloc failed", __func__);
+		options->count = 0;
+		return -1;
+	}
 	options->count = numOptions;
 
 	while( *line != '\0')

@@ -96,6 +96,11 @@ pool_alloc_size(struct pool *pool, size_t size)
 
 		size = pool->size;
 		max = POOL_PAGE_SIZE / (sizeof(struct pool_entry) + size);
+		if (max < 1) {
+			syslog(LOG_ERR, "%s: pool size misconfigured", __func__);
+			free(p);
+			return (NULL);
+		}
 		pool->nalloc += max;
 		for (i = 0; i < max; i++) {
 			entry = p;

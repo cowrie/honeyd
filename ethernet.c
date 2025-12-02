@@ -260,6 +260,8 @@ ethernetcode_find_best(struct etherindex **results, int size, int random)
 		}
 	}
 
+	if (code == NULL)
+		return (0);
 	return (code->prefix);
 }
 

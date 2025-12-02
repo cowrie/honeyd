@@ -593,6 +593,7 @@ honeyd_init(void)
 	{
 		perror("Error: Could not set enviromnent variable HONEYD_HOME");
 	}
+	free(full_path);
 }
 
 #ifdef HAVE_PYTHON
@@ -1654,7 +1655,8 @@ tcp_send(struct tcp_con *con, uint8_t flags, u_char *payload, u_int len)
 	    dontfragment ? IP_DF : 0, ttl,
 	    IP_PROTO_TCP, con->con_ipdst, con->con_ipsrc);
 
-	memcpy(pkt + IP_HDR_LEN + (tcp->th_off << 2), payload, len);
+	if (len > 0 && payload != NULL)
+		memcpy(pkt + IP_HDR_LEN + (tcp->th_off << 2), payload, len);
 
 	hooks_dispatch(IP_PROTO_TCP, HD_OUTGOING, &con->conhdr,
 	    pkt, iplen);
@@ -2140,7 +2142,7 @@ tcp_recv_cb(struct template *tmpl, const struct interface* iface, u_char *pkt, u
 	uint16_t th_sum;
 	u_char *data;
 	u_int dlen, doff;
-	uint8_t tiflags, flags;
+	uint8_t tiflags, flags = 0;
 
 	ip = (struct ip_hdr *)pkt;
 	tcp = (struct tcp_hdr *)(pkt + (ip->ip_hl << 2));
@@ -3009,8 +3011,10 @@ icmp_recv_cb(struct template *tmpl, u_char *pkt, u_short pktlen)
 		/* YM: Added ICMP Address Mask reply capability */
 		case ICMP_MASK:
 		{
+			if (xp_print == NULL)
+				break;
 			/* Happens only if xp_print != NULL */
-				if (xp_print->flags.icmp_addrmask_reply) {
+			if (xp_print->flags.icmp_addrmask_reply) {
 				icmp_idseq = (struct icmp_msg_idseq *)(icmp + 1);
 
 				syslog(LOG_DEBUG, "Sending ICMP Address Mask Reply: %s -> %s",
@@ -3026,8 +3030,10 @@ icmp_recv_cb(struct template *tmpl, u_char *pkt, u_short pktlen)
 		/* YM: Added ICMP Information reply capability */
 		case ICMP_INFO:
 		{
+			if (xp_print == NULL)
+				break;
 			/* Happens only if xp_print != NULL */
-				if (xp_print->flags.icmp_info_reply) {
+			if (xp_print->flags.icmp_info_reply) {
 				icmp_idseq = (struct icmp_msg_idseq *)(icmp + 1);
 
 				syslog(LOG_DEBUG, "Sending ICMP Info Reply: %s -> %s",
@@ -3132,7 +3138,11 @@ honeyd_route_packet(struct ip_hdr *ip, u_int iplen,
 
 	host = *gw;
 	r = router_find(&host);
-	
+	if (r == NULL) {
+		syslog(LOG_DEBUG, "No router found for %s", addr_ntoa(gw));
+		return (FW_DROP);
+	}
+
 	while (addr_cmp(&host, addr) != 0 && --ip->ip_ttl) {
 		if ((rte = network_lookup(r->routes, addr)) == NULL) {
 			if (r->flags & ROUTER_ISENTRY) {
@@ -3193,6 +3203,8 @@ honeyd_route_packet(struct ip_hdr *ip, u_int iplen,
 
 		lastrouter = r;
 		r = rte->gw;
+		if (r == NULL)
+			break;
 		host = r->addr;
 
 		// Prevent underflows of ip_ttl
