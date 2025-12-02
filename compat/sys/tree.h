@@ -91,14 +91,14 @@ struct {								\
 } while (0)
 
 #define SPLAY_LINKLEFT(head, tmp, field) do {				\
-	SPLAY_LEFT(tmp, field) = (head)->sph_root;			\
-	tmp = (head)->sph_root;						\
+	SPLAY_LEFT((tmp), field) = (head)->sph_root;			\
+	(tmp) = (head)->sph_root;					\
 	(head)->sph_root = SPLAY_LEFT((head)->sph_root, field);		\
 } while (0)
 
 #define SPLAY_LINKRIGHT(head, tmp, field) do {				\
-	SPLAY_RIGHT(tmp, field) = (head)->sph_root;			\
-	tmp = (head)->sph_root;						\
+	SPLAY_RIGHT((tmp), field) = (head)->sph_root;			\
+	(tmp) = (head)->sph_root;					\
 	(head)->sph_root = SPLAY_RIGHT((head)->sph_root, field);	\
 } while (0)
 
@@ -270,8 +270,8 @@ void name##_SPLAY_MINMAX(struct name *head, int __comp) \
 	SPLAY_ASSEMBLE(head, &__node, __left, __right, field);		\
 }
 
-#define SPLAY_NEGINF	-1
-#define SPLAY_INF	1
+#define SPLAY_NEGINF	(-1)
+#define SPLAY_INF	(1)
 
 #define SPLAY_INSERT(name, x, y)	name##_SPLAY_INSERT(x, y)
 #define SPLAY_REMOVE(name, x, y)	name##_SPLAY_REMOVE(x, y)
@@ -659,8 +659,8 @@ name##_RB_MINMAX(struct name *head, int val)				\
 	return (parent);						\
 }
 
-#define RB_NEGINF	-1
-#define RB_INF	1
+#define RB_NEGINF	(-1)
+#define RB_INF	(1)
 
 #define RB_INSERT(name, x, y)	name##_RB_INSERT(x, y)
 #define RB_REMOVE(name, x, y)	name##_RB_REMOVE(x, y)

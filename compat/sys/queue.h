@@ -384,7 +384,7 @@ struct name {								\
 }
 
 #define CIRCLEQ_HEAD_INITIALIZER(head)					\
-	{ CIRCLEQ_END(&head), CIRCLEQ_END(&head) }
+	{ CIRCLEQ_END(&(head)), CIRCLEQ_END(&(head)) }
 
 #define CIRCLEQ_ENTRY(type)						\
 struct {								\
