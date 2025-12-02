@@ -386,6 +386,8 @@ void tcp_connectfail(struct tcp_con *con);
 void generic_timeout(struct event *, int);
 
 /* Network protocol related prototypes */
+struct action *honeyd_protocol(struct template *, int);
+void honeyd_recv_cb(u_char *, const struct pcap_pkthdr *, const u_char *);
 int conhdr_compare(struct tuple *, struct tuple *);
 
 void tcp_free(struct tcp_con *);
@@ -398,6 +400,8 @@ int udp_send(struct udp_con *con, u_char *payload, u_int len);
 
 void config_init(void);
 void config_read(char *);
+int parse_configuration(FILE *, char *);
+int parse_line(struct evbuffer *, char *);
 
 
 void bcast_insert(struct template *, int, int, int, struct action *);

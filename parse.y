@@ -92,7 +92,7 @@ extern int honeyd_verify_config;
 
 pf_osfp_t pfctl_get_fingerprint(const char *);
 struct action *honeyd_protocol(struct template *, int);
-void port_action_clone(struct action *, struct action *);
+void port_action_clone(struct action *, const struct action *);
 static void dhcp_template(struct template *tmpl,
     char *interface, char *mac_addr);
 

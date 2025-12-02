@@ -32,6 +32,8 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
+#include "atomicio.h"
+
 /*
  * ensure all of data on socket comes through. f==read || f==write
  */

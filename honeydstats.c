@@ -79,7 +79,11 @@
 
 /* Stubs to make it compile */
 
-int pcap_datalink(void *some) {	return (-1); }
+int pcap_datalink(void *some);
+char *honeyd_osfp_name(struct ip_hdr *hdr);
+void hooks_add_packet_hook(int protocol, int dir, void *callback, void *arg);
+
+int pcap_datalink(void *some) { return (-1); }
 char *honeyd_osfp_name(struct ip_hdr *hdr) { return (NULL); }
 void hooks_add_packet_hook(int protocol, int dir, void *callback, void *arg) {}
 

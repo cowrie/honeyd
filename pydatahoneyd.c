@@ -227,7 +227,7 @@ pyrecord_test(void)
 	fprintf(stderr, "\t%s: OK\n", __func__);
 }
 
-void
+static void
 pydatahoneyd_test(void)
 {
 	if (!Py_IsInitialized())
