@@ -75,8 +75,8 @@ struct kctree spammers;
 struct kctree countries;
 struct kctree country_cache;
 
-#define ROL64(x, b)	(((x) << b) | ((x) >> (64 - b)))
-#define ROR64(x, b)	(((x) >> b) | ((x) << (64 - b)))
+#define ROL64(x, b)	(((x) << (b)) | ((x) >> (64 - (b))))
+#define ROR64(x, b)	(((x) >> (b)) | ((x) << (64 - (b))))
 
 /* 
  * Thomas Wang's 64-bit hash function from 
