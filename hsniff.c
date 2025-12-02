@@ -290,7 +290,11 @@ tcp_insert(struct tcp_track *con, uint32_t th_seq, void *data, size_t dlen)
 		}
 	}
 
-	/* Suppress unused parameter warnings - this function is incomplete */
+	/*
+	 * TODO: This function is incomplete - it should create a new segment
+	 * with the adjusted th_seq, data, and dlen values after the loop.
+	 * Currently these modified values are unused.
+	 */
 	(void)th_seq;
 	(void)data;
 	(void)dlen;

@@ -151,6 +151,7 @@ template_find(const char *name)
 	struct template tmp;
 
 	tmp.name = (char *)name;
+	/* cppcheck-suppress CastIntegerToAddressAtReturn ; SPLAY_FIND returns pointer */
 	return (SPLAY_FIND(templtree, &templates, &tmp));
 }
 
