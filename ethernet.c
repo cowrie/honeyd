@@ -264,7 +264,7 @@ ethernetcode_find_best(struct etherindex **results, int size, int random)
 }
 
 uint32_t
-ethernetcode_find_prefix(char *vendor, int random) {
+ethernetcode_find_prefix(const char *vendor, int random) {
 	struct etherindex *results[20];
 	struct etherindex tmp, *entry;
 	char line[1024], *p, *e;

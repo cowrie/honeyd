@@ -94,7 +94,7 @@ extern struct usertree users;
 static int fd_recv;
 static struct evbuffer *evbuf_recv;
 static char *checkpoint_filename = NULL;
-static char *config_filename = "honeydstats.config";
+static const char *config_filename = "honeydstats.config";
 
 static void
 read_cb(int fd, short what, void *unused)
@@ -128,7 +128,7 @@ read_cb(int fd, short what, void *unused)
 }
 
 struct _unittest {
-	char *name;
+	const char *name;
 	void (*cb)(void);
 } unittests[] = {
 	{ "histogram", histogram_test },

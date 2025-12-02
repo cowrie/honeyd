@@ -833,7 +833,7 @@ analyze_report_cb(int fd, short what, void *unused)
 static void
 os_test(void)
 {
-	char *fingerprints[OS_NUM_OSES] = {
+	const char *fingerprints[OS_NUM_OSES] = {
 		"Linux",
 		"Windows",
 		"NetBSD",

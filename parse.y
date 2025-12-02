@@ -73,9 +73,9 @@
 
 int hydlex(void);
 int hydparse(void);
-int hyderror(char *, ...);
-int hydwarn(char *, ...);
-int hydprintf(char *, ...);
+int hyderror(const char *, ...);
+int hydwarn(const char *, ...);
+int hydprintf(const char *, ...);
 void *hyd_scan_string(char *);
 int hyd_delete_buffer(void *);
 
@@ -1173,7 +1173,7 @@ dhcp_template(struct template *tmpl, char *interface, char *mac_addr)
 }
 
 int
-yyerror(char *fmt, ...)
+yyerror(const char *fmt, ...)
 {
 	va_list ap;
 	errors = 1;
@@ -1195,7 +1195,7 @@ yyerror(char *fmt, ...)
 }
 
 int
-yywarn(char *fmt, ...)
+yywarn(const char *fmt, ...)
 {
 	va_list ap;
 
@@ -1216,7 +1216,7 @@ yywarn(char *fmt, ...)
 }
 
 int
-yyprintf(char *fmt, ...)
+yyprintf(const char *fmt, ...)
 {
 	va_list ap;
 

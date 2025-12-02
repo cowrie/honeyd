@@ -1960,7 +1960,7 @@ parse_option(struct tcp_options *options, char *line)
 //Helper function.
 //Counts the number instances of the characters in *chars in the string *string
 uint
-CountCharsInString(char *string, char *chars)
+CountCharsInString(const char *string, const char *chars)
 {
 	uint charsLength = strlen(chars);
 	uint count = 0;

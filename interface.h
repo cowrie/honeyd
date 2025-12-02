@@ -55,7 +55,7 @@ void interface_prevent_init(void);
 void interface_initialize(pcap_handler);
 void interface_init(char *, int, char **);
 struct interface *interface_get(int);
-struct interface *interface_find(char *);
+struct interface *interface_find(const char *);
 struct interface *interface_find_addr(struct addr *);
 struct interface *interface_find_responsible(struct addr *);
 

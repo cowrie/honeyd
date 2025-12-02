@@ -190,7 +190,7 @@ interface_get(int off)
 }
 
 struct interface *
-interface_find(char *name)
+interface_find(const char *name)
 {
 	struct interface *inter;
 

@@ -63,7 +63,7 @@
 #include "condition.h"
 #include "parse.h"
 
-int hyderror(char *fmt, ...);
+int hyderror(const char *fmt, ...);
 #define yyerror hyderror
 
 extern int lineno;

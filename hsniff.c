@@ -522,7 +522,7 @@ main(int argc, char *argv[])
 	extern int interface_dopoll;
 	char *dev[HSNIFF_MAX_INTERFACES];
 	char **orig_argv;
-	char *osfp = PATH_HONEYDDATA "/pf.os";
+	const char *osfp = PATH_HONEYDDATA "/pf.os";
 	struct addr stats_dst;
 	u_short stats_port = 0;
 	char *stats_username = NULL;

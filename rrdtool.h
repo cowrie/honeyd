@@ -80,15 +80,15 @@ void rrdtool_command(struct rrdtool_drv *, char *, void (*cb)(char *, void *),
     void *);
 void rrdtool_command_done(struct rrdtool_drv *, char *);
 
-struct rrdtool_db *rrdtool_db_start(struct rrdtool_drv *, char *, int);
-int rrdtool_db_datasource(struct rrdtool_db *, char *, char *, int);
+struct rrdtool_db *rrdtool_db_start(struct rrdtool_drv *, const char *, int);
+int rrdtool_db_datasource(struct rrdtool_db *, const char *, const char *, int);
 int rrdtool_db_commit(struct rrdtool_db *db);
 void rrdtool_db_free(struct rrdtool_db *db);
 
 int rrdtool_db_update(struct rrdtool_db *db, struct timeval *tv, char *update);
 
-void rrdtool_graph(struct rrdtool_db *, char *filename,
-    struct timeval *, struct timeval *, char *spec);
+void rrdtool_graph(struct rrdtool_db *, const char *filename,
+    struct timeval *, struct timeval *, const char *spec);
 
 void rrdtool_test(void);
 

@@ -261,7 +261,7 @@ main(int argc, char **argv)
 	int fd, len, display, save_errno;
 	unsigned TimeoutVal;
 	struct sigaction act, oact;
-	char *sockname = HONEYD_SOCK;
+	const char *sockname = HONEYD_SOCK;
 #ifdef HAVE_LIBEDIT
 	EditLine *edit;
 	History *hist;

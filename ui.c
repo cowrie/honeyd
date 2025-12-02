@@ -69,7 +69,7 @@ char *ui_file = UI_FIFO;
 #define PROMPT		"honeydctl> "
 #define WHITESPACE	" \t"
 
-char *strnsep(char **, char *);
+char *strnsep(char **, const char *);
 
 int ui_command_help(struct evbuffer *, char *);
 int ui_command_python(struct evbuffer *, char *);

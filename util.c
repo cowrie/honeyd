@@ -131,7 +131,7 @@ pcap_dloff(pcap_t *pd)
 }
 
 char *
-strrpl(char *str, size_t size, char *match, char *value)
+strrpl(char *str, size_t size, const char *match, const char *value)
 {
 	char *p, *e;
 	int len, rlen;
@@ -189,7 +189,7 @@ addr_contained(struct addr *net, struct addr *addr)
 }
 
 char *
-strnsep(char **line, char *delim)
+strnsep(char **line, const char *delim)
 {
 	char *ret, *p;
 

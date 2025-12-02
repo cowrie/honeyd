@@ -522,7 +522,7 @@ cmd_python(struct tuple *hdr, struct command *cmd, void *con)
 
 int
 cmd_subsystem(struct template *tmpl, struct subsystem *sub,
-    char *execcmd, char **argv)
+    const char *execcmd, char **argv)
 {
 	extern int honeyd_nchildren;
 	struct command *cmd = &sub->cmd;

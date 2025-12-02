@@ -363,7 +363,7 @@ void cmd_free(struct command *);
 int cmd_fork(struct tuple *, struct command *, struct template *,
     char *, char **, void *);
 int cmd_python(struct tuple *, struct command *, void *);
-int cmd_subsystem(struct template *, struct subsystem *, char *, char **);
+int cmd_subsystem(struct template *, struct subsystem *, const char *, char **);
 
 struct addrinfo;
 struct addrinfo *cmd_proxy_getinfo(char *, int, short);

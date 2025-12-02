@@ -281,7 +281,7 @@ int icmp_error_personality(struct template *, struct addr *,
 
 //Helper function.
 //Counts the number instances of the characters in *chars in the string *string
-uint CountCharsInString(char *string, char *chars);
+uint CountCharsInString(const char *string, const char *chars);
 
 
 int parse_option(struct tcp_options *options, char *line);

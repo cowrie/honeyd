@@ -249,7 +249,7 @@ count_increment(struct count *count, int delta)
 }
 
 static void __inline
-count_internal_print(FILE *fout, struct count *count, char *name)
+count_internal_print(FILE *fout, struct count *count, const char *name)
 {
 	struct entry *entry;
 

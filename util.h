@@ -99,8 +99,8 @@ void name_from_addr(struct sockaddr *sa, socklen_t salen,
 /* Utility functions */
 struct addr;
 int addr_contained(struct addr *, struct addr *);
-char *strrpl(char *, size_t, char *, char *);
+char *strrpl(char *, size_t, const char *, const char *);
 char *fgetln(FILE *, size_t *);
-char *strnsep(char **line, char *delim);
+char *strnsep(char **line, const char *delim);
 
 #endif /* _UTIL_H_ */

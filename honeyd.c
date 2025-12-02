@@ -262,7 +262,7 @@ usage(void)
 
 /* XXX ches debug */
 static void
-print_spoof(char *msg, struct spoof s) {
+print_spoof(const char *msg, struct spoof s) {
 	char buf2[100], buf3[100];
 
 	if (s.new_src.addr_type == ADDR_TYPE_NONE)

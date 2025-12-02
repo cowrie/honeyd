@@ -318,7 +318,7 @@ rrdtool_command(struct rrdtool_drv *drv, char *command,
  */
 
 struct rrdtool_db *
-rrdtool_db_start(struct rrdtool_drv *drv, char *filename, int stepsize)
+rrdtool_db_start(struct rrdtool_drv *drv, const char *filename, int stepsize)
 {
 	struct rrdtool_db *db;
 
@@ -339,7 +339,7 @@ rrdtool_db_start(struct rrdtool_drv *drv, char *filename, int stepsize)
 }
 
 int
-rrdtool_db_datasource(struct rrdtool_db *db, char *name, char *type,
+rrdtool_db_datasource(struct rrdtool_db *db, const char *name, const char *type,
     int heartbeat)
 {
 	char line[1024];
@@ -438,9 +438,9 @@ rrdtool_db_update(struct rrdtool_db *db, struct timeval *tv, char *update)
  */
 
 void
-rrdtool_graph(struct rrdtool_db *db, char *filename,
+rrdtool_graph(struct rrdtool_db *db, const char *filename,
     struct timeval *tv_start, struct timeval *tv_end,
-    char *spec)
+    const char *spec)
 {
 	char line[1024];
 	struct timeval tv;

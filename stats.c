@@ -880,7 +880,7 @@ static void
 stats_hmac_test(void)
 {
 	u_char digest[SHA1_DIGESTSIZE];
-	char *test1 = "test", *test2 = "txst";
+	const char *test1 = "test", *test2 = "txst";
 
 	hmac_init(&sc.hmac, "1234");
 	hmac_sign(&sc.hmac, digest, sizeof(digest), test1, strlen(test1));
