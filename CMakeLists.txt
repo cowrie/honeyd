@@ -492,19 +492,25 @@ install(DIRECTORY webserver/
 
 # Post-install: precompile templates and set permissions
 # Templates must be compiled after install so paths are correct
+# Note: DESTDIR is used during staged installs (e.g., Debian packaging)
 install(CODE "
-    message(STATUS \"Precompiling webserver templates...\")
-    execute_process(
-        COMMAND ${Python3_EXECUTABLE} \${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/honeyd/webserver/precompile_templates.py
-                \${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/honeyd/webserver/htdocs
-        WORKING_DIRECTORY \${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/honeyd/webserver
-        RESULT_VARIABLE precompile_result
-    )
-    if(NOT precompile_result EQUAL 0)
-        message(WARNING \"Template precompilation failed (error \${precompile_result})\")
+    set(WEBSERVER_DIR \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/honeyd/webserver\")
+    if(EXISTS \"\${WEBSERVER_DIR}/precompile_templates.py\")
+        message(STATUS \"Precompiling webserver templates...\")
+        execute_process(
+            COMMAND ${Python3_EXECUTABLE} \${WEBSERVER_DIR}/precompile_templates.py
+                    \${WEBSERVER_DIR}/htdocs
+            WORKING_DIRECTORY \${WEBSERVER_DIR}
+            RESULT_VARIABLE precompile_result
+        )
+        if(NOT precompile_result EQUAL 0)
+            message(WARNING \"Template precompilation failed (error \${precompile_result})\")
+        endif()
+        message(STATUS \"Setting graphs directory permissions...\")
+        execute_process(COMMAND chmod 1777 \${WEBSERVER_DIR}/htdocs/graphs)
+    else()
+        message(STATUS \"Webserver not installed, skipping template precompilation\")
     endif()
-    message(STATUS \"Setting graphs directory permissions...\")
-    execute_process(COMMAND chmod 1777 \${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/honeyd/webserver/htdocs/graphs)
 ")
 
 install(FILES honeyd.8

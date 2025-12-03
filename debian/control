@@ -7,10 +7,12 @@ Build-Depends: debhelper-compat (= 13),
                libevent-dev,
                libpcap-dev,
                libdumbnet-dev (>> 1.8),
+               libpcre3-dev,
                flex,
                bison,
                libreadline-dev,
-               zlib1g-dev
+               zlib1g-dev,
+               python3
 Standards-Version: 4.6.2
 Homepage: https://github.com/cowrie/honeyd
 Vcs-Git: https://github.com/cowrie/honeyd.git

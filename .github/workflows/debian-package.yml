@@ -31,10 +31,12 @@ jobs:
           libevent-dev \
           libpcap-dev \
           libdumbnet-dev \
+          libpcre3-dev \
           flex \
           bison \
           libreadline-dev \
-          zlib1g-dev
+          zlib1g-dev \
+          python3
 
     - name: Build Debian packages
       run: |
