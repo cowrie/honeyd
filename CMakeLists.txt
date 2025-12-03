@@ -3,6 +3,19 @@ project(honeyd)
 
 set(CMAKE_COLOR_MAKEFILE ON)
 
+# Make sure we can import out CMake functions
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+# Read the git tags to determine the project version
+include(GetGitVersion)
+get_git_version(GIT_VERSION)
+# Tell the user what versions we are using
+string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" VERSION ${GIT_VERSION})
+message("-- Version: ${VERSION}")
+# The version of the libraries
+set(GENERIC_LIB_VERSION ${VERSION})
+string(SUBSTRING ${VERSION} 0 1 GENERIC_LIB_SOVERSION)
+
 include(CheckIncludeFiles)
 include(CheckLibraryExists)
 include(CheckFunctionExists)
@@ -206,8 +219,7 @@ check_function_exists(vprintf HAVE_VPRINTF)
 # RETSIGTYPE
 # STDC_HEADERS
 # TIME_WITH_SYS_TIME
-# VERSION
-set(VERSION "1.6e")
+# VERSION (now set from git tags via cmake/GetGitVersion.cmake)
 # YYTEXT_POINTER
 # const
 # ...
