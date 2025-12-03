@@ -1,5 +1,5 @@
 #!/bin/bash
-# ABOUTME: Smoke test for honeyd - verifies basic ICMP echo response
+# ABOUTME: Smoke test for honeyd - verifies ICMP, TCP, UDP, and OS fingerprinting
 # ABOUTME: Uses single network namespace with loopback for isolation
 
 set -e
@@ -9,86 +9,154 @@ HONEYD_BIN="${HONEYD_BIN:-/usr/local/bin/honeyd}"
 CONFIG_FILE="${CONFIG_FILE:-/src/honeyd/tests/smoke/test.conf}"
 
 # Network configuration
-# We use a single namespace with loopback - same approach as regression tests
-# This avoids ARP complexity since loopback is L3-only
-
 HONEYD_VIRTUAL_IP="192.0.2.100"
 TEST_NETWORK="192.0.2.0/24"
 
 # Unique names using PID to allow parallel runs
 NS_TEST="hd_test_$$"
 
+# Track test results
+TESTS_RUN=0
+TESTS_PASSED=0
+TESTS_FAILED=0
+
 cleanup() {
+    echo ""
     echo "Cleaning up..."
-    # Kill honeyd if running
     if [ -n "$HONEYD_PID" ]; then
         kill "$HONEYD_PID" 2>/dev/null || true
         wait "$HONEYD_PID" 2>/dev/null || true
     fi
-    # Delete namespace
     ip netns delete "$NS_TEST" 2>/dev/null || true
 }
 
 trap cleanup EXIT
 
-echo "=== Honeyd Smoke Test (Network Namespace Isolated) ==="
+# Run a test and track result
+run_test() {
+    local name="$1"
+    local cmd="$2"
+    TESTS_RUN=$((TESTS_RUN + 1))
+
+    echo -n "  $name... "
+    if eval "$cmd" > /dev/null 2>&1; then
+        echo "PASS"
+        TESTS_PASSED=$((TESTS_PASSED + 1))
+        return 0
+    else
+        echo "FAIL"
+        TESTS_FAILED=$((TESTS_FAILED + 1))
+        return 1
+    fi
+}
+
+# Run a test expecting failure
+run_test_expect_fail() {
+    local name="$1"
+    local cmd="$2"
+    TESTS_RUN=$((TESTS_RUN + 1))
+
+    echo -n "  $name... "
+    if eval "$cmd" > /dev/null 2>&1; then
+        echo "FAIL (expected failure but succeeded)"
+        TESTS_FAILED=$((TESTS_FAILED + 1))
+        return 1
+    else
+        echo "PASS (correctly rejected)"
+        TESTS_PASSED=$((TESTS_PASSED + 1))
+        return 0
+    fi
+}
+
+# Helper to run commands in namespace
+ns_exec() {
+    ip netns exec "$NS_TEST" "$@"
+}
+
+echo "=== Honeyd Smoke Test ==="
+echo ""
 
 # Verify honeyd binary exists
 if [ ! -x "$HONEYD_BIN" ]; then
     echo "ERROR: honeyd binary not found at $HONEYD_BIN"
     exit 1
 fi
-echo "1. Binary exists: OK"
+echo "[Setup] Binary exists: OK"
 
 # Verify config syntax
 if ! "$HONEYD_BIN" --verify-config -f "$CONFIG_FILE" "$TEST_NETWORK" 2>/dev/null; then
     echo "ERROR: Configuration file validation failed"
     exit 1
 fi
-echo "2. Config valid: OK"
+echo "[Setup] Config valid: OK"
 
 # Create network namespace
 ip netns add "$NS_TEST"
-echo "3. Network namespace created: OK"
+ns_exec ip link set lo up
+ns_exec ip addr add 192.0.2.1/32 dev lo
+ns_exec ip route add "$TEST_NETWORK" dev lo
+echo "[Setup] Network namespace created: OK"
 
-# Configure namespace:
-# - Bring up loopback
-# - Add route to test network via loopback (packets go nowhere but honeyd captures them)
-ip netns exec "$NS_TEST" ip link set lo up
-ip netns exec "$NS_TEST" ip route add "$TEST_NETWORK" dev lo
-
-echo "4. Network configured: OK"
-
-# Start honeyd in the namespace on loopback
-ip netns exec "$NS_TEST" "$HONEYD_BIN" -d -f "$CONFIG_FILE" -i lo "$TEST_NETWORK" 2>&1 &
+# Start honeyd in the namespace
+ns_exec "$HONEYD_BIN" -d -f "$CONFIG_FILE" -i lo "$TEST_NETWORK" 2>&1 &
 HONEYD_PID=$!
-
-# Give honeyd time to start and set up pcap
 sleep 2
 
-# Verify honeyd is running
 if ! kill -0 "$HONEYD_PID" 2>/dev/null; then
     echo "ERROR: honeyd failed to start"
-    wait "$HONEYD_PID" 2>/dev/null || true
     exit 1
 fi
-echo "5. Honeyd started (PID $HONEYD_PID): OK"
-
-# Run the actual test: ping from same namespace to honeyd's virtual IP
-echo "6. Testing ping to $HONEYD_VIRTUAL_IP..."
-
-if ip netns exec "$NS_TEST" ping -c 3 -W 2 "$HONEYD_VIRTUAL_IP"; then
-    PING_RESULT=0
-else
-    PING_RESULT=$?
-fi
-
+echo "[Setup] Honeyd started (PID $HONEYD_PID): OK"
 echo ""
-if [ $PING_RESULT -eq 0 ]; then
-    echo "=== SMOKE TEST PASSED ==="
+
+# === ICMP Tests ===
+echo "[ICMP Tests]"
+run_test "Ping virtual host" "ns_exec ping -c 1 -W 2 $HONEYD_VIRTUAL_IP"
+echo ""
+
+# === TCP Tests ===
+echo "[TCP Tests]"
+run_test "Connect to open port 22" "ns_exec nc -z -w 2 $HONEYD_VIRTUAL_IP 22"
+run_test "Connect to open port 80" "ns_exec nc -z -w 2 $HONEYD_VIRTUAL_IP 80"
+run_test_expect_fail "Connect to closed port 23" "ns_exec nc -z -w 2 $HONEYD_VIRTUAL_IP 23"
+run_test_expect_fail "Connect to filtered port 443" "ns_exec nc -z -w 1 $HONEYD_VIRTUAL_IP 443"
+echo ""
+
+
+# === UDP Tests ===
+echo "[UDP Tests]"
+# UDP is harder to test definitively - we check that we don't get ICMP unreachable
+run_test "UDP port 53 accepts packets" "ns_exec sh -c 'echo test | nc -u -w 1 $HONEYD_VIRTUAL_IP 53'"
+echo ""
+
+# === OS Fingerprint Test ===
+echo "[OS Fingerprint Tests]"
+echo "  Running nmap OS detection..."
+TESTS_RUN=$((TESTS_RUN + 1))
+NMAP_OUTPUT=$(ns_exec nmap -O --osscan-guess "$HONEYD_VIRTUAL_IP" 2>&1 || true)
+echo "$NMAP_OUTPUT" | sed 's/^/    /'
+echo ""
+echo -n "  Result: "
+if echo "$NMAP_OUTPUT" | grep -qi "cisco"; then
+    echo "PASS (detected Cisco)"
+    TESTS_PASSED=$((TESTS_PASSED + 1))
+else
+    echo "FAIL (Cisco not detected)"
+    TESTS_FAILED=$((TESTS_FAILED + 1))
+fi
+echo ""
+
+# === Summary ===
+echo "========================================="
+echo "Tests run: $TESTS_RUN"
+echo "Passed: $TESTS_PASSED"
+echo "Failed: $TESTS_FAILED"
+echo "========================================="
+
+if [ $TESTS_FAILED -eq 0 ]; then
+    echo "=== ALL SMOKE TESTS PASSED ==="
     exit 0
 else
-    echo "=== SMOKE TEST FAILED ==="
-    echo "Ping to virtual host $HONEYD_VIRTUAL_IP failed (exit code: $PING_RESULT)"
+    echo "=== SMOKE TESTS FAILED ==="
     exit 1
 fi

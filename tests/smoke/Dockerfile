@@ -17,6 +17,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     iproute2 \
     iputils-ping \
     procps \
+    netcat-openbsd \
+    nmap \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy source
@@ -29,8 +31,8 @@ RUN mkdir -p build && cd build && \
     cmake --build . -j$(nproc) && \
     cmake --install .
 
-# Make test script executable
-RUN chmod +x tests/smoke/smoke_test.sh
+# Make test scripts executable
+RUN chmod +x tests/smoke/smoke_test.sh tests/smoke/http-test.sh
 
 # Run the smoke test
 # Requires: --cap-add=NET_ADMIN --cap-add=NET_RAW
