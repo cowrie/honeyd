@@ -113,10 +113,10 @@ honeyd_osfp_hash(const struct ip_hdr *ip)
 {
 	struct osfptree *root;
 	size_t i;
-	u_char *bin;
+	const u_char *bin;
 	u_char h = 0;
 
-	bin = (u_char *)&ip->ip_src;
+	bin = (const u_char *)&ip->ip_src;
 	for (i = 0; i < sizeof(ip->ip_src); i++)
 		h ^= *bin++;
 
@@ -201,7 +201,7 @@ honeyd_osfp_match(const struct ip_hdr *ip, pf_osfp_t fp)
 	struct pf_osfp_enlist *list;
 	const struct tcp_hdr *tcp;
 
-	tcp = (const struct tcp_hdr *)((u_char *)ip + (ip->ip_hl << 2));
+	tcp = (const struct tcp_hdr *)((const u_char *)ip + (ip->ip_hl << 2));
 
 	list = pf_osfp_fingerprint_hdr(ip, tcp);
 	if (list == NULL) {
