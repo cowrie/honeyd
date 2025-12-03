@@ -1,3 +1,18 @@
+honeyd (1.9.0) unstable; urgency=medium
+
+  * New upstream maintainer
+  * Migrated build system from autotools to CMake
+  * Migrated all Python code to Python 3
+  * Added git-based version detection
+  * Updated debian packaging for modern Debian (Bookworm+):
+    - Added systemd service file
+    - Updated to DEP-5 copyright format
+    - Updated source format to 3.0 (native)
+    - Removed obsolete pyversions file
+    - Updated Standards-Version to 4.6.2
+
+ -- Michel Oosterhof <michel@oosterhof.net>  Wed, 03 Dec 2025 15:08:17 +0800
+
 honeyd (1.6.8) quantal; urgency=low
 
   * Add the ability for honeypots to send periodic broadcasts

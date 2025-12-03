@@ -1,8 +1,7 @@
 Source: honeyd
 Section: net
 Priority: optional
-Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-XSBC-Original-Maintainer: Javier Fernandez-Sanguino Pen~a <jfs@debian.org>
+Maintainer: Michel Oosterhof <michel@oosterhof.net>
 Build-Depends: debhelper-compat (= 13),
                cmake,
                libevent-dev,
@@ -13,7 +12,9 @@ Build-Depends: debhelper-compat (= 13),
                libreadline-dev,
                zlib1g-dev
 Standards-Version: 4.6.2
-Homepage: http://www.honeyd.org
+Homepage: https://github.com/cowrie/honeyd
+Vcs-Git: https://github.com/cowrie/honeyd.git
+Vcs-Browser: https://github.com/cowrie/honeyd
 Rules-Requires-Root: no
 
 Package: honeyd
@@ -21,8 +22,7 @@ Architecture: any
 Depends: adduser (>= 3.52),
          ${shlibs:Depends},
          ${misc:Depends}
-Recommends: farpd, honeyd-common, rrdtool
-Suggests: iisemulator
+Recommends: honeyd-common, rrdtool
 Description: Small daemon that creates virtual hosts simulating their services and behaviour
  Honeyd is a small daemon that creates virtual hosts on a network. The
  hosts can be configured to run arbitrary services, and their TCP
