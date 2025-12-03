@@ -1,0 +1,22 @@
+name: Smoke Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  smoke-test:
+    name: Integration Smoke Test
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build Docker image
+      run: docker build -t honeyd-smoke -f tests/smoke/Dockerfile .
+
+    - name: Run smoke test
+      run: |
+        docker run --rm --privileged honeyd-smoke
