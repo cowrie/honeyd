@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     zlib1g-dev \
     flex \
     bison \
+    python3-dev \
     iproute2 \
     iputils-ping \
     procps \
