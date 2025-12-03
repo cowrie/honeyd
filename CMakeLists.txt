@@ -9,12 +9,12 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 # Read the git tags to determine the project version
 include(GetGitVersion)
 get_git_version(GIT_VERSION)
-# Tell the user what versions we are using
-string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" VERSION ${GIT_VERSION})
+# Strip leading 'v' from version string for display
+string(REGEX REPLACE "^v" "" VERSION ${GIT_VERSION})
 message("-- Version: ${VERSION}")
-# The version of the libraries
-set(GENERIC_LIB_VERSION ${VERSION})
-string(SUBSTRING ${VERSION} 0 1 GENERIC_LIB_SOVERSION)
+# Extract semver for library versioning
+string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" GENERIC_LIB_VERSION ${GIT_VERSION})
+string(SUBSTRING ${GENERIC_LIB_VERSION} 0 1 GENERIC_LIB_SOVERSION)
 
 include(CheckIncludeFiles)
 include(CheckLibraryExists)

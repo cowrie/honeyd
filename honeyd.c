@@ -3578,22 +3578,11 @@ main(int argc, char *argv[])
 	if (getcwd(origin_path, sizeof(origin_path)) == NULL)
 	{
 		syslog(LOG_ERR, "Could not get run path on system.");
-		exit(EXIT_FAILURE);	
-	}
-
-	if(chdir(PATH_HONEYDDATA) == -1)
-	{
-		printf("ERROR: Could not find path PATH_HONEYDDATA: %s\n", PATH_HONEYDDATA);
-		syslog(LOG_ERR,"ERROR: Could not find path PATH_HONEYDDATA: %s\n", PATH_HONEYDDATA);
-		perror("");
 		exit(EXIT_FAILURE);
 	}
-	fprintf(stderr, "Honeyd V%s Copyright (c) 2002-2007 Niels Provos\n",
-	    VERSION);
 
 	orig_argc = argc;
 	orig_argv = argv;
-	syslog_init(orig_argc, orig_argv);
 	while ((c = getopt_long(argc, argv, "VPTdc:i:p:x:a:u:g:f:t:l:s:0:R:m:h?",
 				honeyd_long_opts, NULL)) != -1) {
 		char *ep;
@@ -3759,6 +3748,20 @@ main(int argc, char *argv[])
 		printf("%s\n", PATH_HONEYDDATA);
 		exit(EXIT_SUCCESS);
 	}
+
+	/* Initialize syslog after handling informational options */
+	syslog_init(orig_argc, orig_argv);
+
+	/* Check data directory exists before proceeding */
+	if (chdir(PATH_HONEYDDATA) == -1)
+	{
+		fprintf(stderr, "ERROR: Could not find path PATH_HONEYDDATA: %s\n", PATH_HONEYDDATA);
+		syslog(LOG_ERR, "ERROR: Could not find path PATH_HONEYDDATA: %s", PATH_HONEYDDATA);
+		perror("");
+		exit(EXIT_FAILURE);
+	}
+	fprintf(stderr, "Honeyd V%s Copyright (c) 2002-2007 Niels Provos\n",
+	    VERSION);
 
 	argc -= optind;
 	argv += optind;
