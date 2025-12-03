@@ -22,7 +22,7 @@ Architecture: any
 Depends: adduser (>= 3.52),
          ${shlibs:Depends},
          ${misc:Depends}
-Recommends: honeyd-common, rrdtool
+Recommends: rrdtool
 Description: Small daemon that creates virtual hosts simulating their services and behaviour
  Honeyd is a small daemon that creates virtual hosts on a network. The
  hosts can be configured to run arbitrary services, and their TCP
@@ -44,16 +44,6 @@ Description: Small daemon that creates virtual hosts simulating their services a
         o Adjustable FIN-scan policy.
      * Simulation of arbitrary routing topologies:
        o Configurable latency and packet loss.
-
-Package: honeyd-common
-Architecture: all
-Recommends: honeyd
-Depends: ${misc:Depends}
-Description: Honeyd's honeypot documentation and scripts
- Honeyd is a small daemon that creates virtual hosts on a network,
- including OS fingerprinting personality and simulation of services
- that are simulated by scripts.
  .
- This package provides honeyd's documentation and a number of scripts
- useful to simulate services of different UNIX and Windows operating
- systems: smtp, pop3, ftp, telnet, web server, ssh...
+ This package includes service simulation scripts for smtp, pop3, ftp,
+ telnet, web server, ssh, and more.

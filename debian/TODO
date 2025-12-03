@@ -2,4 +2,4 @@ Debian packaging TODO for honeyd
 
 - Test systemd service file on actual Debian system
 - Consider adding AppArmor profile
-- Update service scripts in honeyd-common for Python 3
+- Update service scripts for Python 3
