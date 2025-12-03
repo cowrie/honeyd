@@ -41,7 +41,7 @@ import sys
 import copy
 import html  # for HTML escaping of variables
 import urllib  # for URL escaping of variables
-import pickle as cPickle  # for template compilation
+import pickle
 import gettext
 
 INCLUDE_DIR = "inc"
@@ -62,10 +62,10 @@ LOCKTYPE_MSVCRT = 2
 LOCKTYPE = None
 try:
     import fcntl
-except:
+except ImportError:
     try:
         import msvcrt
-    except:
+    except ImportError:
         LOCKTYPE = None
     else:
         LOCKTYPE = LOCKTYPE_MSVCRT
@@ -332,14 +332,14 @@ class TemplateManager:
             try:
                 file = open(filename, "rb")
                 self.lock_file(file, LOCK_SH)
-                precompiled = cPickle.load(file)
+                precompiled = pickle.load(file)
             except IOError as e:
                 errno, errstr = e.args
                 raise TemplateError(
                     "IO error in load precompiled "
                     "template '%s': (%d) %s" % (filename, errno, errstr)
                 )
-            except cPickle.UnpicklingError:
+            except pickle.UnpicklingError:
                 remove_bad = 1
                 raise PrecompiledError(filename)
             except:
@@ -385,9 +385,9 @@ class TemplateManager:
                 BINARY = 1
                 READABLE = 0
                 if self._debug:
-                    cPickle.dump(template, file, READABLE)
+                    pickle.dump(template, file, READABLE)
                 else:
-                    cPickle.dump(template, file, BINARY)
+                    pickle.dump(template, file, BINARY)
             except IOError as e:
                 errno, errstr = e.args
                 remove_bad = 1
@@ -570,7 +570,7 @@ class TemplateProcessor:
         self.DEB("APP INPUT:")
         if self._debug:
             pprint.pprint(self._vars, sys.stderr)
-        if part != None and (part == 0 or part < self._current_part):
+        if part is not None and (part == 0 or part < self._current_part):
             raise TemplateError("process() - invalid part number")
 
         # This flag means "jump behind the end of current statement" or
@@ -1423,7 +1423,7 @@ class Template:
             self.DEB("TEMPLATE: VERSION NOT UPTODATE")
             return 0
 
-        if compile_params != None and compile_params != self._compile_params:
+        if compile_params is not None and compile_params != self._compile_params:
             self.DEB("TEMPLATE: DIFFERENT COMPILATION PARAMS")
             return 0
 

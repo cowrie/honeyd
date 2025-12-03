@@ -272,6 +272,6 @@ for line in open(sys.argv[2]):
 
 #Main Loop. Keep accepting requests until one comes back bad
 keep_going = True
-while keep_going == True:
+while keep_going:
     keep_going = GetRequest()    
 

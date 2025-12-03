@@ -1,8 +1,6 @@
 import support
 from htmltmpl import TemplateManager, TemplateProcessor
 
-global counter
-
 self.send_response(200)
 self.send_header("Content-Type", "text/html")
 self.send_nocache()
@@ -18,11 +16,10 @@ message = support.parse_query(self.query)
 # Set the title.
 tproc.set("title", "Honeyd Administration Interface")
 
-# Test
-try:
-    counter += 1
-except:
-    counter = 1
+# Visitor counter (persisted in globals)
+if 'counter' not in globals():
+    counter = 0
+counter += 1
 
 greeting = (
     "Welcome to the Honeyd Administration Interface.You are visitor %d.<p>"

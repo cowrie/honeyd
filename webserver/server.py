@@ -113,7 +113,7 @@ class HoneydRequestHandler(http.server.SimpleHTTPRequestHandler):
         path = self.translate_path(self.path)
         i = path.rfind("?")
         if i >= 0:
-            path, query = path[:i], path[i + 1 :]
+            path = path[:i]
         head, tail = os.path.splitext(path)
         return tail.lower() in (".py", ".pyw")
 
@@ -149,7 +149,7 @@ class HoneydRequestHandler(http.server.SimpleHTTPRequestHandler):
             import honeyd
 
             honeyd.raw_log(message)
-        except:
+        except ImportError:
             sys.stderr.write(message + "\n")
 
     def address_string(self):
