@@ -1,0 +1,6 @@
+# ABOUTME: Ruff linter configuration
+# ABOUTME: Configures per-file ignores for exec'd scripts
+
+[lint.per-file-ignores]
+# These files are executed via exec() with 'request' injected into globals
+"webserver/htdocs/*.py" = ["F821"]
