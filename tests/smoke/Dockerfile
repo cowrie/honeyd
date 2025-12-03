@@ -31,8 +31,8 @@ RUN mkdir -p build && cd build && \
     cmake --build . -j$(nproc) && \
     cmake --install .
 
-# Make test scripts executable
-RUN chmod +x tests/smoke/smoke_test.sh tests/smoke/http-test.sh
+# Make test script executable
+RUN chmod +x tests/smoke/smoke_test.sh
 
 # Run the smoke test
 # Requires: --cap-add=NET_ADMIN --cap-add=NET_RAW
