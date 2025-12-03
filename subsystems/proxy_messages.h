@@ -33,34 +33,39 @@
 #ifndef _PROXY_MESSAGES_H_
 #define _PROXY_MESSAGES_H_
 
-static struct keyvalue badport[] = {
+struct const_keyvalue {
+	const char *key;
+	const char *value;
+};
+
+static struct const_keyvalue badport[] = {
 	{ "junkbuster", "HTTP/1.0 503 Connect failed\r\nContent-Type: text/html\r\n\r\n<html>\r\n<head>\r\n<title>Internet Junkbuster: Connect failed</title>\r\n</head>\r\n<body bgcolor=\"#f8f8f0\" link=\"#000078\" alink=\"#ff0022\" vlink=\"#787878\">\r\n<h1><center><strong>Internet J<small>UNK<i><font color=\"red\">BUSTER</font></i></small></strong></center></h1>TCP connection to $rawhost failed: Operation not permitted.\r\n<br></body>\r\n</html>\r\n" },
 	{ NULL, NULL }
 };
 
-static struct keyvalue goodport[] = {
+static struct const_keyvalue goodport[] = {
 	{ "junkbuster", "HTTP/1.0 200 Connection established\r\nProxy-Agent: IJ/2.0.2\r\n\r\n" },
 	{ NULL, NULL }
 };
 
-static struct keyvalue badconnection[] = {
+static struct const_keyvalue badconnection[] = {
 	{ "junkbuster", "HTTP/1.0 400 Invalid header received from browser\r\n\r\n" },
 	{ NULL, NULL }
 };
 
-static struct keyvalue baddomain[] = {
+static struct const_keyvalue baddomain[] = {
 	{ "junkbuster", "HTTP/1.0 404 Non-existent domain\r\nContent-Type: text/html\r\n\r\n<html>\r\n<head>\r\n<title>Internet Junkbuster: Non-existent domain</title>\r\n</head>\r\n<body bgcolor=\"#f8f8f0\" link=\"#000078\" alink=\"#ff0022\" vlink=\"#787878\">\r\n<h1><center><strong>Internet J<small>UNK<i><font color=\"red\">BUSTER</font></i></small></strong></center></h1>No such domain: $host\r\n</body>\r\n</html>\r\n" },
 	{ NULL, NULL }
 };
 
-struct keyvalue badconnect[] = {
+static struct const_keyvalue badconnect[] = {
 	{ "junkbuster", "HTTP/1.0 503 Connect failed\r\nContent-Type: text/html\r\n\r\n<html>\r\n<head>\r\n<title>Internet Junkbuster: Connect failed</title>\r\n</head>\r\n<body bgcolor=\"#f8f8f0\" link=\"#000078\" alink=\"#ff0022\" vlink=\"#787878\">\r\n<h1><center><strong>Internet J<small>UNK<i><font color=\"red\">BUSTER</font></i></small></strong></center></h1>TCP connection to $host failed: $reason.\r\n<br></body>\r\n</html>\r\n" },
 	{ NULL, NULL }
 };
 
 /* Allowed domains */
 
-static struct keyvalue allowedhosts[] = {
+static struct const_keyvalue allowedhosts[] = {
     { "www.yahoo.com", "^.*" },
     { "www.google.com", "^.*" },
     { "www.alltheweb.com", "^.*" },

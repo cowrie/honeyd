@@ -100,46 +100,41 @@ proxy_logline(struct proxy_ta *ta)
 
 	if (!strcasecmp("connect", cmd)) {
 		snprintf(line, sizeof(line),
-		    "%d %s: CONNECT %s:%s",
-		    time(NULL), srcipaddress,
+		    "%ld %s: CONNECT %s:%s",
+		    (long)time(NULL), srcipaddress,
 		    host, port);
 	} else {
 		snprintf(line, sizeof(line),
-		    "%d %s: GET %s:%s%s", 
-		    time(NULL), srcipaddress,
+		    "%ld %s: GET %s:%s%s",
+		    (long)time(NULL), srcipaddress,
 		    host, port, uri);
 	}
 
 	return (line);
 }
 
-static void
-proxy_clear_state(struct proxy_ta *ta)
-{
-	/* XXX - something here */
-}
-
 /* Callbacks for PROXY handling */
 
 static char *
-proxy_response(struct proxy_ta *ta, struct keyvalue data[]) {
+proxy_response(struct proxy_ta *ta, struct const_keyvalue data[]) {
 	static char line[1024];
-	struct keyvalue *cur;
+	const struct const_keyvalue *msg;
+	struct keyvalue *kv;
 
-	for (cur = &data[0]; cur->key != NULL; cur++) {
-		if (strcmp(ta->proxy_id, cur->key) == 0)
+	for (msg = &data[0]; msg->key != NULL; msg++) {
+		if (strcmp(ta->proxy_id, msg->key) == 0)
 			break;
 	}
 
-	if (cur->key == NULL)
+	if (msg->key == NULL)
 		return (NULL);
 
-	strlcpy(line, cur->value, sizeof(line));
+	strlcpy(line, msg->value, sizeof(line));
 
-	TAILQ_FOREACH(cur, &ta->dictionary, next) {
-		strrpl(line, sizeof(line), cur->key, cur->value);
+	TAILQ_FOREACH(kv, &ta->dictionary, next) {
+		strrpl(line, sizeof(line), kv->key, kv->value);
 	}
-	
+
 	return (line);
 }
 
@@ -192,12 +187,12 @@ proxy_allowed_network(const char *host)
  */
 
 static int
-proxy_allowed_get(struct proxy_ta *ta, struct keyvalue data[])
+proxy_allowed_get(struct proxy_ta *ta, struct const_keyvalue data[])
 {
 	const char *error;
 	int erroroffset;
 	char *host, *uri;
-	struct keyvalue *cur;
+	const struct const_keyvalue *cur;
 	pcre *re_uri;
 	int rc;
 	int ovector[30];

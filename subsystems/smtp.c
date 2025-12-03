@@ -79,7 +79,9 @@ extern int debug;
 	if (debug >= x) fprintf y; \
 } while (0)
 
-ssize_t atomicio(ssize_t (*)(), int, void *, size_t);
+#include "atomicio.h"
+
+typedef ssize_t (*atomicio_f)(int, void *, size_t);
 
 /* globals */
 
@@ -89,7 +91,7 @@ const char *log_datadir = NULL;	/* log the data somewhere */
 static char datadir_buf[1024];
 static char getcwdbuf[1024];
 
-static char *domains[] = {
+static const char *domains[] = {
 	"iridic", "bocoy", "hers", "alfa", "chital", "sound", "razz",
 	"update", "gown", "teeter", "embark", "valeta", "sipid", "whally",
 	"dewcup", "shabby", "eral", "kibble", "samh", "artha", "zither",
@@ -101,7 +103,7 @@ static char *domains[] = {
 	"finial", "euphon", "auxin", "voiced"
 };
 
-static char *hosts[] = {
+static const char *hosts[] = {
 	"neofetal", "theonomy", "panicked", "securely", "palgat", "rejoice",
 	"teagle", "unkeyed", "calor", "overpick", "runefolk", "trend",
 	"nunship", "leveling", "messe", "baetuli", "bossing", "mystic",
@@ -115,18 +117,18 @@ static char *hosts[] = {
 };
 
 int
-smtp_set_datadir(const char *optarg)
+smtp_set_datadir(const char *dir)
 {
 	struct stat sb;
 
 	getcwd(getcwdbuf, sizeof(getcwdbuf));
 
-	if (*optarg != '/') {
+	if (*dir != '/') {
 		snprintf(datadir_buf, sizeof(datadir_buf),
-		    "%s/%s", getcwdbuf, optarg);
+		    "%s/%s", getcwdbuf, dir);
 		log_datadir = datadir_buf;
 	} else {
-		log_datadir = optarg;
+		log_datadir = dir;
 	}
 	if (stat(log_datadir, &sb) == -1 || (sb.st_mode & S_IFDIR) == 0)
 		return (-1);
@@ -212,24 +214,25 @@ smtp_clear_state(struct smtp_ta *ta)
 /* Callbacks for SMTP handling */
 
 static char *
-smtp_response(struct smtp_ta *ta, struct keyvalue data[]) {
+smtp_response(struct smtp_ta *ta, struct const_keyvalue data[]) {
 	static char line[1024];
-	struct keyvalue *cur;
+	const struct const_keyvalue *msg;
+	struct keyvalue *kv;
 
-	for (cur = &data[0]; cur->key != NULL; cur++) {
-		if (strcmp(ta->mailer_id, cur->key) == 0)
+	for (msg = &data[0]; msg->key != NULL; msg++) {
+		if (strcmp(ta->mailer_id, msg->key) == 0)
 			break;
 	}
 
-	if (cur->key == NULL)
+	if (msg->key == NULL)
 		return (NULL);
 
-	strlcpy(line, cur->value, sizeof(line));
+	strlcpy(line, msg->value, sizeof(line));
 
-	TAILQ_FOREACH(cur, &ta->dictionary, next) {
-		strrpl(line, sizeof(line), cur->key, cur->value);
+	TAILQ_FOREACH(kv, &ta->dictionary, next) {
+		strrpl(line, sizeof(line), kv->key, kv->value);
 	}
-	
+
 	return (line);
 }
 
@@ -346,7 +349,7 @@ smtp_handle_data(struct smtp_ta *ta, char *line)
 	} else if (kv_find(&ta->dictionary, "$recipient") == NULL) {
 		response = smtp_response(ta, datanorcpt);
 	} else {
-		response = smtp_response(ta, data);
+		response = smtp_response(ta, smtpdata);
 		ta->state = EXPECT_DATA;
 	}
 
@@ -640,7 +643,7 @@ smtp_write_count(const char *countname, int count)
 		return (-1);
 	}
 
-	if (atomicio(write, fd, &count, sizeof(count)) != count) {
+	if (atomicio((atomicio_f)write, fd, &count, sizeof(count)) != count) {
 		count = -1;
 		goto out;
 	}
@@ -697,7 +700,7 @@ smtp_hashed_store(const char *datadir, void *data, size_t datalen)
 		return (adigest);
 	}
 
-	atomicio(write, fd, data, datalen);
+	atomicio((atomicio_f)write, fd, data, datalen);
 	close(fd);
 
 	return (adigest);
