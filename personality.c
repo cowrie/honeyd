@@ -2286,7 +2286,7 @@ parse_ie(struct personality *pers, int off, char *line)
 
 
 struct parse_test {
-	char *start;
+	const char *start;
 	int offset;
 	int (*parse_test)(struct personality *, int, char *);
 } parse_tests[] = {
