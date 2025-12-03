@@ -1,5 +1,5 @@
 #!/bin/bash
-# ABOUTME: Smoke test for honeyd - verifies ICMP, TCP, UDP, and OS fingerprinting
+# ABOUTME: Smoke test for honeyd - verifies ICMP, TCP, UDP, OS fingerprinting, and webserver
 # ABOUTME: Uses single network namespace with loopback for isolation
 
 set -e
@@ -10,7 +10,9 @@ CONFIG_FILE="${CONFIG_FILE:-/src/honeyd/tests/smoke/test.conf}"
 
 # Network configuration
 HONEYD_VIRTUAL_IP="192.0.2.100"
+HONEYD_HOST_IP="192.0.2.1"
 TEST_NETWORK="192.0.2.0/24"
+WEBSERVER_PORT="8080"
 
 # Unique names using PID to allow parallel runs
 NS_TEST="hd_test_$$"
@@ -97,8 +99,11 @@ ns_exec ip addr add 192.0.2.1/32 dev lo
 ns_exec ip route add "$TEST_NETWORK" dev lo
 echo "[Setup] Network namespace created: OK"
 
-# Start honeyd in the namespace
-ns_exec "$HONEYD_BIN" -d -f "$CONFIG_FILE" -i lo "$TEST_NETWORK" 2>&1 &
+# Start honeyd in the namespace with webserver enabled
+ns_exec "$HONEYD_BIN" -d -f "$CONFIG_FILE" -i lo \
+    --webserver-address="$HONEYD_HOST_IP" \
+    --webserver-port="$WEBSERVER_PORT" \
+    "$TEST_NETWORK" 2>&1 &
 HONEYD_PID=$!
 sleep 2
 
@@ -127,6 +132,11 @@ echo ""
 echo "[UDP Tests]"
 # UDP is harder to test definitively - we check that we don't get ICMP unreachable
 run_test "UDP port 53 accepts packets" "ns_exec sh -c 'echo test | nc -u -w 1 $HONEYD_VIRTUAL_IP 53'"
+echo ""
+
+# === Webserver Tests ===
+echo "[Webserver Tests]"
+run_test "Webserver responds to HTTP GET" "ns_exec curl -s -o /dev/null -w '%{http_code}' http://$HONEYD_HOST_IP:$WEBSERVER_PORT/ | grep -q '200\\|404'"
 echo ""
 
 # === OS Fingerprint Test ===

@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     procps \
     netcat-openbsd \
     nmap \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy source
