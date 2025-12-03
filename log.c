@@ -161,9 +161,12 @@ honeyd_logproto(int proto)
 	static char protoname[32];
 
 	struct protoent *pe;
-	struct protoent tcp = { "tcp", NULL, IP_PROTO_TCP };
-	struct protoent udp = { "udp", NULL, IP_PROTO_UDP };
-	struct protoent icmp = { "icmp", NULL, IP_PROTO_ICMP };
+	static char tcp_name[] = "tcp";
+	static char udp_name[] = "udp";
+	static char icmp_name[] = "icmp";
+	struct protoent tcp = { tcp_name, NULL, IP_PROTO_TCP };
+	struct protoent udp = { udp_name, NULL, IP_PROTO_UDP };
+	struct protoent icmp = { icmp_name, NULL, IP_PROTO_ICMP };
 
 	switch(proto) {
 	case IP_PROTO_TCP:
