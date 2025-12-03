@@ -1,5 +1,10 @@
 Honeyd TODO
 
+- Fix webserver segfault
+  - Honeyd crashes when starting with --webserver-address and --webserver-port
+  - Likely issue in pyextend_webserver_init() or Python module loading
+  - See: pyextend.c:1415
+
 - Upgrade nmap-os-db to modern format (7.94.2+)
   - Current db works but is from 2022 (1996-2022 copyright)
   - Modern nmap-os-db has intentional "poison pill" line without # comment:
