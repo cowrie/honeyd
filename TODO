@@ -1,0 +1,11 @@
+Honeyd TODO
+
+- Upgrade nmap-os-db to modern format (7.94.2+)
+  - Current db works but is from 2022 (1996-2022 copyright)
+  - Modern nmap-os-db has intentional "poison pill" line without # comment:
+    "This nmap-os-db is only valid for Nmap 7.94.2 and later"
+  - This breaks honeyd's parser in personality.c at line 2412
+  - Format change: TCP Options (OPS) now support ranges like "M5B4-M5B8"
+  - Would need to modify parse_ops() and parse_option() to handle ranges
+  - See: https://nmap.org/changelog.html (7.95 entry)
+  - Files: personality.c (parse_ops at line 1860, parse_option at line 1911)
