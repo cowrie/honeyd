@@ -143,19 +143,19 @@ echo ""
 echo "[Proxy/SMTP Subsystem Tests]"
 export PROXY_BIN="${PROXY_BIN:-/usr/local/share/honeyd/proxy}"
 export SMTP_BIN="${SMTP_BIN:-/usr/local/share/honeyd/smtp}"
+TESTS_RUN=$((TESTS_RUN + 1))
 if [ -x "$PROXY_BIN" ] && [ -x "$SMTP_BIN" ]; then
     # Run the Python unit tests for proxy/smtp
     if python3 /src/honeyd/subsystems/test_proxy.py 2>&1; then
         echo "  Proxy/SMTP unit tests... PASS"
-        TESTS_RUN=$((TESTS_RUN + 1))
         TESTS_PASSED=$((TESTS_PASSED + 1))
     else
         echo "  Proxy/SMTP unit tests... FAIL"
-        TESTS_RUN=$((TESTS_RUN + 1))
         TESTS_FAILED=$((TESTS_FAILED + 1))
     fi
 else
-    echo "  Proxy/SMTP binaries not found at $PROXY_BIN / $SMTP_BIN, skipping"
+    echo "  Proxy/SMTP binaries not found at $PROXY_BIN / $SMTP_BIN... FAIL"
+    TESTS_FAILED=$((TESTS_FAILED + 1))
 fi
 echo ""
 
