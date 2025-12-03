@@ -1,17 +1,17 @@
 import support
 from htmltmpl import TemplateManager, TemplateProcessor
 
-self.send_response(200)
-self.send_header("Content-Type", "text/html")
-self.send_nocache()
-self.end_headers()
+request.send_response(200)
+request.send_header("Content-Type", "text/html")
+request.send_nocache()
+request.end_headers()
 
 # Compile or load already precompiled template.
-template = TemplateManager().prepare(self.root + "/templates/index.tmpl")
+template = TemplateManager().prepare(request.root + "/templates/index.tmpl")
 tproc = TemplateProcessor(0)
 
 # Process commands given to us
-message = support.parse_query(self.query)
+message = support.parse_query(request.query)
 
 # Set the title.
 tproc.set("title", "Honeyd Administration Interface")
@@ -26,9 +26,9 @@ greeting = (
 ) % counter
 
 content = support.interface_table()
-content += "<p>" + support.stats_table(self.root) + "</p>\n"
-content += "<p>" + support.status_connections(self.root, "tcp") + "</p>\n"
-content += "<p>" + support.status_connections(self.root, "udp") + "</p>\n"
+content += "<p>" + support.stats_table(request.root) + "</p>\n"
+content += "<p>" + support.status_connections(request.root, "tcp") + "</p>\n"
+content += "<p>" + support.status_connections(request.root, "udp") + "</p>\n"
 
 side_content = (
     "<div class=graphs>"
@@ -46,4 +46,4 @@ tproc.set("side_content", side_content)
 tproc.set("uptime", support.uptime())
 
 # Print the processed template.
-self.wfile.write(tproc.process(template).encode('utf-8'))
+request.wfile.write(tproc.process(template).encode('utf-8'))
