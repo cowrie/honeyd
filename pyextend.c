@@ -1053,8 +1053,8 @@ pyextend_connection_start(struct tuple *hdr, struct command *cmd,
 	}
 
 	/* Set up state with event callbacks */
-	event_set(&state->pread, state->fd, EV_READ, pyextend_cbread, state);
-	event_set(&state->pwrite, state->fd, EV_WRITE, pyextend_cbwrite,state);
+	event_assign(&state->pread, libevent_base, state->fd, EV_READ, pyextend_cbread, state);
+	event_assign(&state->pwrite, libevent_base, state->fd, EV_WRITE, pyextend_cbwrite, state);
 
 	addr_pack(&src, ADDR_TYPE_IP, IP_ADDR_BITS, &hdr->ip_src,IP_ADDR_LEN);
 	addr_pack(&dst, ADDR_TYPE_IP, IP_ADDR_BITS, &hdr->ip_dst,IP_ADDR_LEN);
@@ -1465,7 +1465,7 @@ pyextend_webserver_init(char *address, int port, char *root_dir)
 	syslog(LOG_NOTICE, "HTTP server root at %s", root_dir);
 	
 	/* Accept connections */
-	event_set(&ev_accept, pyserver_fd, EV_READ | EV_PERSIST,
+	event_assign(&ev_accept, libevent_base, pyserver_fd, EV_READ | EV_PERSIST,
 	    pyextend_accept, NULL);
 
 	/* Give the highest priority to the accept */
