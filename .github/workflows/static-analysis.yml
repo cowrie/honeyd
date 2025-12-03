@@ -89,4 +89,6 @@ jobs:
         find .. -name "*.c" ! -path "../build/*" ! -path "../dpkt/*" ! -path "../pypcap/*" > files.txt
 
         # Run clang-tidy on each file
-        cat files.txt | xargs -I {} clang-tidy -p . {}
+        # Disable concurrency-mt-unsafe: honeyd is single-threaded
+        cat files.txt | xargs -I {} clang-tidy -p . \
+          -checks='-concurrency-mt-unsafe' {}
