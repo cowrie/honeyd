@@ -39,9 +39,9 @@ import os.path
 import pprint  # only for debugging
 import sys
 import copy
-import cgi  # for HTML escaping of variables
+import html  # for HTML escaping of variables
 import urllib  # for URL escaping of variables
-import cPickle  # for template compilation
+import pickle as cPickle  # for template compilation
 import gettext
 
 INCLUDE_DIR = "inc"
@@ -507,7 +507,7 @@ class TemplateProcessor:
             # template top-level ordinary variable
             if not var.islower():
                 raise TemplateError("Invalid variable name '%s'." % var)
-        elif type(value) == ListType:
+        elif isinstance(value, list):
             # template top-level loop
             if var != var.capitalize():
                 raise TemplateError("Invalid loop name '%s'." % var)
@@ -833,20 +833,20 @@ class TemplateProcessor:
                     (self._global_vars and global_override != "0")
                     or global_override == "1"
                 )
-                and scope.has_key(var)
+                and var in scope
                 and self.is_ordinary_var(scope[var])
             ):
                 globals.append(scope[var])
 
             # Descent deeper into the hierarchy.
-            if scope.has_key(loop_name[i]) and scope[loop_name[i]]:
+            if loop_name[i] in scope and scope[loop_name[i]]:
                 scope = scope[loop_name[i]][loop_pass[i]]
             else:
                 return ""
 
-        if scope.has_key(var):
+        if var in scope:
             # Value exists in current loop.
-            if type(scope[var]) == ListType:
+            if isinstance(scope[var], list):
                 # The requested value is a loop.
                 # Return total number of its passes.
                 return len(scope[var])
@@ -944,7 +944,7 @@ class TemplateProcessor:
             or override == "HTML"
             or override == "1"
         ):
-            return cgi.escape(str, ESCAPE_QUOTES)
+            return html.escape(str, quote=bool(ESCAPE_QUOTES))
         elif override == "URL":
             return urllib.quote_plus(str)
         else:

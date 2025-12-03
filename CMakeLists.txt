@@ -431,8 +431,27 @@ install(DIRECTORY scripts/
 
 install(DIRECTORY webserver/
     DESTINATION ${CMAKE_INSTALL_DATADIR}/honeyd/webserver
-    USE_SOURCE_PERMISSIONS
-    PATTERN "*.pyc" EXCLUDE)
+    FILE_PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
+    DIRECTORY_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+    PATTERN "*.pyc" EXCLUDE
+    PATTERN "*.tmplc" EXCLUDE)
+
+# Post-install: precompile templates and set permissions
+# Templates must be compiled after install so paths are correct
+install(CODE "
+    message(STATUS \"Precompiling webserver templates...\")
+    execute_process(
+        COMMAND ${Python3_EXECUTABLE} \${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/honeyd/webserver/precompile_templates.py
+                \${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/honeyd/webserver/htdocs
+        WORKING_DIRECTORY \${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/honeyd/webserver
+        RESULT_VARIABLE precompile_result
+    )
+    if(NOT precompile_result EQUAL 0)
+        message(WARNING \"Template precompilation failed (error \${precompile_result})\")
+    endif()
+    message(STATUS \"Setting graphs directory permissions...\")
+    execute_process(COMMAND chmod 1777 \${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/honeyd/webserver/htdocs/graphs)
+")
 
 install(FILES honeyd.8
     DESTINATION ${CMAKE_INSTALL_MANDIR}/man8)

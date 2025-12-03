@@ -31,6 +31,7 @@
  */
 
 /* Python.h must be included first per Python documentation */
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
 #include <sys/types.h>
@@ -821,6 +822,10 @@ pyextend_init(void)
 	PyModule_AddIntConstant(pModule, "EVENT_ON", 1);
 	PyModule_AddIntConstant(pModule, "EVENT_OFF", 0);
 	PyModule_AddStringConstant(pModule, "version", VERSION);
+
+	/* Add the honeyd module to sys.modules so it can be imported */
+	PyObject *sys_modules = PyImport_GetModuleDict();
+	PyDict_SetItemString(sys_modules, "honeyd", pModule);
 }
 
 /* Cleans up all Python stuff when we exit */
@@ -1237,12 +1242,12 @@ pyextend_request_new(int fd, struct addr *src)
 	req->fd = fd;
 	req->src = *src;
 
-	if ((req->evb = bufferevent_new(fd,
-		 pyextend_evb_readcb, pyextend_evb_writecb, pyextend_evb_errcb,
-		 req)) == NULL) {
+	if ((req->evb = bufferevent_socket_new(libevent_base, fd, 0)) == NULL) {
 		free(req);
 		return (NULL);
 	}
+	bufferevent_setcb(req->evb, pyextend_evb_readcb, pyextend_evb_writecb,
+	    pyextend_evb_errcb, req);
 
 	/* Highest priority to UI requests */
 	bufferevent_priority_set(req->evb, 0);
@@ -1382,12 +1387,12 @@ pyextend_webserver_verify_setup(const char *root_dir)
 	struct _dirs {
 		const char *path;
 		int mode;
-	} dirs[] = { 
+	} dirs[] = {
 		{ "styles", R_OK },
 		{ "images", R_OK },
-		{ ".", W_OK|R_OK },
+		{ ".", R_OK },
 		{ "graphs", W_OK|R_OK },
-		{ "templates", W_OK|R_OK },
+		{ "templates", R_OK },
 		{ NULL, 0 }
 	};
 	struct _dirs *p;

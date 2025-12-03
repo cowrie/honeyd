@@ -31,6 +31,7 @@
  */
 
 /* Python.h must be included first per Python documentation */
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <marshal.h>
 

@@ -49,4 +49,4 @@ tproc.set("side_content", side_content)
 tproc.set("uptime", support.uptime())
 
 # Print the processed template.
-self.wfile.write(tproc.process(template))
+self.wfile.write(tproc.process(template).encode('utf-8'))

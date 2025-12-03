@@ -1,9 +1,11 @@
 Honeyd TODO
 
-- Fix webserver segfault
-  - Honeyd crashes when starting with --webserver-address and --webserver-port
-  - Likely issue in pyextend_webserver_init() or Python module loading
-  - See: pyextend.c:1415
+- Webserver permission verification after privilege drop (partially fixed)
+  - Templates are now precompiled at build time (precompile_templates.py)
+  - htdocs can be installed read-only since .tmplc files exist
+  - graphs directory still needs write access for RRD graph generation
+  - pyextend.c:1379 (verify_setup) may still fail if graphs directory is read-only
+  - Consider: disable graph generation or make it optional
 
 - Upgrade nmap-os-db to modern format (7.94.2+)
   - Current db works but is from 2022 (1996-2022 copyright)

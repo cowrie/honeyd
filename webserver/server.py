@@ -138,7 +138,7 @@ class HoneydRequestHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         with open(scriptname) as f:
-            exec(f.read(), {"__name__": "__main__", "__file__": scriptname})
+            exec(f.read(), {"__name__": "__main__", "__file__": scriptname, "self": self})
 
     def log_message(self, format, *args):
         """Logs a message to Honeyd via syslog."""
