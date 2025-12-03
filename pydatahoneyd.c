@@ -174,7 +174,7 @@ static unsigned char record_data[] = {
 static void
 pyrecord_test(void)
 {
-	char *some_code =
+	const char *some_code =
 	    "def TestProcessing(input):\n"
 	    "  print('\\t\\t', input)\n"
 	    "  return [ [ input['src'], b'\\x01' ] ]\n"

@@ -263,7 +263,7 @@ PyFilterFree(struct PyFilter *filter)
 }
 
 struct PyFilter*
-PyFilterFromCode(char *code)
+PyFilterFromCode(const char *code)
 {
 	struct PyFilter *filter = calloc(1, sizeof(struct PyFilter));
 	if (filter == NULL) {
@@ -374,7 +374,7 @@ PyFilterRun(struct PyFilter *filter, PyObject *record)
 static void
 pyfilter_test(void)
 {
-	char *some_code =
+	const char *some_code =
 	    "def TestProcessing(input):\n"
 	    "  print('\\t\\tinput: %d' % len(input))\n"
 	    "  return [ [ input['src'], b'\\x01' ], [ input['dst'], b'\\x01' ] ]\n"

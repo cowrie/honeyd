@@ -267,7 +267,7 @@ pyextend_count_ips(struct template *tmpl, void *arg)
 static void
 pyextend_humanreadable_action(struct action *action, char *buffer, size_t len)
 {
-	char *flags = NULL;
+	const char *flags = NULL;
 	if (action->flags & PORT_TARPIT) {
 		flags = "tarpit ";
 	}
@@ -838,7 +838,7 @@ pyextend_run(struct evbuffer *output, char *command)
 	char *data;
 	Py_ssize_t datlen;
 
-	char *preamble = "import StringIO\n"
+	const char *preamble = "import StringIO\n"
 	    "import sys\n"
 	    "myout = StringIO.StringIO()\n"
 	    "myerr = StringIO.StringIO()\n"
@@ -872,7 +872,7 @@ pyextend_run(struct evbuffer *output, char *command)
 	
 	if (compiled_code == NULL) {
 		const char *err = "Compilation of Python code failed.\n";
-		evbuffer_add(output, (char *)err, strlen(err));
+		evbuffer_add(output, err, strlen(err));
 		PyErr_Print();
 		return;
 	}
@@ -1415,7 +1415,7 @@ void
 pyextend_webserver_init(char *address, int port, char *root_dir)
 {
 	PyObject *pArgs, *pName, *pModule, *pDict, *pFuncWebInit;
-	char *script = "server";
+	const char *script = "server";
 
 	pName = PyUnicode_FromString(script);
 	pModule = PyImport_Import(pName);

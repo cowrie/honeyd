@@ -77,7 +77,7 @@ void pydataprocessing_init(void);
 void pydataprocessing_test(void);
 
 void PyFilterFree(struct PyFilter *filter);
-struct PyFilter* PyFilterFromCode(char *code);
+struct PyFilter* PyFilterFromCode(const char *code);
 
 PyObject *PyFilterRun(struct PyFilter *filter, PyObject *record);
 
