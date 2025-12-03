@@ -23,6 +23,7 @@ jobs:
           libevent-dev \
           libpcap-dev \
           libdumbnet-dev \
+          libpcre3-dev \
           flex \
           bison \
           libreadline-dev \
@@ -70,6 +71,7 @@ jobs:
           libevent-dev \
           libpcap-dev \
           libdumbnet-dev \
+          libpcre3-dev \
           flex \
           bison \
           libreadline-dev \
