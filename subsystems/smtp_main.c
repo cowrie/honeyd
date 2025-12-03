@@ -60,8 +60,8 @@
 #include <err.h>
 #include <syslog.h>
 
-#include <event.h>
-#include <evdns.h>
+#include <event2/event.h>
+#include <event2/dns.h>
 
 #include "util.h"
 #include "smtp.h"
@@ -72,6 +72,8 @@ extern FILE *flog_email;	/* log the email transactions somewhere */
 extern const char *log_datadir;	/* log the email transactions somewhere */
 
 int debug;
+struct event_base *proxy_base;
+struct evdns_base *proxy_dns_base;
 
 static void
 usage(char *progname)
@@ -86,7 +88,7 @@ usage(char *progname)
 int
 main(int argc, char **argv)
 {
-	struct event bind_ev;
+	struct event *bind_ev;
 	char *progname = argv[0];
 	char *logfile = NULL;
 	int ch;
@@ -100,7 +102,7 @@ main(int argc, char **argv)
 		case 'p':
 			port = atoi(optarg);
 			if (!port)
-			err(1, "Bad port number: %s", optarg);
+				err(1, "Bad port number: %s", optarg);
 			break;
 		case 'd': {
 			if (smtp_set_datadir(optarg) == -1)
@@ -119,17 +121,25 @@ main(int argc, char **argv)
 	if (logfile != NULL) {
 		flog_email = fopen(logfile, "a");
 		if (flog_email == NULL)
-		err(1, "%s: fopen(%s)", __func__, logfile);
+			err(1, "%s: fopen(%s)", __func__, logfile);
 		fprintf(stderr, "Logging to %s\n", logfile);
 	}
 
-	event_init();
+	proxy_base = event_base_new();
+	if (proxy_base == NULL)
+		errx(1, "event_base_new failed");
 
-	evdns_init();
+	proxy_dns_base = evdns_base_new(proxy_base, 1);
+	if (proxy_dns_base == NULL)
+		errx(1, "evdns_base_new failed");
 
-	smtp_bind_socket(&bind_ev, port);
-	
-	event_dispatch();
+	bind_ev = smtp_bind_socket(port);
+	(void)bind_ev;
+
+	event_base_dispatch(proxy_base);
+
+	evdns_base_free(proxy_dns_base, 0);
+	event_base_free(proxy_base);
 
 	exit(0);
 }

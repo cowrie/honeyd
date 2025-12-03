@@ -33,6 +33,12 @@
 #ifndef _PROXY_H_
 #define _PROXY_H_
 
+#include <event2/event.h>
+#include <event2/dns.h>
+
+extern struct event_base *proxy_base;
+extern struct evdns_base *proxy_dns_base;
+
 #define X_FORWARDED "X-Forwarded-For:"
 #define CORRUPT_SPACE	20
 
@@ -64,7 +70,7 @@ struct proxy_ta {
 struct proxy_ta *proxy_ta_new(int fd, struct sockaddr *sa, socklen_t salen,
     struct sockaddr *lsa, socklen_t lsalen);
 void proxy_ta_free(struct proxy_ta *ta);
-void proxy_bind_socket(struct event *ev, u_short port);
+struct event *proxy_bind_socket(u_short port);
 void proxy_init(void);
 char *proxy_pcre_group(char *line, int groupnr, int ovector[]);
 

@@ -63,8 +63,10 @@
 #include <err.h>
 #include <sha1.h>
 #include <syslog.h>
-#include <event.h>
-#include <evdns.h>
+#include <event2/event.h>
+#include <event2/bufferevent.h>
+#include <event2/buffer.h>
+#include <event2/dns.h>
 
 #include "util.h"
 #include "smtp.h"
@@ -170,7 +172,7 @@ longhash1(uint64_t key)
 
 /* Generic SMTP related code */
 
-char *
+static char *
 smtp_logline(struct smtp_ta *ta)
 {
 	static char line[1024];
@@ -193,7 +195,7 @@ smtp_logline(struct smtp_ta *ta)
 	return (line);
 }
 
-void
+static void
 smtp_clear_state(struct smtp_ta *ta)
 {
 	ta->state = EXPECT_HELO;
@@ -209,7 +211,7 @@ smtp_clear_state(struct smtp_ta *ta)
 
 /* Callbacks for SMTP handling */
 
-char *
+static char *
 smtp_response(struct smtp_ta *ta, struct keyvalue data[]) {
 	static char line[1024];
 	struct keyvalue *cur;
@@ -231,7 +233,7 @@ smtp_response(struct smtp_ta *ta, struct keyvalue data[]) {
 	return (line);
 }
 
-void
+static void
 smtp_handle_helo_cb(int result, char type, int count, int ttl,
     void *addresses, void *arg)
 {
@@ -255,7 +257,7 @@ smtp_handle_helo_cb(int result, char type, int count, int ttl,
 	ta->state = EXPECT_MAILFROM;
 }
 
-int
+static int
 smtp_handle_helo(struct smtp_ta *ta, char *line)
 {
 	struct sockaddr_in *sin = (struct sockaddr_in *)&ta->sa;
@@ -272,13 +274,14 @@ smtp_handle_helo(struct smtp_ta *ta, char *line)
 	domainname = strsep(&line, " ");
 	kv_replace(&ta->dictionary, "$srcname", domainname);
 
-	evdns_resolve_reverse(&sin->sin_addr, 0, smtp_handle_helo_cb, ta);
+	evdns_base_resolve_reverse(proxy_dns_base, &sin->sin_addr, 0,
+	    smtp_handle_helo_cb, ta);
 	ta->dns_pending = 1;
 
 	return (0);
 }
 
-int
+static int
 smtp_handle_ehlo(struct smtp_ta *ta, char *line)
 {
 	char *domainname, *response;
@@ -301,7 +304,7 @@ smtp_handle_ehlo(struct smtp_ta *ta, char *line)
 	return (0);
 }
 
-int
+static int
 smtp_handle_mailfrom(struct smtp_ta *ta, char *line)
 {
 	char *response;
@@ -318,7 +321,7 @@ smtp_handle_mailfrom(struct smtp_ta *ta, char *line)
 	return (0);
 }
 
-int
+static int
 smtp_handle_rcpt(struct smtp_ta *ta, char *line)
 {
 	char *response;
@@ -334,7 +337,7 @@ smtp_handle_rcpt(struct smtp_ta *ta, char *line)
 	return (0);
 }
 
-int
+static int
 smtp_handle_data(struct smtp_ta *ta, char *line)
 {
 	char *response;
@@ -351,7 +354,7 @@ smtp_handle_data(struct smtp_ta *ta, char *line)
 	return (0);
 }
 
-int
+static int
 smtp_handle_quit(struct smtp_ta *ta, char *line)
 {
 	char *response;
@@ -361,7 +364,7 @@ smtp_handle_quit(struct smtp_ta *ta, char *line)
 	return (0);
 }
 
-int
+static int
 smtp_handle_help(struct smtp_ta *ta, char *line)
 {
 	char *response;
@@ -377,7 +380,7 @@ smtp_handle_help(struct smtp_ta *ta, char *line)
 	return (0);
 }
 
-int
+static int
 smtp_handle_noop(struct smtp_ta *ta, char *line)
 {
 	char *response;
@@ -388,7 +391,7 @@ smtp_handle_noop(struct smtp_ta *ta, char *line)
 	return (0);
 }
 
-int
+static int
 smtp_handle_rset(struct smtp_ta *ta, char *line)
 {
 	char *response;
@@ -401,7 +404,7 @@ smtp_handle_rset(struct smtp_ta *ta, char *line)
 	return (0);
 }
 
-int
+static int
 smtp_handle_vrfy(struct smtp_ta *ta, char *line)
 {
 	char *response;
@@ -425,7 +428,7 @@ smtp_handle_vrfy(struct smtp_ta *ta, char *line)
 	return (0);
 }
 
-int
+static int
 smtp_handle_dot(struct smtp_ta *ta)
 {
 	char *response;
@@ -471,7 +474,7 @@ smtp_handle_dot(struct smtp_ta *ta)
 	return (0);
 }
 
-int
+static int
 smtp_handle(struct smtp_ta *ta, char *line)
 {
 	char *command;
@@ -527,7 +530,7 @@ smtp_handle(struct smtp_ta *ta, char *line)
 	return (0);
 }
 
-int
+static int
 smtp_lock(const char *lockfile)
 {
 	mode_t mode = S_IRUSR|S_IWUSR|S_IRGRP;
@@ -546,7 +549,7 @@ smtp_lock(const char *lockfile)
 	return (fd);
 }
 
-void
+static void
 smtp_unlock(int fd)
 {
 	if (flock(fd, LOCK_UN) == -1)
@@ -554,7 +557,7 @@ smtp_unlock(int fd)
 	close(fd);
 }
 
-int
+static int
 smtp_chmkdir_one(const char *component)
 {
 	mode_t mode = S_IRUSR|S_IWUSR|S_IXUSR|S_IXGRP|S_IRGRP;
@@ -581,7 +584,7 @@ smtp_chmkdir_one(const char *component)
 	return (0);
 }
 
-int
+static int
 smtp_chmkdir(const char *datadir, const char *address)
 {
 	char buf[32], *myaddress = buf, *p;
@@ -603,7 +606,7 @@ smtp_chmkdir(const char *datadir, const char *address)
 
 /* Assumes a lock on the directory */
 
-int
+static int
 smtp_get_count(const char *countname)
 {
 	int fd = open(countname, O_RDONLY, 0);
@@ -626,7 +629,7 @@ smtp_get_count(const char *countname)
 	return (count);
 }
 
-int
+static int
 smtp_write_count(const char *countname, int count)
 {
 	mode_t mode = S_IRUSR|S_IWUSR|S_IRGRP;
@@ -651,7 +654,7 @@ smtp_write_count(const char *countname, int count)
 
 #define TOHEX(x) ((x) < 10 ? (x) + '0' : (x) - 10 + 'a')
 
-char *
+static char *
 smtp_hashed_store(const char *datadir, void *data, size_t datalen)
 {
 	SHA1_CTX ctx;
@@ -700,7 +703,7 @@ smtp_hashed_store(const char *datadir, void *data, size_t datalen)
 	return (adigest);
 }
 
-int
+static int
 smtp_write_email(struct smtp_ta *ta, int count)
 {
 	struct evbuffer *buffer;
@@ -757,8 +760,8 @@ smtp_write_email(struct smtp_ta *ta, int count)
 			kv_remove(&ta->dictionary, "data");
 		}
 
-		hash = smtp_hashed_store(log_datadir, 
-		    EVBUFFER_DATA(buffer), evbuffer_get_length(buffer));
+		hash = smtp_hashed_store(log_datadir,
+		    evbuffer_pullup(buffer, -1), evbuffer_get_length(buffer));
 		evbuffer_drain(buffer, -1);
 
 		evbuffer_add_printf(buffer, "\n%s\n", hash);
@@ -804,11 +807,11 @@ smtp_store(struct smtp_ta *ta, const char *dir)
 	smtp_unlock(lock_fd);
 }
 
-char *
+static char *
 smtp_readline(struct bufferevent *bev)
 {
-	struct evbuffer *buffer = EVBUFFER_INPUT(bev);
-	char *data = EVBUFFER_DATA(buffer);
+	struct evbuffer *buffer = bufferevent_get_input(bev);
+	char *data = (char *)evbuffer_pullup(buffer, -1);
 	size_t len = evbuffer_get_length(buffer);
 	char *line;
 	int i;
@@ -843,7 +846,7 @@ smtp_readline(struct bufferevent *bev)
 	return (line);
 }
 
-void
+static void
 smtp_readcb(struct bufferevent *bev, void *arg)
 {
 	char *line;
@@ -853,7 +856,7 @@ smtp_readcb(struct bufferevent *bev, void *arg)
 		int res;
 
 		res = smtp_handle(ta, line);
-		
+
 		DFPRINTF(1, (stderr, "%s: %s\n",
 			     kv_find(&ta->dictionary, "$srcipaddress"),
 			     line));
@@ -868,18 +871,21 @@ smtp_readcb(struct bufferevent *bev, void *arg)
 	}
 }
 
-void
+static void
 smtp_writecb(struct bufferevent *bev, void *arg)
 {
 	struct smtp_ta *ta = arg;
-	
+	(void)bev;
+
 	if (ta->wantclose)
 		smtp_ta_free(ta);
 }
 
-void
+static void
 smtp_errorcb(struct bufferevent *bev, short what, void *arg)
 {
+	(void)bev;
+	(void)what;
 	fprintf(stderr, "%s: called with %p, freeing\n", __func__, arg);
 
 	smtp_ta_free(arg);
@@ -904,8 +910,8 @@ smtp_ta_free(struct smtp_ta *ta)
 		free(entry);
 	}
 
+	/* BEV_OPT_CLOSE_ON_FREE handles closing the fd */
 	bufferevent_free(ta->bev);
-	close(ta->fd);
 	free(ta);
 	
 }
@@ -941,10 +947,11 @@ smtp_ta_new(int fd, struct sockaddr *sa, socklen_t salen,
 
 	ta->state = EXPECT_HELO;
 	ta->fd = fd;
-	ta->bev = bufferevent_new(fd,
-	    smtp_readcb, smtp_writecb, smtp_errorcb, ta);
+	ta->bev = bufferevent_socket_new(proxy_base, fd, BEV_OPT_CLOSE_ON_FREE);
 	if (ta->bev == NULL)
 		goto error;
+	bufferevent_setcb(ta->bev, smtp_readcb, smtp_writecb,
+	    smtp_errorcb, ta);
 
 	/* Create our tiny dictionary */
 	name_from_addr(sa, salen, &ipname, &portname);
@@ -1013,7 +1020,7 @@ smtp_ta_new(int fd, struct sockaddr *sa, socklen_t salen,
 	return (NULL);
 }
 
-void
+static void
 accept_socket(int fd, short what, void *arg)
 {
 	struct sockaddr_storage ss, lss;
@@ -1041,9 +1048,10 @@ accept_socket(int fd, short what, void *arg)
 	}
 }
 
-void
-smtp_bind_socket(struct event *ev, u_short port)
+struct event *
+smtp_bind_socket(u_short port)
 {
+	struct event *ev;
 	int fd;
 
 	if ((fd = make_socket(bind, SOCK_STREAM, "0.0.0.0", port)) == -1)
@@ -1059,11 +1067,18 @@ smtp_bind_socket(struct event *ev, u_short port)
 	}
 
 	/* Schedule the socket for accepting */
-	event_set(ev, fd, EV_READ | EV_PERSIST, accept_socket, NULL);
+	ev = event_new(proxy_base, fd, EV_READ | EV_PERSIST, accept_socket, NULL);
+	if (ev == NULL)
+	{
+		syslog(LOG_ERR, "%s: event_new failed", __func__);
+		exit(EXIT_FAILURE);
+	}
 	event_add(ev, NULL);
 
-	fprintf(stderr, 
+	fprintf(stderr,
 	    "Bound to port %d\n"
 	    "Awaiting connections ... \n",
 	    port);
+
+	return ev;
 }

@@ -139,6 +139,26 @@ echo "[Webserver Tests]"
 run_test "Webserver responds to HTTP GET" "ns_exec curl -s -o /dev/null -w '%{http_code}' http://$HONEYD_HOST_IP:$WEBSERVER_PORT/ | grep -q '200\\|404'"
 echo ""
 
+# === Proxy/SMTP Subsystem Tests ===
+echo "[Proxy/SMTP Subsystem Tests]"
+export PROXY_BIN="${PROXY_BIN:-/usr/local/share/honeyd/proxy}"
+export SMTP_BIN="${SMTP_BIN:-/usr/local/share/honeyd/smtp}"
+if [ -x "$PROXY_BIN" ] && [ -x "$SMTP_BIN" ]; then
+    # Run the Python unit tests for proxy/smtp
+    if python3 /src/honeyd/subsystems/test_proxy.py 2>&1; then
+        echo "  Proxy/SMTP unit tests... PASS"
+        TESTS_RUN=$((TESTS_RUN + 1))
+        TESTS_PASSED=$((TESTS_PASSED + 1))
+    else
+        echo "  Proxy/SMTP unit tests... FAIL"
+        TESTS_RUN=$((TESTS_RUN + 1))
+        TESTS_FAILED=$((TESTS_FAILED + 1))
+    fi
+else
+    echo "  Proxy/SMTP binaries not found at $PROXY_BIN / $SMTP_BIN, skipping"
+fi
+echo ""
+
 # === OS Fingerprint Test ===
 echo "[OS Fingerprint Tests]"
 echo "  Running nmap OS detection..."

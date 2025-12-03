@@ -61,8 +61,8 @@
 #include <err.h>
 #include <syslog.h>
 
-#include <event.h>
-#include <evdns.h>
+#include <event2/event.h>
+#include <event2/dns.h>
 
 #include "util.h"
 #include "proxy.h"
@@ -75,6 +75,8 @@ extern FILE *flog_email;	/* log SMTP transactions somewhere */
 extern const char *log_datadir;	/* log the email transactions somewhere */
 
 int debug;
+struct event_base *proxy_base;
+struct evdns_base *proxy_dns_base;
 
 static void
 usage(char *progname)
@@ -90,7 +92,7 @@ usage(char *progname)
 int
 main(int argc, char **argv)
 {
-	struct event bind_ev;
+	struct event *bind_ev;
 	char *progname = argv[0];
 	char *logfile = NULL;
 	char *mail_logfile = NULL;
@@ -156,17 +158,27 @@ main(int argc, char **argv)
 
 	proxy_init();
 
-	event_init();
+	proxy_base = event_base_new();
+	if (proxy_base == NULL)
+	{
+		syslog(LOG_ERR, "%s: event_base_new failed", __func__);
+		exit(EXIT_FAILURE);
+	}
 
-	evdns_init();
+	proxy_dns_base = evdns_base_new(proxy_base, 1);
+	if (proxy_dns_base == NULL)
+	{
+		syslog(LOG_ERR, "%s: evdns_base_new failed", __func__);
+		exit(EXIT_FAILURE);
+	}
 
 	if (ports == NULL) {
 		/* Just a single port to connect to */
-		proxy_bind_socket(&bind_ev, port);
+		bind_ev = proxy_bind_socket(port);
+		(void)bind_ev;
 	} else {
 		/* We might have multiple ports */
 		char *p;
-		struct event *event;
 
 		while ((p = strsep(&ports, ",")) != NULL) {
 			port = atoi(p);
@@ -175,17 +187,14 @@ main(int argc, char **argv)
 				syslog(LOG_ERR, "Bad port number: %s", p);
 				exit(EXIT_FAILURE);
 			}
-			event = malloc(sizeof(struct event));
-			if (event == NULL)
-			{
-				syslog(LOG_ERR, "%s: malloc", __func__);
-				exit(EXIT_FAILURE);
-			}
-			proxy_bind_socket(event, port);
+			proxy_bind_socket(port);
 		}
 	}
 	
-	event_dispatch();
+	event_base_dispatch(proxy_base);
+
+	evdns_base_free(proxy_dns_base, 0);
+	event_base_free(proxy_base);
 
 	exit(0);
 }

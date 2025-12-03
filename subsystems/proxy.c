@@ -61,8 +61,10 @@
 #include <syslog.h>
 
 #include <pcre.h>
-#include <event.h>
-#include <evdns.h>
+#include <event2/event.h>
+#include <event2/bufferevent.h>
+#include <event2/buffer.h>
+#include <event2/dns.h>
 #include <dnet.h>
 
 #include "util.h"
@@ -86,7 +88,7 @@ static pcre *re_get;		/* generic get request */
 
 /* Generic PROXY related code */
 
-char *
+static char *
 proxy_logline(struct proxy_ta *ta)
 {
 	static char line[1024];
@@ -111,7 +113,7 @@ proxy_logline(struct proxy_ta *ta)
 	return (line);
 }
 
-void
+static void
 proxy_clear_state(struct proxy_ta *ta)
 {
 	/* XXX - something here */
@@ -119,7 +121,7 @@ proxy_clear_state(struct proxy_ta *ta)
 
 /* Callbacks for PROXY handling */
 
-char *
+static char *
 proxy_response(struct proxy_ta *ta, struct keyvalue data[]) {
 	static char line[1024];
 	struct keyvalue *cur;
@@ -141,7 +143,7 @@ proxy_response(struct proxy_ta *ta, struct keyvalue data[]) {
 	return (line);
 }
 
-int
+static int
 proxy_allowed_network(const char *host)
 {
 	const char *error;
@@ -189,7 +191,7 @@ proxy_allowed_network(const char *host)
  * Checks if we are allowed to retrieve a URL from here.
  */
 
-int
+static int
 proxy_allowed_get(struct proxy_ta *ta, struct keyvalue data[])
 {
 	const char *error;
@@ -229,7 +231,7 @@ proxy_allowed_get(struct proxy_ta *ta, struct keyvalue data[])
 	return (rc >= 0);
 }
 
-int
+static int
 proxy_bad_connection(struct proxy_ta *ta)
 {
 	char *response = proxy_response(ta, badconnection);
@@ -238,28 +240,31 @@ proxy_bad_connection(struct proxy_ta *ta)
 	return (0);
 }
 
-void
+static void
 proxy_remote_readcb(struct bufferevent *bev, void *arg)
 {
 	struct proxy_ta *ta = arg;
-	struct evbuffer *buffer = EVBUFFER_INPUT(bev);
-	unsigned char *data = EVBUFFER_DATA(buffer);
+	struct evbuffer *buffer = bufferevent_get_input(bev);
+	unsigned char *data = evbuffer_pullup(buffer, -1);
 	size_t len = evbuffer_get_length(buffer);
 
 	bufferevent_write(ta->bev, data, len);
 	evbuffer_drain(buffer, len);
 }
 
-void
+static void
 proxy_remote_writecb(struct bufferevent *bev, void *arg)
 {
+	(void)bev;
+	(void)arg;
 }
 
-void
+static void
 proxy_remote_errorcb(struct bufferevent *bev, short what, void *arg)
 {
 	struct proxy_ta *ta = arg;
-	struct evbuffer *buffer = EVBUFFER_OUTPUT(ta->bev);
+	struct evbuffer *buffer = bufferevent_get_output(ta->bev);
+	(void)what;
 	fprintf(stderr, "%s: called with %p, freeing\n", __func__, arg);
 
 	/* If we still have data to write; we just wait for the flush */
@@ -273,7 +278,7 @@ proxy_remote_errorcb(struct bufferevent *bev, short what, void *arg)
 	}
 }
 
-char *
+static char *
 proxy_corrupt(char *data, size_t len)
 {
 	static char buffer[4096];
@@ -292,7 +297,7 @@ proxy_corrupt(char *data, size_t len)
 	return (buffer);
 }
 
-void
+static void
 proxy_connect_cb(int fd, short what, void *arg)
 {
 	char line[1024], *data;
@@ -318,14 +323,15 @@ proxy_connect_cb(int fd, short what, void *arg)
 		return;
 	}
 
-	ta->remote_bev = bufferevent_new(ta->remote_fd,
-	    proxy_remote_readcb, proxy_remote_writecb,
-	    proxy_remote_errorcb, ta);
-	if (ta->bev == NULL) {
+	ta->remote_bev = bufferevent_socket_new(proxy_base, ta->remote_fd,
+	    BEV_OPT_CLOSE_ON_FREE);
+	if (ta->remote_bev == NULL) {
 		close(fd);
 		proxy_ta_free(ta);
 		return;
 	}
+	bufferevent_setcb(ta->remote_bev, proxy_remote_readcb,
+	    proxy_remote_writecb, proxy_remote_errorcb, ta);
 
 	/* If this get is not allowed, we are going to corrupt the data */
 	if (!proxy_allowed_get(ta, allowedhosts))
@@ -357,7 +363,7 @@ proxy_connect_cb(int fd, short what, void *arg)
 	ta->justforward = 1;
 }
 
-void
+static void
 proxy_connect(struct proxy_ta *ta, char *host, int port)
 {
 	fprintf(stderr, "Connecting to %s port %d\n", host, port);
@@ -386,10 +392,10 @@ proxy_connect(struct proxy_ta *ta, char *host, int port)
 	}
 
 	/* One handy event to get called back on this */
-	event_once(ta->remote_fd, EV_WRITE, proxy_connect_cb, ta, NULL);
+	event_base_once(proxy_base, ta->remote_fd, EV_WRITE, proxy_connect_cb, ta, NULL);
 }
 
-void
+static void
 proxy_handle_get_cb(int result, char type, int count, int ttl,
     void *addresses, void *arg)
 {
@@ -419,7 +425,7 @@ proxy_handle_get_cb(int result, char type, int count, int ttl,
 	proxy_connect(ta, addr_ntoa(&addr), port);
 }
 
-int
+static int
 proxy_handle_get(struct proxy_ta *ta)
 {
 	char *host = kv_find(&ta->dictionary, "$rawhost");
@@ -451,13 +457,13 @@ proxy_handle_get(struct proxy_ta *ta)
 	}
 
 	/* Try to resolve the domain name */
-	evdns_resolve_ipv4(kv_find(&ta->dictionary, "$host"), 0,
-	    proxy_handle_get_cb, ta);
+	evdns_base_resolve_ipv4(proxy_dns_base,
+	    kv_find(&ta->dictionary, "$host"), 0, proxy_handle_get_cb, ta);
 	ta->dns_pending = 1;
 	return (0);
 }
 
-void
+static void
 proxy_handle_connect_cb(int result, char type, int count, int ttl,
     void *addresses, void *arg)
 {
@@ -508,7 +514,7 @@ proxy_handle_connect_cb(int result, char type, int count, int ttl,
 	}
 }
 
-int
+static int
 proxy_handle_connect(struct proxy_ta *ta)
 {
 	char *host = kv_find(&ta->dictionary, "$rawhost");
@@ -540,8 +546,8 @@ proxy_handle_connect(struct proxy_ta *ta)
 	}
 
 	/* Try to resolve the domain name */
-	evdns_resolve_ipv4(kv_find(&ta->dictionary, "$host"), 0,
-	    proxy_handle_connect_cb, ta);
+	evdns_base_resolve_ipv4(proxy_dns_base,
+	    kv_find(&ta->dictionary, "$host"), 0, proxy_handle_connect_cb, ta);
 	ta->dns_pending = 1;
 	return (0);
 }
@@ -563,7 +569,7 @@ proxy_pcre_group(char *line, int groupnr, int ovector[])
 	return (group);
 }
 
-int
+static int
 proxy_handle(struct proxy_ta *ta, char *line)
 {
 	int rc;
@@ -598,11 +604,11 @@ proxy_handle(struct proxy_ta *ta, char *line)
 	return proxy_bad_connection(ta);
 }
 
-char *
+static char *
 proxy_readline(struct bufferevent *bev)
 {
-	struct evbuffer *buffer = EVBUFFER_INPUT(bev);
-	char *data = EVBUFFER_DATA(buffer);
+	struct evbuffer *buffer = bufferevent_get_input(bev);
+	char *data = (char *)evbuffer_pullup(buffer, -1);
 	size_t len = evbuffer_get_length(buffer);
 	char *line;
 	int i;
@@ -637,15 +643,15 @@ proxy_readline(struct bufferevent *bev)
 	return (line);
 }
 
-void
+static void
 proxy_readcb(struct bufferevent *bev, void *arg)
 {
 	struct proxy_ta *ta = arg;
 	char *line;
 
 	if (ta->justforward) {
-		struct evbuffer *input = EVBUFFER_INPUT(bev);
-		char *data = EVBUFFER_DATA(input);
+		struct evbuffer *input = bufferevent_get_input(bev);
+		char *data = (char *)evbuffer_pullup(input, -1);
 		size_t len = evbuffer_get_length(input);
 		if (ta->corrupt) {
 			bufferevent_write(ta->remote_bev,
@@ -687,18 +693,21 @@ proxy_readcb(struct bufferevent *bev, void *arg)
 	}
 }
 
-void
+static void
 proxy_writecb(struct bufferevent *bev, void *arg)
 {
 	struct proxy_ta *ta = arg;
-	
+	(void)bev;
+
 	if (ta->wantclose)
 		proxy_ta_free(ta);
 }
 
-void
+static void
 proxy_errorcb(struct bufferevent *bev, short what, void *arg)
 {
+	(void)bev;
+	(void)what;
 	fprintf(stderr, "%s: called with %p, freeing\n", __func__, arg);
 
 	proxy_ta_free(arg);
@@ -723,12 +732,11 @@ proxy_ta_free(struct proxy_ta *ta)
 		free(entry);
 	}
 
+	/* BEV_OPT_CLOSE_ON_FREE handles closing the fds */
 	bufferevent_free(ta->bev);
-	close(ta->fd);
 
 	if (ta->remote_bev) {
 		bufferevent_free(ta->remote_bev);
-		close(ta->remote_fd);
 	}
 
 	free(ta);
@@ -756,10 +764,11 @@ proxy_ta_new(int fd, struct sockaddr *sa, socklen_t salen,
 	ta->salen = salen;
 
 	ta->fd = fd;
-	ta->bev = bufferevent_new(fd,
-	    proxy_readcb, proxy_writecb, proxy_errorcb, ta);
+	ta->bev = bufferevent_socket_new(proxy_base, fd, BEV_OPT_CLOSE_ON_FREE);
 	if (ta->bev == NULL)
 		goto error;
+	bufferevent_setcb(ta->bev, proxy_readcb, proxy_writecb,
+	    proxy_errorcb, ta);
 
 	/* Create our tiny dictionary */
 	if (lsa != NULL) {
@@ -814,9 +823,10 @@ accept_socket(int fd, short what, void *arg)
 	}
 }
 
-void
-proxy_bind_socket(struct event *ev, u_short port)
+struct event *
+proxy_bind_socket(u_short port)
 {
+	struct event *ev;
 	int fd;
 
 	if ((fd = make_socket(bind, SOCK_STREAM, "0.0.0.0", port)) == -1)
@@ -832,13 +842,20 @@ proxy_bind_socket(struct event *ev, u_short port)
 	}
 
 	/* Schedule the socket for accepting */
-	event_set(ev, fd, EV_READ | EV_PERSIST, accept_socket, NULL);
+	ev = event_new(proxy_base, fd, EV_READ | EV_PERSIST, accept_socket, NULL);
+	if (ev == NULL)
+	{
+		syslog(LOG_ERR, "%s: event_new failed", __func__);
+		exit(EXIT_FAILURE);
+	}
 	event_add(ev, NULL);
 
-	fprintf(stderr, 
+	fprintf(stderr,
 	    "Bound to port %d\n"
 	    "Awaiting connections ... \n",
 	    port);
+
+	return ev;
 }
 
 void

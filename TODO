@@ -16,3 +16,7 @@ Honeyd TODO
   - Would need to modify parse_ops() and parse_option() to handle ranges
   - See: https://nmap.org/changelog.html (7.95 entry)
   - Files: personality.c (parse_ops at line 1860, parse_option at line 1911)
+
+- Move proxy/smtp subsystems to libexec directory structure
+  - Currently installed to ${CMAKE_INSTALL_DATADIR}/honeyd (share/honeyd)
+  - Should be in libexec/honeyd for proper FHS compliance
