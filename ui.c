@@ -64,7 +64,7 @@
 #include "pyextend.h"
 #endif
 
-char *ui_file = UI_FIFO;
+const char *ui_file = UI_FIFO;
 
 #define PROMPT		"honeydctl> "
 #define WHITESPACE	" \t"
@@ -75,9 +75,9 @@ int ui_command_help(struct evbuffer *, char *);
 int ui_command_python(struct evbuffer *, char *);
 
 struct ui_command {
-	char *cmd;
-	char *short_help;
-	char *long_help;
+	const char *cmd;
+	const char *short_help;
+	const char *long_help;
 	int (*func)(struct evbuffer *, char *);
 };
 
