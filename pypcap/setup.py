@@ -2,9 +2,12 @@
 #
 # $Id: setup.py,v 1.1.1.1 2005/10/29 18:25:03 provos Exp $
 
-from distutils.core import setup, Extension
 from distutils.command import config, clean
-import cPickle, glob, os, sys
+from distutils.core import setup, Extension
+import glob
+import os
+import pickle as cPickle
+import sys
 
 pcap_config = {}
 pcap_cache = 'config.pkl'
