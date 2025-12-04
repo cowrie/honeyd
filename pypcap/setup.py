@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # $Id: setup.py,v 1.1.1.1 2005/10/29 18:25:03 provos Exp $
 
@@ -6,7 +6,7 @@ from distutils.command import config, clean
 from distutils.core import setup, Extension
 import glob
 import os
-import pickle as cPickle
+import pickle
 import sys
 
 pcap_config = {}
@@ -29,7 +29,7 @@ class config_pcap(config.config):
         if os.path.exists(os.path.join(cfg['include_dirs'][0], 'pcap-int.h')):
             d['HAVE_PCAP_INT_H'] = 1
         buf = open(os.path.join(cfg['include_dirs'][0], 'pcap.h')).read()
-	print os.path.join(cfg['include_dirs'][0], 'pcap.h')
+        print(os.path.join(cfg['include_dirs'][0], 'pcap.h'))
         if buf.find('pcap_file(') != -1:
             d['HAVE_PCAP_FILE'] = 1
         if buf.find('pcap_compile_nopcap(') != -1:
@@ -37,7 +37,7 @@ class config_pcap(config.config):
         if buf.find('pcap_setnonblock(') != -1:
             d['HAVE_PCAP_SETNONBLOCK'] = 1
         f = open('config.h', 'w')
-        for k, v in d.iteritems():
+        for k, v in d.items():
             f.write('#define %s %s\n' % (k, v))
     
     def _pcap_config(self, dirs=[ None ]):
@@ -62,14 +62,14 @@ class config_pcap(config.config):
                                     cfg['libraries'].append('iphlpapi')
                                     cfg['extra_compile_args'] = \
                                         [ '-DWIN32', '-DWPCAP' ]
-                                print 'found', cfg
+                                print('found', cfg)
                                 self._write_config_h(cfg)
                                 return cfg
-        raise "couldn't find pcap build or installation directory"
+        raise Exception("couldn't find pcap build or installation directory")
     
     def run(self):
         #config.log.set_verbosity(0)
-        cPickle.dump(self._pcap_config([ self.with_pcap ]),
+        pickle.dump(self._pcap_config([ self.with_pcap ]),
                      open(pcap_cache, 'wb'))
         self.temp_files.append(pcap_cache)
 
@@ -77,14 +77,14 @@ class clean_pcap(clean.clean):
     def run(self):
         clean.clean.run(self)
         if self.all and os.path.exists(pcap_cache):
-            print "removing '%s'" % pcap_cache
+            print("removing '%s'" % pcap_cache)
             os.unlink(pcap_cache)
 
 if len(sys.argv) > 1 and sys.argv[1] == 'build':
     try:
-        pcap_config = cPickle.load(open(pcap_cache))
+        pcap_config = pickle.load(open(pcap_cache, 'rb'))
     except IOError:
-        print >>sys.stderr, 'run "%s config" first!' % sys.argv[0]
+        print('run "%s config" first!' % sys.argv[0], file=sys.stderr)
         sys.exit(1)
 
 pcap = Extension(name='pcap',

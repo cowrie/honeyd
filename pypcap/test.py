@@ -1,6 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-import glob, sys, unittest
+import glob
+import sys
+import unittest
 sys.path.insert(0, glob.glob('build/lib.*')[0])
 import pcap
 
@@ -16,7 +18,7 @@ class PcapTestCase(unittest.TestCase):
     def test_pcap_errors(self):
         p = pcap.pcap('test.pcap')
         try:
-            print p.stats()
+            print(p.stats())
         except OSError:
             pass
         assert p.geterr() != '', 'pcap_geterr'

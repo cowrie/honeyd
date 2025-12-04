@@ -1,10 +1,13 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-import getopt, sys
-import dpkt, pcap
+import getopt
+import sys
+
+import dpkt
+import pcap
 
 def usage():
-    print >>sys.stderr, 'usage: %s [-i device] [pattern]' % sys.argv[0]
+    print('usage: %s [-i device] [pattern]' % sys.argv[0], file=sys.stderr)
     sys.exit(1)
 
 def main():
@@ -20,13 +23,13 @@ def main():
                pcap.DLT_NULL:dpkt.loopback.Loopback,
                pcap.DLT_EN10MB:dpkt.ethernet.Ethernet }[pc.datalink()]
     try:
-        print 'listening on %s: %s' % (pc.name, pc.filter)
+        print('listening on %s: %s' % (pc.name, pc.filter))
         for ts, pkt in pc:
-            print ts, `decode(pkt)`
+            print(ts, repr(decode(pkt)))
     except KeyboardInterrupt:
         nrecv, ndrop, nifdrop = pc.stats()
-        print '\n%d packets received by filter' % nrecv
-        print '%d packets dropped by kernel' % ndrop
+        print('\n%d packets received by filter' % nrecv)
+        print('%d packets dropped by kernel' % ndrop)
 
 if __name__ == '__main__':
     main()
