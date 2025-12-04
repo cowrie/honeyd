@@ -1975,13 +1975,11 @@ CountCharsInString(const char *string, const char *chars)
 	uint charsLength = strlen(chars);
 	uint count = 0;
 	uint i = 0;
-	uint num = 0;
 	while(*(string + i) != '\0')
 	{
 		uint j=0;
 		for(; j < charsLength; j++)
 		{
-			num++;
 			if( string[i] == chars[j] )
 			{
 				count++;

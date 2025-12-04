@@ -143,7 +143,6 @@ void ethernetcode_init(FILE *in_file){
 	char currentChar;
 	struct ethernetcode *currentCode;
 	struct ethernetcode *codes;
-	int counter = 0;
 	int numOfLine = 0;
 	uint32_t prefix;
 
@@ -173,7 +172,6 @@ void ethernetcode_init(FILE *in_file){
 		{
 
 		}
-		counter++;
 	}while(currentLine[0] == '#');
 	SPLAY_INIT(&etherroot);
 		do{

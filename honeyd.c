@@ -2586,8 +2586,7 @@ handle_udp_packet(struct template *tmpl, void *wrapper)
 	struct spoof spoof;
 	char unicast;
 	char isBroadcast = 0;
-	int i;
-	
+
 	uint16_t uh_sum;
 	u_char *data;
 	u_int dlen;

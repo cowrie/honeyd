@@ -439,5 +439,9 @@ arp_recv_cb(u_char *u, const struct pcap_pkthdr *pkthdr, const u_char *pkt)
 			}
 		}
 		break;
+
+	default:
+		/* Ignore other ARP operations */
+		break;
 	}
 }

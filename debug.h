@@ -31,7 +31,7 @@ extern int honeyd_debug;
 
 /* Standard debug printf */
 #define DFPRINTF(x, y) do { \
-	if (honeyd_debug >= x) fprintf y; \
+	if (honeyd_debug >= (x)) fprintf y; \
 } while (0)
 
 #ifdef HONEYD_DEBUG
@@ -56,7 +56,7 @@ extern int honeyd_debug;
  * The macro outputs @msg if the expression @exp evaluates
  * to %FALSE.
  */
-#define D_ASSERT(exp, msg)    if (! exp) { printf("%s/%i: %s\n", __FILE__, __LINE__, msg); }
+#define D_ASSERT(exp, msg)    if (!(exp)) { printf("%s/%i: %s\n", __FILE__, __LINE__, (msg)); }
 
 /**
  * D_ASSERT_PTR - pointer existence assertion.
