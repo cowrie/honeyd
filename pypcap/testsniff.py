@@ -14,8 +14,10 @@ def main():
     opts, args = getopt.getopt(sys.argv[1:], 'i:h')
     name = None
     for o, a in opts:
-        if o == '-i': name = a
-        else: usage()
+        if o == '-i':
+            name = a
+        else:
+            usage()
         
     pc = pcap.pcap(name)
     pc.setfilter(' '.join(args))

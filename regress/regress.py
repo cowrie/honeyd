@@ -154,13 +154,13 @@ class regress:
 
         error = 0
         try:
-            res = router.delete(network)
+            router.delete(network)
         except OSError:
             if self.debug:
                 print("Cannot remove route: ", network, file=sys.stderr)
 
         try:
-            res = router.add(network, gw)
+            router.add(network, gw)
         except OSError:
             if self.debug:
                 print("Cannot add route: ", network, file=sys.stderr)
@@ -192,7 +192,7 @@ class regress:
 
         error = 0
         try:
-            res = router.delete(network)
+            router.delete(network)
         except OSError:
             if self.debug:
                 print("Cannot remove route: ", network, file=sys.stderr)
@@ -400,7 +400,7 @@ class regress:
             pc = 0
             try:
                 pc = pcap.pcap(self.interface)
-            except:
+            except OSError:
                 print("Cannot run packet filter, aborting", file=sys.stderr)
                 sys.exit(1)
 
@@ -460,7 +460,7 @@ class regress:
                         print("Failed to kill honeyd: ", self.honeyd)
                         # Close all file descriptors
                         self.fe.close()
-                except:
+                except (IOError, OSError):
                     if self.debug:
                         print(
                             "Killed an instance of honeyd we did not run",
@@ -469,7 +469,7 @@ class regress:
                 # Clean up the file
             try:
                 os.remove(self.pidfile)
-            except:
+            except OSError:
                 print("Cannot remove pidfile", file=sys.stderr)
                 sys.exit(1)
         else:

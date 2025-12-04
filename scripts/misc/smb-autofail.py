@@ -17,15 +17,15 @@ def GetRequest():
     
     ### SMB Header ###
     smb_command = sys.stdin.read(1)     #SMB command
-    nt_status = sys.stdin.read(4)       #NT status 
-    flags1 = sys.stdin.read(1)          #Flags 1
-    flags2 = sys.stdin.read(2)          #Flags 2
-    pid_high = sys.stdin.read(2)        #PID high
-    signature = sys.stdin.read(8)       #Signature
-    pid_high = sys.stdin.read(2)        #Reserved
-    tree_id = sys.stdin.read(2)         #Tree ID
+    _nt_status = sys.stdin.read(4)      #NT status (unused)
+    _flags1 = sys.stdin.read(1)         #Flags 1 (unused)
+    _flags2 = sys.stdin.read(2)         #Flags 2 (unused)
+    _pid_high = sys.stdin.read(2)       #PID high (unused)
+    _signature = sys.stdin.read(8)      #Signature (unused)
+    _reserved = sys.stdin.read(2)       #Reserved (unused)
+    _tree_id = sys.stdin.read(2)        #Tree ID (unused)
     pid = sys.stdin.read(2)             #pid
-    uid = sys.stdin.read(2)             #User id
+    _uid = sys.stdin.read(2)            #User id (unused)
     mid = sys.stdin.read(2)             #Multiplex id
 
     ### Supported Request Types ###
@@ -53,7 +53,7 @@ def GetRequest():
 #mid = the Message ID that needs to be parroted back
 def HandleNegotiateProtocolRequest(pid, mid):
     #Word Count
-    word_count = sys.stdin.read(1)
+    _word_count = sys.stdin.read(1)  # unused
     #Byte Count
     byte_count = sys.stdin.read(2)
     #convert to integer, read in that many bytes (reverse byte order)
@@ -116,13 +116,13 @@ def HandleSessionSetupRequest(pid, mid):
     #Word Count
     word_count = sys.stdin.read(1)
     remaining_bytes = ord(word_count) * 2
-    options = sys.stdin.read(remaining_bytes)
+    _options = sys.stdin.read(remaining_bytes)  # unused
 
     #Byte Count
     byte_count = sys.stdin.read(2)
     #convert to integer, read in that many bytes (reverse byte order)
     remaining_bytes = ord(byte_count[0]) + ( 256 * ord(byte_count[1]))
-    rest = sys.stdin.read(remaining_bytes)
+    _rest = sys.stdin.read(remaining_bytes)  # unused
 
     ### Create SMB Header ###
     response = "\xffSMB"   
@@ -164,13 +164,13 @@ def HandleTreeConnectRequest(pid, mid):
     #Word Count
     word_count = sys.stdin.read(1)
     remaining_bytes = ord(word_count) * 2
-    options = sys.stdin.read(remaining_bytes)
+    _options = sys.stdin.read(remaining_bytes)  # unused
 
     #Byte Count
     byte_count = sys.stdin.read(2)
     #convert to integer, read in that many bytes (reverse byte order)
     remaining_bytes = ord(byte_count[0]) + ( 256 * ord(byte_count[1]))
-    rest = sys.stdin.read(remaining_bytes)
+    _rest = sys.stdin.read(remaining_bytes)  # unused
 
     ### Create SMB Header ###
     response = "\xffSMB"    
@@ -199,13 +199,13 @@ def HandleDisconnectRequest(pid, mid):
     #Word Count
     word_count = sys.stdin.read(1)
     remaining_bytes = ord(word_count) * 2
-    options = sys.stdin.read(remaining_bytes)
+    _options = sys.stdin.read(remaining_bytes)  # unused
 
     #Byte Count
     byte_count = sys.stdin.read(2)
     #convert to integer, read in that many bytes (reverse byte order)
     remaining_bytes = ord(byte_count[0]) + ( 256 * ord(byte_count[1]))
-    rest = sys.stdin.read(remaining_bytes)
+    _rest = sys.stdin.read(remaining_bytes)  # unused
 
     ### Create SMB Header ###
     response = "\xffSMB"    

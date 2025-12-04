@@ -8,8 +8,8 @@ import pcap
 
 class PcapTestCase(unittest.TestCase):
     def test_pcap_iter(self):
-        l = [ (x[0], len(x[1])) for x in pcap.pcap('test.pcap') ]
-        assert l == [(1092256609.9265549, 62), (1092256609.9265759, 54), (1092256610.332396, 62), (1092256610.3324161, 54), (1092256610.8330729, 62), (1092256610.8330951, 54)], 'pcap iter'
+        result = [ (x[0], len(x[1])) for x in pcap.pcap('test.pcap') ]
+        assert result == [(1092256609.9265549, 62), (1092256609.9265759, 54), (1092256610.332396, 62), (1092256610.3324161, 54), (1092256610.8330729, 62), (1092256610.8330951, 54)], 'pcap iter'
 
     def test_pcap_properties(self):
         p = pcap.pcap('test.pcap')

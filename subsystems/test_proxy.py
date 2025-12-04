@@ -6,8 +6,6 @@ import socket
 import subprocess
 import time
 import os
-import signal
-import sys
 import unittest
 
 # Allow override via environment for Docker/CI
