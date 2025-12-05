@@ -1,0 +1,22 @@
+# ABOUTME: Simple honeyd config that proxies all traffic to real local services
+# ABOUTME: Behaves like the real system by forwarding to localhost
+
+# Create a passthrough template that proxies everything to localhost
+create passthrough
+
+# ICMP: Allow all ICMP (ping, etc.)
+set passthrough default icmp action open
+
+# TCP: Proxy all TCP connections to the real local service
+# $dport expands to the destination port of the incoming connection
+set passthrough default tcp action proxy 127.0.0.1:$dport
+
+# UDP: Proxy all UDP packets to the real local service
+set passthrough default udp action proxy 127.0.0.1:$dport
+
+# OS fingerprint personality
+set passthrough personality "Cisco 2900XL switch (IOS 11.2)"
+
+# Bind to your honeypot IP address
+# Replace 192.168.1.100 with your target IP
+bind 192.168.1.100 passthrough

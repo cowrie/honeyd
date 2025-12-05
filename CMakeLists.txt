@@ -149,13 +149,17 @@ else()
         "Install libevent-dev (Debian/Ubuntu) or 'brew install libevent' (macOS)")
 endif()
 
-set(HAVE_LIBREADLINE 1)
+# Find readline library
+find_package(Readline REQUIRED)
+if(READLINE_FOUND)
+    message(STATUS "Found readline: ${READLINE_LIBRARY}")
+    set(HAVE_LIBREADLINE 1)
+    include_directories(${READLINE_INCLUDE_DIRS})
+endif()
+
 if (ZLIB_FOUND)
   set(HAVE_LIBZ 1)
 endif (ZLIB_FOUND)
-# libevent
-# libreadline
-# libz
 check_function_exists(memmove HAVE_MEMMOVE)
 check_include_files(memory.h HAVE_MEMORY_H)
 check_function_exists(memset HAVE_MEMSET)
@@ -295,6 +299,14 @@ foreach(flag ${WARNING_FLAGS})
     endif()
 endforeach()
 
+# On BSD systems, dlopen is in libc, not libdl
+# On Linux, we need to link libdl explicitly
+if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+    set(DL_LIBRARY dl)
+else()
+    set(DL_LIBRARY "")
+endif()
+
 add_executable(hsniff
     hsniff.c
     tagging.c
@@ -310,7 +322,7 @@ add_executable(hsniff
 )
 
 # link the libraries to the executable
-target_link_libraries (hsniff pcap ${DNET_LIBRARY} ${LIBEVENT_LIBRARY} z dl)
+target_link_libraries (hsniff pcap ${DNET_LIBRARY} ${LIBEVENT_LIBRARY} z ${DL_LIBRARY})
 
 add_executable(honeydctl
     honeydctl.c
@@ -318,7 +330,7 @@ add_executable(honeydctl
     util.c
     sha1.c
 )
-target_link_libraries(honeydctl readline termcap ${LIBEVENT_LIBRARY} ${DNET_LIBRARY} pcap dl)
+target_link_libraries(honeydctl ${READLINE_LIBRARIES} ${LIBEVENT_LIBRARY} ${DNET_LIBRARY} pcap ${DL_LIBRARY})
 
 add_library(libhoneyd
     honeyd_overload.c
@@ -342,7 +354,7 @@ add_executable(honeydstats
 )
 
 # link the libraries to the executable
-target_link_libraries (honeydstats ${DNET_LIBRARY} ${LIBEVENT_LIBRARY} z dl)
+target_link_libraries (honeydstats ${DNET_LIBRARY} ${LIBEVENT_LIBRARY} z ${DL_LIBRARY})
 
 # Generate parser and lexer
 BISON_TARGET(HoneydParser parse.y ${CMAKE_CURRENT_BINARY_DIR}/parse.c
@@ -401,7 +413,7 @@ if(Python3_FOUND AND HAVE_PYTHON)
 endif()
 
 # link the libraries to the executable
-target_link_libraries (honeyd pcap ${DNET_LIBRARY} ${LIBEVENT_LIBRARY} m z dl)
+target_link_libraries (honeyd pcap ${DNET_LIBRARY} ${LIBEVENT_LIBRARY} m z ${DL_LIBRARY})
 
 # Link Python 3 libraries if available
 if(Python3_FOUND AND HAVE_PYTHON)
