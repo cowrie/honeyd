@@ -17,7 +17,8 @@ fi
 HONEYD_VIRTUAL_IP="192.0.2.100"
 HONEYD_HOST_IP="192.0.2.1"
 TEST_NETWORK="192.0.2.0/24"
-TEST_SERVICE_PORT="8888"
+# Use port 80 which is configured in config.passthrough
+TEST_SERVICE_PORT="80"
 
 # Unique namespace name
 NS_TEST="hd_proxy_$$"
@@ -59,6 +60,23 @@ run_test() {
     fi
 }
 
+run_test_expect_fail() {
+    local name="$1"
+    local cmd="$2"
+    TESTS_RUN=$((TESTS_RUN + 1))
+
+    echo -n "  $name... "
+    if eval "$cmd" > /dev/null 2>&1; then
+        echo "FAIL (expected failure but succeeded)"
+        TESTS_FAILED=$((TESTS_FAILED + 1))
+        return 1
+    else
+        echo "PASS (correctly rejected)"
+        TESTS_PASSED=$((TESTS_PASSED + 1))
+        return 0
+    fi
+}
+
 ns_exec() {
     ip netns exec "$NS_TEST" "$@"
 }
@@ -94,7 +112,7 @@ ns_exec ip addr add "$HONEYD_HOST_IP/32" dev lo
 ns_exec ip route add "$TEST_NETWORK" dev lo
 echo "[Setup] Network namespace created: OK"
 
-# Start a simple test service on localhost (in the namespace)
+# Start a simple test service on localhost port 80 (in the namespace)
 # This uses nc to listen and echo a response
 ns_exec sh -c "while true; do echo 'PROXY_TEST_RESPONSE' | nc -l -p $TEST_SERVICE_PORT -q 1 2>/dev/null || true; done" &
 SERVICE_PID=$!
@@ -122,9 +140,9 @@ echo ""
 # === TCP Proxy Tests ===
 echo "[TCP Proxy Tests]"
 
-# Test that connecting to the honeyd IP on the test port proxies to localhost
+# Test that connecting to the honeyd IP on port 80 proxies to localhost
 TESTS_RUN=$((TESTS_RUN + 1))
-echo -n "  TCP proxy to local service... "
+echo -n "  TCP proxy to local service (port 80)... "
 RESPONSE=$(ns_exec sh -c "echo 'test' | nc -w 2 $HONEYD_VIRTUAL_IP $TEST_SERVICE_PORT" 2>/dev/null || true)
 if echo "$RESPONSE" | grep -q "PROXY_TEST_RESPONSE"; then
     echo "PASS"
@@ -133,13 +151,16 @@ else
     echo "FAIL (got: '$RESPONSE')"
     TESTS_FAILED=$((TESTS_FAILED + 1))
 fi
+
+# Test that unconfigured ports are closed (not proxied)
+run_test_expect_fail "Unconfigured port 8888 is closed" "ns_exec nc -z -w 2 $HONEYD_VIRTUAL_IP 8888"
+run_test_expect_fail "Unconfigured port 23 is closed" "ns_exec nc -z -w 2 $HONEYD_VIRTUAL_IP 23"
 echo ""
 
 # === UDP Tests ===
 echo "[UDP Tests]"
-# UDP proxy is harder to test without a specific UDP service
-# Just verify the port accepts packets (no ICMP unreachable)
-run_test "UDP port accepts packets" "ns_exec sh -c 'echo test | nc -u -w 1 $HONEYD_VIRTUAL_IP 53'"
+# UDP port 53 is configured in passthrough config
+run_test "UDP port 53 accepts packets" "ns_exec sh -c 'echo test | nc -u -w 1 $HONEYD_VIRTUAL_IP 53'"
 echo ""
 
 # === OS Fingerprint Test ===
