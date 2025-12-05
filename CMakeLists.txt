@@ -122,8 +122,9 @@ check_function_exists(kqueue HAVE_KQUEUE)
 
 # Find libevent
 find_library(LIBEVENT_LIBRARY
-    NAMES event
+    NAMES event event_core
     HINTS
+        /usr/local/lib
         /opt/homebrew/opt/libevent/lib
         /usr/local/opt/libevent/lib
         ENV LIBEVENT_ROOT
@@ -133,9 +134,14 @@ if(LIBEVENT_LIBRARY)
     message(STATUS "Found libevent: ${LIBEVENT_LIBRARY}")
     set(HAVE_LIBEVENT 1)
 
+    # Get the directory containing libevent for RPATH
+    get_filename_component(LIBEVENT_LIBRARY_DIR ${LIBEVENT_LIBRARY} DIRECTORY)
+    link_directories(${LIBEVENT_LIBRARY_DIR})
+
     find_path(LIBEVENT_INCLUDE_DIR
         NAMES event.h
         HINTS
+            /usr/local/include
             /opt/homebrew/opt/libevent/include
             /usr/local/opt/libevent/include
             ENV LIBEVENT_ROOT

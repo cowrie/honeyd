@@ -95,9 +95,9 @@ jobs:
       with:
         usesh: true
         prepare: |
-          pkg_add cmake libevent libdnet pcre readline bison
+          pkg_add cmake libevent libdnet libpcap pcre readline bison
         run: |
           mkdir -p build
           cd build
-          cmake ..
+          cmake .. -DCMAKE_PREFIX_PATH="/usr/local"
           make -j$(sysctl -n hw.ncpu)
