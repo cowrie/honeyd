@@ -1,0 +1,28 @@
+# ABOUTME: Honeyd config that proxies specific ports to real local services
+# ABOUTME: Only configured ports are proxied; others appear closed
+
+# Create a passthrough template
+create passthrough
+
+# ICMP: Allow all ICMP (ping, etc.)
+set passthrough default icmp action open
+
+# TCP/UDP defaults: closed (realistic behavior)
+set passthrough default tcp action closed
+set passthrough default udp action closed
+
+# OS fingerprint personality
+set passthrough personality "Cisco 2900XL switch (IOS 11.2)"
+
+# Proxy specific TCP services to localhost
+# Add ports for services actually running on this host
+add passthrough tcp port 22 proxy 127.0.0.1:22
+add passthrough tcp port 80 proxy 127.0.0.1:80
+add passthrough tcp port 443 proxy 127.0.0.1:443
+
+# Proxy specific UDP services to localhost
+add passthrough udp port 53 proxy 127.0.0.1:53
+
+# Bind to your honeypot IP address
+# Replace 192.168.1.100 with your target IP
+bind 192.168.1.100 passthrough

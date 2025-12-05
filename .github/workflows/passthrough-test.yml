@@ -1,0 +1,25 @@
+name: Passthrough Proxy Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  passthrough-test:
+    name: Passthrough Proxy Integration Test
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: true
+
+    - name: Build Docker image
+      run: docker build -t honeyd-passthrough -f tests/passthrough/Dockerfile .
+
+    - name: Run passthrough test
+      run: |
+        docker run --rm --privileged honeyd-passthrough

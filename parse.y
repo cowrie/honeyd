@@ -31,6 +31,9 @@
  */
 %{
 #define _XOPEN_SOURCE 700
+#ifdef __FreeBSD__
+#define __BSD_VISIBLE 1
+#endif
 #include <sys/types.h>
 
 #include "config.h"
