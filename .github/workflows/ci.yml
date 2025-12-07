@@ -95,7 +95,7 @@ jobs:
       with:
         usesh: true
         prepare: |
-          pkg_add cmake libevent libdnet libpcap pcre readline bison
+          pkg_add cmake libevent libdnet libpcap readline bison
         run: |
           mkdir -p build
           cd build

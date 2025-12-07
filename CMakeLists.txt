@@ -432,59 +432,34 @@ if(Python3_FOUND AND HAVE_PYTHON)
     target_link_libraries(honeyd ${Python3_LIBRARIES})
 endif()
 
-# Proxy subsystem (optional - requires PCRE)
-find_library(PCRE_LIBRARY
-    NAMES pcre
-    HINTS
-        /opt/homebrew/opt/pcre/lib
-        /usr/local/opt/pcre/lib
-        ENV PCRE_ROOT
+# Proxy subsystem - HTTP proxy with SMTP tunneling support (uses POSIX regex)
+add_executable(proxy
+    subsystems/proxy_main.c
+    subsystems/proxy.c
+    subsystems/smtp.c
+    util.c
+    sha1.c
+    atomicio.c
+    ${COMPAT_SOURCES}
 )
+target_include_directories(proxy PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/subsystems)
+target_link_libraries(proxy ${LIBEVENT_LIBRARY} ${DNET_LIBRARY} pcap)
 
-find_path(PCRE_INCLUDE_DIR
-    NAMES pcre.h
-    HINTS
-        /opt/homebrew/opt/pcre/include
-        /usr/local/opt/pcre/include
-        ENV PCRE_ROOT
-    PATH_SUFFIXES include
+# SMTP subsystem - standalone SMTP honeypot
+add_executable(smtp
+    subsystems/smtp_main.c
+    subsystems/smtp.c
+    util.c
+    sha1.c
+    atomicio.c
+    ${COMPAT_SOURCES}
 )
+target_include_directories(smtp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/subsystems)
+target_link_libraries(smtp ${LIBEVENT_LIBRARY} ${DNET_LIBRARY} pcap)
 
-if(PCRE_LIBRARY AND PCRE_INCLUDE_DIR)
-    message(STATUS "Found PCRE: ${PCRE_LIBRARY}")
-    include_directories(${PCRE_INCLUDE_DIR})
-
-    # Proxy subsystem - HTTP proxy with SMTP tunneling support
-    add_executable(proxy
-        subsystems/proxy_main.c
-        subsystems/proxy.c
-        subsystems/smtp.c
-        util.c
-        sha1.c
-        atomicio.c
-        ${COMPAT_SOURCES}
-    )
-    target_include_directories(proxy PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/subsystems)
-    target_link_libraries(proxy ${LIBEVENT_LIBRARY} ${DNET_LIBRARY} ${PCRE_LIBRARY} pcap)
-
-    # SMTP subsystem - standalone SMTP honeypot
-    add_executable(smtp
-        subsystems/smtp_main.c
-        subsystems/smtp.c
-        util.c
-        sha1.c
-        atomicio.c
-        ${COMPAT_SOURCES}
-    )
-    target_include_directories(smtp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/subsystems)
-    target_link_libraries(smtp ${LIBEVENT_LIBRARY} ${DNET_LIBRARY} ${PCRE_LIBRARY} pcap)
-
-    # Install subsystems to data directory (like original autotools build)
-    install(TARGETS proxy smtp
-        RUNTIME DESTINATION ${CMAKE_INSTALL_DATADIR}/honeyd)
-else()
-    message(STATUS "PCRE not found - proxy/smtp subsystems disabled")
-endif()
+# Install subsystems to data directory (like original autotools build)
+install(TARGETS proxy smtp
+    RUNTIME DESTINATION ${CMAKE_INSTALL_DATADIR}/honeyd)
 
 # Installation
 install(TARGETS honeyd honeydctl honeydstats hsniff

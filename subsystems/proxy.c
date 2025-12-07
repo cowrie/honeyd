@@ -60,7 +60,7 @@
 #include <err.h>
 #include <syslog.h>
 
-#include <pcre.h>
+#include <regex.h>
 #include <event2/event.h>
 #include <event2/bufferevent.h>
 #include <event2/buffer.h>
@@ -82,9 +82,32 @@ extern int debug;
 /* globals */
 
 FILE *flog_proxy = NULL;	/* log the proxy transactions somewhere */
-static pcre *re_connect;	/* regular expression to match connect */
-static pcre *re_hostport;	/* extracts host and port */
-static pcre *re_get;		/* generic get request */
+static regex_t re_connect;	/* regular expression to match connect */
+static regex_t re_hostport;	/* extracts host and port */
+static regex_t re_get;		/* generic get request */
+
+/* Extract a captured group from a regex match */
+static char *
+proxy_regex_group(const char *line, int groupnr, regmatch_t *pmatch)
+{
+	regoff_t start = pmatch[groupnr].rm_so;
+	regoff_t end = pmatch[groupnr].rm_eo;
+	char *group;
+
+	if (start < 0 || end < 0)
+		return (NULL);
+
+	group = malloc(end - start + 1);
+	if (group == NULL)
+	{
+		syslog(LOG_ERR, "%s: malloc", __func__);
+		exit(EXIT_FAILURE);
+	}
+	memcpy(group, line + start, end - start);
+	group[end - start] = '\0';
+
+	return (group);
+}
 
 /* Generic PROXY related code */
 
@@ -141,11 +164,8 @@ proxy_response(struct proxy_ta *ta, struct const_keyvalue data[]) {
 static int
 proxy_allowed_network(const char *host)
 {
-	const char *error;
-	int erroroffset;
-	pcre *re_uri;
+	regex_t re_uri;
 	int rc;
-	int ovector[30];
 	char *unusednets[] = {
 		"^127\\.[0-9]+\\.[0-9]+\\.[0-9]+$",		/* local */
 		"^10\\.[0-9]+\\.[0-9]+\\.[0-9]+$",		/* rfc-1918 */
@@ -161,21 +181,19 @@ proxy_allowed_network(const char *host)
 	char **p;
 
 	for (p = &unusednets[0]; *p; ++p) {
-		re_uri = pcre_compile(*p, PCRE_CASELESS,
-		    &error, &erroroffset, NULL);
-		if (re_uri == NULL) {
+		rc = regcomp(&re_uri, *p, REG_EXTENDED | REG_ICASE | REG_NOSUB);
+		if (rc != 0) {
 			/* Default to no match */
-			fprintf(stderr, "%s: %s: %s at %d",
-			    __func__, *p, error, erroroffset);
+			fprintf(stderr, "%s: %s: regcomp failed\n",
+			    __func__, *p);
 			return (0);
 		}
 
 		/* Match against the URI */
-		rc = pcre_exec(re_uri, NULL, host, strlen(host),
-		    0, 0, ovector, 30);
-		pcre_free(re_uri);
+		rc = regexec(&re_uri, host, 0, NULL, 0);
+		regfree(&re_uri);
 
-		if (rc >= 0)
+		if (rc == 0)
 			return (0);
 	}
 
@@ -189,13 +207,10 @@ proxy_allowed_network(const char *host)
 static int
 proxy_allowed_get(struct proxy_ta *ta, struct const_keyvalue data[])
 {
-	const char *error;
-	int erroroffset;
 	char *host, *uri;
 	const struct const_keyvalue *cur;
-	pcre *re_uri;
+	regex_t re_uri;
 	int rc;
-	int ovector[30];
 
 	host = kv_find(&ta->dictionary, "$host");
 	uri = kv_find(&ta->dictionary, "$rawuri");
@@ -209,21 +224,20 @@ proxy_allowed_get(struct proxy_ta *ta, struct const_keyvalue data[])
 	if (cur->key == NULL)
 		return (0);
 
-	re_uri = pcre_compile(cur->value, PCRE_CASELESS,
-	    &error, &erroroffset, NULL);
-	if (re_uri == NULL) {
+	rc = regcomp(&re_uri, cur->value, REG_EXTENDED | REG_ICASE | REG_NOSUB);
+	if (rc != 0) {
 		/* Default to no match */
-		fprintf(stderr, "%s: %s: %s at %d",
-		    __func__, cur->value, error, erroroffset);
+		fprintf(stderr, "%s: %s: regcomp failed\n",
+		    __func__, cur->value);
 		return (0);
 	}
 
 	/* Match against the URI */
-	rc = pcre_exec(re_uri, NULL, uri, strlen(uri), 0, 0, ovector, 30);
+	rc = regexec(&re_uri, uri, 0, NULL, 0);
 
-	pcre_free(re_uri);
+	regfree(&re_uri);
 
-	return (rc >= 0);
+	return (rc == 0);
 }
 
 static int
@@ -425,15 +439,14 @@ proxy_handle_get(struct proxy_ta *ta)
 {
 	char *host = kv_find(&ta->dictionary, "$rawhost");
 	int rc;
-	int ovector[30];
+	regmatch_t pmatch[10];
 
 	kv_replace(&ta->dictionary, "$command", "GET");
 
-	rc = pcre_exec(re_hostport, NULL, host, strlen(host), 0, 0,
-	    ovector, 30);
-	if (rc >= 0) {
-		char *strport = proxy_pcre_group(host, 2, ovector);
-		char *real_host = proxy_pcre_group(host, 1, ovector);
+	rc = regexec(&re_hostport, host, 10, pmatch, 0);
+	if (rc == 0) {
+		char *strport = proxy_regex_group(host, 2, pmatch);
+		char *real_host = proxy_regex_group(host, 1, pmatch);
 
 		kv_add(&ta->dictionary, "$host", real_host);
 		kv_add(&ta->dictionary, "$port", strport);
@@ -514,15 +527,14 @@ proxy_handle_connect(struct proxy_ta *ta)
 {
 	char *host = kv_find(&ta->dictionary, "$rawhost");
 	int rc;
-	int ovector[30];
+	regmatch_t pmatch[10];
 
 	kv_replace(&ta->dictionary, "$command", "CONNECT");
 
-	rc = pcre_exec(re_hostport, NULL, host, strlen(host), 0, 0,
-	    ovector, 30);
-	if (rc >= 0) {
-		char *strport = proxy_pcre_group(host, 2, ovector);
-		char *real_host = proxy_pcre_group(host, 1, ovector);
+	rc = regexec(&re_hostport, host, 10, pmatch, 0);
+	if (rc == 0) {
+		char *strport = proxy_regex_group(host, 2, pmatch);
+		char *real_host = proxy_regex_group(host, 1, pmatch);
 
 		kv_add(&ta->dictionary, "$host", real_host);
 		kv_add(&ta->dictionary, "$port", strport);
@@ -547,35 +559,17 @@ proxy_handle_connect(struct proxy_ta *ta)
 	return (0);
 }
 
-char *
-proxy_pcre_group(char *line, int groupnr, int ovector[])
-{
-	int start = ovector[2*groupnr];
-	int end = ovector[2*groupnr + 1];
-	char *group = malloc(end - start + 1);
-	if (group == NULL)
-	{
-		syslog(LOG_ERR, "%s: gettimeofday", __func__);
-		exit(EXIT_FAILURE);
-	}
-	memcpy(group, line + start, end - start);
-	group[end-start] = '\0';
-
-	return (group);
-}
-
 static int
 proxy_handle(struct proxy_ta *ta, char *line)
 {
 	int rc;
-	int ovector[30];
+	regmatch_t pmatch[10];
 
 	/* Execute regular expressions to match the command */
 
-	rc = pcre_exec(re_connect, NULL, line, strlen(line), 0, 0,
-	    ovector, 30);
-	if (rc >= 0) {
-		char *host = proxy_pcre_group(line, 1, ovector);
+	rc = regexec(&re_connect, line, 10, pmatch, 0);
+	if (rc == 0) {
+		char *host = proxy_regex_group(line, 1, pmatch);
 		kv_replace(&ta->dictionary, "$rawhost", host);
 		free(host);
 
@@ -583,10 +577,10 @@ proxy_handle(struct proxy_ta *ta, char *line)
 		return (0);
 	}
 
-	rc = pcre_exec(re_get, NULL, line, strlen(line), 0, 0, ovector, 30);
-	if (rc >= 0) {
-		char *host = proxy_pcre_group(line, 1, ovector);
-		char *uri = proxy_pcre_group(line, 2, ovector);
+	rc = regexec(&re_get, line, 10, pmatch, 0);
+	if (rc == 0) {
+		char *host = proxy_regex_group(line, 1, pmatch);
+		char *uri = proxy_regex_group(line, 2, pmatch);
 		kv_replace(&ta->dictionary, "$rawhost", host);
 		kv_replace(&ta->dictionary, "$rawuri", uri);
 		free(host);
@@ -856,34 +850,30 @@ proxy_bind_socket(u_short port)
 void
 proxy_init(void)
 {
-	const char *error;
-	int erroroffset;
-	const char *exp_connect = "^connect\\s+(.*)\\s+http";
+	int rc;
+	const char *exp_connect = "^connect[[:space:]]+(.*)[ \t]+http";
 	const char *exp_hostport = "^(.*):([0-9]+)$";
-	const char *exp_get = "^GET\\s+http://([^/ ]*)(/?[^ ]*)\\s+HTTP";
+	const char *exp_get = "^GET[[:space:]]+http://([^/ ]*)(/?[^ ]*)[[:space:]]+HTTP";
 
 	/* Compile regular expressions for command parsing */
-	re_connect = pcre_compile(exp_connect, PCRE_CASELESS,
-	    &error, &erroroffset, NULL);
-	if (re_connect == NULL)
+	rc = regcomp(&re_connect, exp_connect, REG_EXTENDED | REG_ICASE);
+	if (rc != 0)
 	{
-		syslog(LOG_ERR, "%s: %s at %d", __func__, error, erroroffset);
+		syslog(LOG_ERR, "%s: regcomp failed for re_connect", __func__);
 		exit(EXIT_FAILURE);
 	}
 
-	re_hostport = pcre_compile(exp_hostport, PCRE_CASELESS,
-	    &error, &erroroffset, NULL);
-	if (re_connect == NULL)
+	rc = regcomp(&re_hostport, exp_hostport, REG_EXTENDED | REG_ICASE);
+	if (rc != 0)
 	{
-		syslog(LOG_ERR, "%s: %s at %d", __func__, error, erroroffset);
+		syslog(LOG_ERR, "%s: regcomp failed for re_hostport", __func__);
 		exit(EXIT_FAILURE);
 	}
 
-	re_get = pcre_compile(exp_get, PCRE_CASELESS,
-	    &error, &erroroffset, NULL);
-	if (re_connect == NULL)
+	rc = regcomp(&re_get, exp_get, REG_EXTENDED | REG_ICASE);
+	if (rc != 0)
 	{
-		syslog(LOG_ERR, "%s: %s at %d", __func__, error, erroroffset);
+		syslog(LOG_ERR, "%s: regcomp failed for re_get", __func__);
 		exit(EXIT_FAILURE);
 	}
 }
