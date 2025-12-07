@@ -122,7 +122,8 @@ check_function_exists(kqueue HAVE_KQUEUE)
 
 # Find libevent (libevent2 required)
 # On OpenBSD, /usr/lib has old libevent 1.x - we need libevent2 from /usr/local
-find_library(LIBEVENT_LIBRARY
+# libevent2 may be split into event_core and event_extra (OpenBSD, some Linux)
+find_library(LIBEVENT_CORE_LIBRARY
     NAMES event event_core
     HINTS
         /usr/local/lib
@@ -132,16 +133,33 @@ find_library(LIBEVENT_LIBRARY
     NO_DEFAULT_PATH
 )
 # Fallback to default paths if not found in hints
-if(NOT LIBEVENT_LIBRARY)
-    find_library(LIBEVENT_LIBRARY NAMES event event_core)
+if(NOT LIBEVENT_CORE_LIBRARY)
+    find_library(LIBEVENT_CORE_LIBRARY NAMES event event_core)
 endif()
 
-if(LIBEVENT_LIBRARY)
-    message(STATUS "Found libevent: ${LIBEVENT_LIBRARY}")
+# Look for libevent_extra (contains evtag_* RPC functions)
+find_library(LIBEVENT_EXTRA_LIBRARY
+    NAMES event_extra
+    HINTS
+        /usr/local/lib
+        /opt/homebrew/opt/libevent/lib
+        /usr/local/opt/libevent/lib
+        ENV LIBEVENT_ROOT
+)
+
+if(LIBEVENT_CORE_LIBRARY)
+    message(STATUS "Found libevent: ${LIBEVENT_CORE_LIBRARY}")
     set(HAVE_LIBEVENT 1)
+    set(LIBEVENT_LIBRARIES ${LIBEVENT_CORE_LIBRARY})
+
+    # Add extra library if found (needed for evtag_* functions)
+    if(LIBEVENT_EXTRA_LIBRARY)
+        message(STATUS "Found libevent_extra: ${LIBEVENT_EXTRA_LIBRARY}")
+        list(APPEND LIBEVENT_LIBRARIES ${LIBEVENT_EXTRA_LIBRARY})
+    endif()
 
     # Get the directory containing libevent for RPATH
-    get_filename_component(LIBEVENT_LIBRARY_DIR ${LIBEVENT_LIBRARY} DIRECTORY)
+    get_filename_component(LIBEVENT_LIBRARY_DIR ${LIBEVENT_CORE_LIBRARY} DIRECTORY)
     link_directories(${LIBEVENT_LIBRARY_DIR})
 
     find_path(LIBEVENT_INCLUDE_DIR
@@ -334,7 +352,7 @@ add_executable(hsniff
 )
 
 # link the libraries to the executable
-target_link_libraries (hsniff pcap ${DNET_LIBRARY} ${LIBEVENT_LIBRARY} z ${DL_LIBRARY})
+target_link_libraries (hsniff pcap ${DNET_LIBRARY} ${LIBEVENT_LIBRARIES} z ${DL_LIBRARY})
 
 add_executable(honeydctl
     honeydctl.c
@@ -342,7 +360,7 @@ add_executable(honeydctl
     util.c
     sha1.c
 )
-target_link_libraries(honeydctl ${READLINE_LIBRARIES} ${LIBEVENT_LIBRARY} ${DNET_LIBRARY} pcap ${DL_LIBRARY})
+target_link_libraries(honeydctl ${READLINE_LIBRARIES} ${LIBEVENT_LIBRARIES} ${DNET_LIBRARY} pcap ${DL_LIBRARY})
 
 add_library(libhoneyd
     honeyd_overload.c
@@ -366,7 +384,7 @@ add_executable(honeydstats
 )
 
 # link the libraries to the executable
-target_link_libraries (honeydstats ${DNET_LIBRARY} ${LIBEVENT_LIBRARY} z ${DL_LIBRARY})
+target_link_libraries (honeydstats ${DNET_LIBRARY} ${LIBEVENT_LIBRARIES} z ${DL_LIBRARY})
 
 # Generate parser and lexer
 BISON_TARGET(HoneydParser parse.y ${CMAKE_CURRENT_BINARY_DIR}/parse.c
@@ -425,7 +443,7 @@ if(Python3_FOUND AND HAVE_PYTHON)
 endif()
 
 # link the libraries to the executable
-target_link_libraries (honeyd pcap ${DNET_LIBRARY} ${LIBEVENT_LIBRARY} m z ${DL_LIBRARY})
+target_link_libraries (honeyd pcap ${DNET_LIBRARY} ${LIBEVENT_LIBRARIES} m z ${DL_LIBRARY})
 
 # Link Python 3 libraries if available
 if(Python3_FOUND AND HAVE_PYTHON)
@@ -443,7 +461,7 @@ add_executable(proxy
     ${COMPAT_SOURCES}
 )
 target_include_directories(proxy PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/subsystems)
-target_link_libraries(proxy ${LIBEVENT_LIBRARY} ${DNET_LIBRARY} pcap)
+target_link_libraries(proxy ${LIBEVENT_LIBRARIES} ${DNET_LIBRARY} pcap)
 
 # SMTP subsystem - standalone SMTP honeypot
 add_executable(smtp
@@ -455,7 +473,7 @@ add_executable(smtp
     ${COMPAT_SOURCES}
 )
 target_include_directories(smtp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/subsystems)
-target_link_libraries(smtp ${LIBEVENT_LIBRARY} ${DNET_LIBRARY} pcap)
+target_link_libraries(smtp ${LIBEVENT_LIBRARIES} ${DNET_LIBRARY} pcap)
 
 # Install subsystems to data directory (like original autotools build)
 install(TARGETS proxy smtp
