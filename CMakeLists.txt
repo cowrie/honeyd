@@ -120,7 +120,8 @@ check_function_exists(isblank HAVE_ISBLANK)
 check_function_exists(kqueue HAVE_KQUEUE)
 # libedit
 
-# Find libevent
+# Find libevent (libevent2 required)
+# On OpenBSD, /usr/lib has old libevent 1.x - we need libevent2 from /usr/local
 find_library(LIBEVENT_LIBRARY
     NAMES event event_core
     HINTS
@@ -128,7 +129,12 @@ find_library(LIBEVENT_LIBRARY
         /opt/homebrew/opt/libevent/lib
         /usr/local/opt/libevent/lib
         ENV LIBEVENT_ROOT
+    NO_DEFAULT_PATH
 )
+# Fallback to default paths if not found in hints
+if(NOT LIBEVENT_LIBRARY)
+    find_library(LIBEVENT_LIBRARY NAMES event event_core)
+endif()
 
 if(LIBEVENT_LIBRARY)
     message(STATUS "Found libevent: ${LIBEVENT_LIBRARY}")
