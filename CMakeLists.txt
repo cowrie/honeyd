@@ -162,6 +162,7 @@ if(LIBEVENT_CORE_LIBRARY)
     get_filename_component(LIBEVENT_LIBRARY_DIR ${LIBEVENT_CORE_LIBRARY} DIRECTORY)
     link_directories(${LIBEVENT_LIBRARY_DIR})
 
+    # On OpenBSD, /usr/include has old libevent1 headers - prefer /usr/local
     find_path(LIBEVENT_INCLUDE_DIR
         NAMES event.h
         HINTS
@@ -170,9 +171,16 @@ if(LIBEVENT_CORE_LIBRARY)
             /usr/local/opt/libevent/include
             ENV LIBEVENT_ROOT
         PATH_SUFFIXES include
+        NO_DEFAULT_PATH
     )
+    # Fallback to default paths if not found in hints
+    if(NOT LIBEVENT_INCLUDE_DIR)
+        find_path(LIBEVENT_INCLUDE_DIR NAMES event.h)
+    endif()
     if(LIBEVENT_INCLUDE_DIR)
-        include_directories(${LIBEVENT_INCLUDE_DIR})
+        message(STATUS "Found libevent headers: ${LIBEVENT_INCLUDE_DIR}")
+        # Use BEFORE to ensure libevent2 headers take precedence over system headers
+        include_directories(BEFORE ${LIBEVENT_INCLUDE_DIR})
     endif()
 else()
     message(FATAL_ERROR "libevent not found. "
