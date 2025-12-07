@@ -57,3 +57,47 @@ jobs:
           build/honeydctl
           build/honeydstats
           build/hsniff
+
+  build-freebsd:
+    name: Build on FreeBSD
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: true
+
+    - name: Build on FreeBSD
+      uses: vmactions/freebsd-vm@v1
+      with:
+        usesh: true
+        prepare: |
+          pkg install -y cmake libevent libdnet libpcap readline bison flex
+        run: |
+          mkdir -p build
+          cd build
+          cmake ..
+          make -j$(sysctl -n hw.ncpu)
+
+  build-openbsd:
+    name: Build on OpenBSD
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: true
+
+    - name: Build on OpenBSD
+      uses: vmactions/openbsd-vm@v1
+      with:
+        usesh: true
+        prepare: |
+          pkg_add cmake libevent libdnet libpcap readline bison
+        run: |
+          mkdir -p build
+          cd build
+          cmake .. -DCMAKE_PREFIX_PATH="/usr/local"
+          make -j$(sysctl -n hw.ncpu)

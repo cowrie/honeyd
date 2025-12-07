@@ -120,42 +120,84 @@ check_function_exists(isblank HAVE_ISBLANK)
 check_function_exists(kqueue HAVE_KQUEUE)
 # libedit
 
-# Find libevent
-find_library(LIBEVENT_LIBRARY
-    NAMES event
+# Find libevent (libevent2 required)
+# On OpenBSD, /usr/lib has old libevent 1.x - we need libevent2 from /usr/local
+# libevent2 may be split into event_core and event_extra (OpenBSD, some Linux)
+find_library(LIBEVENT_CORE_LIBRARY
+    NAMES event event_core
     HINTS
+        /usr/local/lib
+        /opt/homebrew/opt/libevent/lib
+        /usr/local/opt/libevent/lib
+        ENV LIBEVENT_ROOT
+    NO_DEFAULT_PATH
+)
+# Fallback to default paths if not found in hints
+if(NOT LIBEVENT_CORE_LIBRARY)
+    find_library(LIBEVENT_CORE_LIBRARY NAMES event event_core)
+endif()
+
+# Look for libevent_extra (contains evtag_* RPC functions)
+find_library(LIBEVENT_EXTRA_LIBRARY
+    NAMES event_extra
+    HINTS
+        /usr/local/lib
         /opt/homebrew/opt/libevent/lib
         /usr/local/opt/libevent/lib
         ENV LIBEVENT_ROOT
 )
 
-if(LIBEVENT_LIBRARY)
-    message(STATUS "Found libevent: ${LIBEVENT_LIBRARY}")
+if(LIBEVENT_CORE_LIBRARY)
+    message(STATUS "Found libevent: ${LIBEVENT_CORE_LIBRARY}")
     set(HAVE_LIBEVENT 1)
+    set(LIBEVENT_LIBRARIES ${LIBEVENT_CORE_LIBRARY})
 
+    # Add extra library if found (needed for evtag_* functions)
+    if(LIBEVENT_EXTRA_LIBRARY)
+        message(STATUS "Found libevent_extra: ${LIBEVENT_EXTRA_LIBRARY}")
+        list(APPEND LIBEVENT_LIBRARIES ${LIBEVENT_EXTRA_LIBRARY})
+    endif()
+
+    # Get the directory containing libevent for RPATH
+    get_filename_component(LIBEVENT_LIBRARY_DIR ${LIBEVENT_CORE_LIBRARY} DIRECTORY)
+    link_directories(${LIBEVENT_LIBRARY_DIR})
+
+    # On OpenBSD, /usr/include has old libevent1 headers - prefer /usr/local
     find_path(LIBEVENT_INCLUDE_DIR
         NAMES event.h
         HINTS
+            /usr/local/include
             /opt/homebrew/opt/libevent/include
             /usr/local/opt/libevent/include
             ENV LIBEVENT_ROOT
         PATH_SUFFIXES include
+        NO_DEFAULT_PATH
     )
+    # Fallback to default paths if not found in hints
+    if(NOT LIBEVENT_INCLUDE_DIR)
+        find_path(LIBEVENT_INCLUDE_DIR NAMES event.h)
+    endif()
     if(LIBEVENT_INCLUDE_DIR)
-        include_directories(${LIBEVENT_INCLUDE_DIR})
+        message(STATUS "Found libevent headers: ${LIBEVENT_INCLUDE_DIR}")
+        # Use BEFORE to ensure libevent2 headers take precedence over system headers
+        include_directories(BEFORE ${LIBEVENT_INCLUDE_DIR})
     endif()
 else()
     message(FATAL_ERROR "libevent not found. "
         "Install libevent-dev (Debian/Ubuntu) or 'brew install libevent' (macOS)")
 endif()
 
-set(HAVE_LIBREADLINE 1)
+# Find readline library
+find_package(Readline REQUIRED)
+if(READLINE_FOUND)
+    message(STATUS "Found readline: ${READLINE_LIBRARY}")
+    set(HAVE_LIBREADLINE 1)
+    include_directories(${READLINE_INCLUDE_DIRS})
+endif()
+
 if (ZLIB_FOUND)
   set(HAVE_LIBZ 1)
 endif (ZLIB_FOUND)
-# libevent
-# libreadline
-# libz
 check_function_exists(memmove HAVE_MEMMOVE)
 check_include_files(memory.h HAVE_MEMORY_H)
 check_function_exists(memset HAVE_MEMSET)
@@ -295,6 +337,14 @@ foreach(flag ${WARNING_FLAGS})
     endif()
 endforeach()
 
+# On BSD systems, dlopen is in libc, not libdl
+# On Linux, we need to link libdl explicitly
+if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+    set(DL_LIBRARY dl)
+else()
+    set(DL_LIBRARY "")
+endif()
+
 add_executable(hsniff
     hsniff.c
     tagging.c
@@ -310,7 +360,7 @@ add_executable(hsniff
 )
 
 # link the libraries to the executable
-target_link_libraries (hsniff pcap ${DNET_LIBRARY} ${LIBEVENT_LIBRARY} z dl)
+target_link_libraries (hsniff pcap ${DNET_LIBRARY} ${LIBEVENT_LIBRARIES} z ${DL_LIBRARY})
 
 add_executable(honeydctl
     honeydctl.c
@@ -318,7 +368,7 @@ add_executable(honeydctl
     util.c
     sha1.c
 )
-target_link_libraries(honeydctl readline termcap ${LIBEVENT_LIBRARY} ${DNET_LIBRARY} pcap dl)
+target_link_libraries(honeydctl ${READLINE_LIBRARIES} ${LIBEVENT_LIBRARIES} ${DNET_LIBRARY} pcap ${DL_LIBRARY})
 
 add_library(libhoneyd
     honeyd_overload.c
@@ -342,7 +392,7 @@ add_executable(honeydstats
 )
 
 # link the libraries to the executable
-target_link_libraries (honeydstats ${DNET_LIBRARY} ${LIBEVENT_LIBRARY} z dl)
+target_link_libraries (honeydstats ${DNET_LIBRARY} ${LIBEVENT_LIBRARIES} z ${DL_LIBRARY})
 
 # Generate parser and lexer
 BISON_TARGET(HoneydParser parse.y ${CMAKE_CURRENT_BINARY_DIR}/parse.c
@@ -401,66 +451,41 @@ if(Python3_FOUND AND HAVE_PYTHON)
 endif()
 
 # link the libraries to the executable
-target_link_libraries (honeyd pcap ${DNET_LIBRARY} ${LIBEVENT_LIBRARY} m z dl)
+target_link_libraries (honeyd pcap ${DNET_LIBRARY} ${LIBEVENT_LIBRARIES} m z ${DL_LIBRARY})
 
 # Link Python 3 libraries if available
 if(Python3_FOUND AND HAVE_PYTHON)
     target_link_libraries(honeyd ${Python3_LIBRARIES})
 endif()
 
-# Proxy subsystem (optional - requires PCRE)
-find_library(PCRE_LIBRARY
-    NAMES pcre
-    HINTS
-        /opt/homebrew/opt/pcre/lib
-        /usr/local/opt/pcre/lib
-        ENV PCRE_ROOT
+# Proxy subsystem - HTTP proxy with SMTP tunneling support (uses POSIX regex)
+add_executable(proxy
+    subsystems/proxy_main.c
+    subsystems/proxy.c
+    subsystems/smtp.c
+    util.c
+    sha1.c
+    atomicio.c
+    ${COMPAT_SOURCES}
 )
+target_include_directories(proxy PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/subsystems)
+target_link_libraries(proxy ${LIBEVENT_LIBRARIES} ${DNET_LIBRARY} pcap)
 
-find_path(PCRE_INCLUDE_DIR
-    NAMES pcre.h
-    HINTS
-        /opt/homebrew/opt/pcre/include
-        /usr/local/opt/pcre/include
-        ENV PCRE_ROOT
-    PATH_SUFFIXES include
+# SMTP subsystem - standalone SMTP honeypot
+add_executable(smtp
+    subsystems/smtp_main.c
+    subsystems/smtp.c
+    util.c
+    sha1.c
+    atomicio.c
+    ${COMPAT_SOURCES}
 )
+target_include_directories(smtp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/subsystems)
+target_link_libraries(smtp ${LIBEVENT_LIBRARIES} ${DNET_LIBRARY} pcap)
 
-if(PCRE_LIBRARY AND PCRE_INCLUDE_DIR)
-    message(STATUS "Found PCRE: ${PCRE_LIBRARY}")
-    include_directories(${PCRE_INCLUDE_DIR})
-
-    # Proxy subsystem - HTTP proxy with SMTP tunneling support
-    add_executable(proxy
-        subsystems/proxy_main.c
-        subsystems/proxy.c
-        subsystems/smtp.c
-        util.c
-        sha1.c
-        atomicio.c
-        ${COMPAT_SOURCES}
-    )
-    target_include_directories(proxy PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/subsystems)
-    target_link_libraries(proxy ${LIBEVENT_LIBRARY} ${DNET_LIBRARY} ${PCRE_LIBRARY} pcap)
-
-    # SMTP subsystem - standalone SMTP honeypot
-    add_executable(smtp
-        subsystems/smtp_main.c
-        subsystems/smtp.c
-        util.c
-        sha1.c
-        atomicio.c
-        ${COMPAT_SOURCES}
-    )
-    target_include_directories(smtp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/subsystems)
-    target_link_libraries(smtp ${LIBEVENT_LIBRARY} ${DNET_LIBRARY} ${PCRE_LIBRARY} pcap)
-
-    # Install subsystems to data directory (like original autotools build)
-    install(TARGETS proxy smtp
-        RUNTIME DESTINATION ${CMAKE_INSTALL_DATADIR}/honeyd)
-else()
-    message(STATUS "PCRE not found - proxy/smtp subsystems disabled")
-endif()
+# Install subsystems to data directory (like original autotools build)
+install(TARGETS proxy smtp
+    RUNTIME DESTINATION ${CMAKE_INSTALL_DATADIR}/honeyd)
 
 # Installation
 install(TARGETS honeyd honeydctl honeydstats hsniff
